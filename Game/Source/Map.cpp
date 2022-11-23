@@ -13,6 +13,9 @@
 #include <vector>
 #include <variant>
 #include <unordered_map>
+#include <utility>
+
+#include <iostream>
 
 
 #include "SDL_image/include/SDL_image.h"
@@ -43,7 +46,7 @@ void Map::Draw() const
 	
 	for(auto const &layer : mapData.mapLayers)
 	{
-		if(auto const drawProperty = layer->GetPropertyValue("draw");
+		if(auto const drawProperty = layer->GetPropertyValue("Draw");
 		   !*(std::get_if<bool>(&drawProperty)))
 		{
 			continue;
@@ -143,6 +146,8 @@ bool Map::Load()
 		return false;
 	}
 
+	LogLoadedData();
+
 	// L07 DONE 3: Create colliders
 	// Later you can create a function here to load and create the colliders from the map
 	PhysBody *c1 = app->physics->CreateRectangle(224 + 128, 543 + 32, 256, 64, STATIC);
@@ -228,7 +233,7 @@ bool Map::LoadMap(pugi::xml_node const &mapFile)
 // Load the tileset properties
 bool Map::LoadTileSet(pugi::xml_node const &mapFile)
 {
-	for(auto const &elem : mapFile.child("map").child("tileset"))
+	for(auto const &elem : mapFile.child("map").children("tileset"))
 	{
 		auto retTileSet = std::make_unique<TileSet>();
 
@@ -243,8 +248,8 @@ bool Map::LoadTileSet(pugi::xml_node const &mapFile)
 
 		auto path = mapFolder + elem.child("image").attribute("source").as_string();
 		retTileSet->texture = app->tex->Load(path.c_str());
-
-		mapData.tilesets.push_back(retTileSet.get());
+		
+		mapData.tilesets.emplace_back(retTileSet.release());
 	}
 
 	return true;
@@ -253,7 +258,7 @@ bool Map::LoadTileSet(pugi::xml_node const &mapFile)
 // Iterate all layers and load each of them
 bool Map::LoadAllLayers(pugi::xml_node const &node)
 {
-	for(auto const &layer : node.child("layer"))
+	for(auto const &layer : node.children("layer"))
 	{
 		mapData.mapLayers.push_back(LoadLayer(layer));
 	}
@@ -261,7 +266,7 @@ bool Map::LoadAllLayers(pugi::xml_node const &node)
 }
 
 // Loads a single layer
-MapLayer *Map::LoadLayer(pugi::xml_node const &node) const
+std::unique_ptr<MapLayer> Map::LoadLayer(pugi::xml_node const &node) const
 {
 
 	auto layer = std::make_unique<MapLayer>();
@@ -273,41 +278,41 @@ MapLayer *Map::LoadLayer(pugi::xml_node const &node) const
 	layer->height = node.attribute("height").as_int();
 
 	//Iterate over all the tiles and get gid values
-	for(int i = 0; auto const &elem : node.child("data").child("tile"))
+	for(int i = 0; auto const &elem : node.child("data").children("tile"))
 	{
 		if(int gid = elem.attribute("gid").as_int(); gid > 0) layer->data.push_back(gid);
 	}
 
 	layer->properties = LoadProperties(node);
-	
 
-	return layer.release();
+	return std::move(layer);
 }
 
 
 propertiesUnorderedmap Map::LoadProperties(pugi::xml_node const &node) const
 {
 	propertiesUnorderedmap properties;
-	for(auto const &elem : node.child("properties").child("property"))
+	for(auto const &elem : node.child("properties").children("property"))
 	{
 		variantProperty valueToEmplace;
-		switch(str2int(elem.attribute("type").name()))
+		switch(str2int(elem.attribute("type").as_string()))
 		{
-			case g_IntTypeStr2Int:
+			case str2int("int"):
 			case str2int("object"):
 				valueToEmplace = elem.attribute("value").as_int();
 				break;
-			case g_FloatTypeStr2Int:
+			case str2int("float"):
 				valueToEmplace = elem.attribute("value").as_float();
 				break;
-			case g_BoolTypeStr2Int:
+			case str2int("bool"):
 				valueToEmplace = elem.attribute("value").as_bool();
 				break;
 			default:
-				LOG("Variant doesn't have %s type", elem.attribute("type").name());
+				LOG("Variant doesn't have %s type", elem.attribute("type").as_string());
 				valueToEmplace = elem.attribute("value").as_string();
 				continue;
 		}
+		
 		properties.try_emplace(elem.attribute("name").as_string(), valueToEmplace);
 	}
 	return properties;
@@ -327,48 +332,62 @@ variantProperty MapLayer::GetPropertyValue(const char *pName) const
 void Map::LogLoadedData() const
 {
 	LOG("Successfully parsed map XML file :%s", mapFileName);
-	LOG("width : %d height : %d", mapData.width, mapData.height);
-	LOG("tile_width : %d tile_height : %d", mapData.tileWidth, mapData.tileHeight);
+	LOG("width : %d					height : %d", mapData.width, mapData.height);
+	LOG("tile_width : %d				tile_height : %d", mapData.tileWidth, mapData.tileHeight);
 
 	LOG("Tilesets----");
 
 	// Info for each loaded tileset
-	for(auto const &tileset : mapData.tilesets)
+	for(auto const &elem : mapData.tilesets)
 	{
-		LOG("Name : %s			First gid : %d", tileset->name, tileset->firstgid);
-		LOG("Tile width : %d	Tile height : %d", tileset->tileWidth, tileset->tileHeight);
-		LOG("Spacing : %d		Margin : %d", tileset->spacing, tileset->margin);
+		std::cout << "[" << elem->name << " " << elem->firstgid << "]" << std::endl;
+		LOG("Name : %s	First gid : %d", elem->name.c_str(), elem->firstgid);
+		LOG("Tile width : %d				Tile height : %d", elem->tileWidth, elem->tileHeight);
+		LOG("Spacing : %d					Margin : %d", elem->spacing, elem->margin);
 	}
+
+	LOG("Layers----");
 
 	// Info for each loaded layer
 	for(auto const &layer : mapData.mapLayers)
 	{
-		LOG("Id : %d			Name : %s", layer->id, layer->name);
-		LOG("Layer width : %d	Layer height : %d", layer->width, layer->height);
+		LOG("Id : %d						Name : %s", layer->id, layer->name.c_str());
+		LOG("Layer width : %d				Layer height : %d", layer->width, layer->height);
 
-		for(auto const &[key, value] : layer->properties)
+		for(auto &[key, value] : layer->properties)
 		{
 			if(value.valueless_by_exception())
 			{
 				LOG("Property %s has key valueless_by_exception.", key);
 				continue;
 			}
+
 			switch(value.index())
 			{
 				case 0:
-					LOG("Property: %s		Value: %i, ", key, value);
+				{
+					LOG("Property: %s				Value: %i ", key.c_str(), value);
 					break;
+				}
 				case 1:
-					LOG("Property: %s		Value: %s, ", key, (*(std::get_if<bool>(&value)) ? "true" : "false"));
+				{
+					std::string boolHelper = *(std::get_if<bool>(&value)) ? "true" : "false";
+					LOG("Property: %s				Value: %s ", key.c_str(), boolHelper.c_str());
 					break;
+				}
 				case 2:
-					LOG("Property: %s		Value: %.2f, ", key, value);
+				{
+					std::string strHelper = *(std::get_if<std::string>(&value));
+					LOG("Property: %s				Value: %.2f ", key.c_str(), strHelper.c_str());
 					break;
+				}
 				case 3:
-					LOG("Property: %s		Value: %s, ", key, value);
+				{
+					LOG("Property: %s				Value: %s ", key.c_str(), value);
 					break;
+				}
 				default:
-					LOG("Case %i of property %s not covered in Switch", value, key);
+					LOG("Case %i of property %s not covered in Switch", value, key.c_str());
 					break;
 			}
 

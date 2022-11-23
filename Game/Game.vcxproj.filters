@@ -172,4 +172,9 @@
       <Filter>Utils\XML\Maps</Filter>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="Keeper.txt">
+      <Filter>Utils</Filter>
+    </Text>
+  </ItemGroup>
 </Project>

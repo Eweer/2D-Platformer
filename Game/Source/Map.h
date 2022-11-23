@@ -23,7 +23,7 @@ using propertiesUnorderedmap = std::unordered_map<std::string, variantProperty, 
 // Ignore Terrain Types and Tile Types for now, but we want the image!
 struct TileSet
 {
-	SString	name;
+	std::string name;
 	int	firstgid;
 	int margin;
 	int	spacing;
@@ -79,7 +79,7 @@ struct MapData
 	MapTypes type;
 
 	// L05: DONE 2: Add a list/array of layers to the map
-	std::vector<MapLayer *> mapLayers;
+	std::vector<std::unique_ptr<MapLayer>> mapLayers;
 };
 
 class Map : public Module
@@ -92,7 +92,7 @@ public:
 	virtual ~Map();
 
 	// Called before render is available
-	bool Awake(pugi::xml_node &conf);
+	bool Awake(pugi::xml_node &conf) final;
 
 	// Called each loop iteration
 	void Draw() const;
@@ -117,7 +117,7 @@ private:
 
 	// L05
 	bool LoadAllLayers(pugi::xml_node const &mapNode);
-	MapLayer *LoadLayer(pugi::xml_node const &node) const;
+	std::unique_ptr<MapLayer> LoadLayer(pugi::xml_node const &node) const;
 	propertiesUnorderedmap LoadProperties(pugi::xml_node const &node) const;
 
 	// L06: DONE 2
