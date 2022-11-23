@@ -4,8 +4,20 @@
 #include "Module.h"
 #include "List.h"
 #include "Point.h"
+#include "Defs.h"
+#include "Log.h"
 
-#include "PugiXml\src\pugixml.hpp"
+#include <unordered_map>
+#include <functional>
+#include <vector>
+#include <variant>
+#include <memory>
+
+#include "PugiXml/src/pugixml.hpp"
+
+using variantProperty = std::variant<int, bool, float, std::string>;
+using propertiesUnorderedmap = std::unordered_map<std::string, variantProperty, StringHash, std::equal_to<>>;
+
 
 // L04: DONE 2: Create a struct to hold information for a TileSet
 // Ignore Terrain Types and Tile Types for now, but we want the image!
@@ -20,15 +32,15 @@ struct TileSet
 	int columns;
 	int tilecount;
 
-	SDL_Texture* texture;
+	SDL_Texture *texture;
 
-	// L05: DONE 7: Create a method that receives a tile id and returns it's Rectfind the Rect associated with a specific tile id
+	// L05: DONE 7: Create a method that receives a tile id and returns it's Rect find the Rect associated with a specific tile id
 	SDL_Rect GetTileRect(int gid) const;
 };
 
 //  We create an enum for map type, just for convenience,
 // NOTE: Platformer game will be of type ORTHOGONAL
-enum MapTypes
+enum class MapTypes
 {
 	MAPTYPE_UNKNOWN = 0,
 	MAPTYPE_ORTHOGONAL,
@@ -36,61 +48,24 @@ enum MapTypes
 	MAPTYPE_STAGGERED
 };
 
-// L06: DONE 5: Create a generic structure to hold properties
-struct Properties
-{
-	struct Property
-	{
-		SString name;
-		bool value;
-	};
-
-	~Properties()
-	{
-		//...
-		ListItem<Property*>* item;
-		item = list.start;
-
-		while (item != NULL)
-		{
-			RELEASE(item->data);
-			item = item->next;
-		}
-
-		list.Clear();
-	}
-
-	// L06: DONE 7: Method to ask for the value of a custom property
-	Property* GetProperty(const char* name);
-
-	List<Property*> list;
-};
-
-// L05: DONE 1: Create a struct for the map layer
 struct MapLayer
 {
-	SString	name;
-	int id; 
-	int width;
-	int height;
-	uint* data;
+	std::string name = "";
+	int id = -1;
+	int width = 0;
+	int height = 0;
+	std::vector<uint> data;
 
-	// L06: DONE: Store custom properties
-	Properties properties;
+	propertiesUnorderedmap properties;
 
-	MapLayer() : data(NULL)
-	{}
-
-	~MapLayer()
-	{
-		RELEASE(data);
-	}
-
-	// L05: DONE 6: Short function to get the gid value of x,y
-	inline uint Get(int x, int y) const
+	// Short function to get the gid value of x,y
+	inline uint GetGidValue(int x, int y) const
 	{
 		return data[(y * width) + x];
 	}
+
+	variantProperty GetPropertyValue(const char *pName) const;
+
 };
 
 // L04: DONE 1: Create a struct needed to hold the information to Map node
@@ -100,11 +75,11 @@ struct MapData
 	int	height;
 	int	tileWidth;
 	int	tileHeight;
-	List<TileSet*> tilesets;
+	std::vector<TileSet *> tilesets;
 	MapTypes type;
 
 	// L05: DONE 2: Add a list/array of layers to the map
-	List<MapLayer*> maplayers;
+	List<MapLayer *> mapLayers;
 };
 
 class Map : public Module
@@ -117,7 +92,7 @@ public:
 	virtual ~Map();
 
 	// Called before render is available
-	bool Awake(pugi::xml_node& conf);
+	bool Awake(pugi::xml_node &conf);
 
 	// Called each loop iteration
 	void Draw();
@@ -131,38 +106,28 @@ public:
 	// L05: DONE 8: Create a method that translates x,y coordinates from map positions to world positions
 	iPoint MapToWorld(int x, int y) const;
 
-	// L08: TODO 3: Add method WorldToMap to obtain  
-	iPoint WorldToMap(int x, int y);
-
-private:
-
-	bool LoadMap(pugi::xml_node mapFile);
-
-	// L04: DONE 4: Create and call a private function to load a tileset
-	bool LoadTileSet(pugi::xml_node mapFile);
-
-	// L05
-	bool LoadLayer(pugi::xml_node& node, MapLayer* layer);
-	bool LoadAllLayers(pugi::xml_node mapNode);
-
-	// L06: DONE 2
-	TileSet* GetTilesetFromTileId(int gid) const;
-
-	// L06: DONE 6: Load a group of properties 
-	bool LoadProperties(pugi::xml_node& node, Properties& properties);
-
-	bool CreateColliders() const;
-
-public: 
-
-	// L04: DONE 1: Declare a variable data of the struct MapData
 	MapData mapData;
 
 private:
 
-	SString mapFileName;
-	SString mapFolder;
-	bool mapLoaded;
+	bool LoadMap(pugi::xml_node const &mapFile);
+
+	// L04: DONE 4: Create and call a private function to load a tileset
+	bool LoadTileSet(pugi::xml_node const &mapFile);
+
+	// L05
+	bool LoadAllLayers(pugi::xml_node const &mapNode);
+	MapLayer *LoadLayer(pugi::xml_node const &node) const;
+	propertiesUnorderedmap LoadProperties(pugi::xml_node const &node) const;
+
+	// L06: DONE 2
+	TileSet *GetTilesetFromTileId(int gid) const;
+
+	void LogLoadedData() const;
+
+	std::string mapFileName;
+	std::string mapFolder;
+	bool mapLoaded = false;
 };
 
 #endif // __MAP_H__

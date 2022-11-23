@@ -1,47 +1,61 @@
 #ifndef __DEFS_H__
 #define __DEFS_H__
 
-#include <stdio.h>
+#include <string>
+#include <cstdio>
+#include <unordered_map>
+#include <variant>
+#include <stdarg.h>
+#include <initializer_list>
 
 //  NULL just in case ----------------------
 
-#ifdef NULL
-#undef NULL
+#ifndef NULL
+#define NULL 0
 #endif
-#define NULL  0
 
 // Deletes a buffer
-#define RELEASE( x ) \
+#define RELEASE( x )		\
+{							\
+	if( x != nullptr )		\
 	{						\
-	if( x != NULL )		\
-		{					  \
-	  delete x;			\
-	  x = NULL;			  \
-		}					  \
-	}
+		delete x;			\
+		x = nullptr;		\
+	}						\
+}
 
 // Deletes an array of buffers
-#define RELEASE_ARRAY( x ) \
-	{							  \
-	if( x != NULL )			  \
-		{							\
-	  delete[] x;				\
-	  x = NULL;					\
-		}							\
-							  \
-	}
+#define RELEASE_ARRAY( x )	\
+{							\
+	if( x != nullptr )		\
+	{						\
+		delete[] x;			\
+		x = nullptr;		\
+	}						\
+}
 
-#define IN_RANGE( value, min, max ) ( ((value) >= (min) && (value) <= (max)) ? 1 : 0 )
-#define MIN( a, b ) ( ((a) < (b)) ? (a) : (b) )
-#define MAX( a, b ) ( ((a) > (b)) ? (a) : (b) )
-#define TO_BOOL( a )  ( (a != 0) ? true : false )
 
-typedef unsigned int uint;
-typedef unsigned char uchar;
-typedef unsigned __int32 uint32;
-typedef unsigned __int64 uint64;
+#define IN_RANGE(value, min, max) ( ((value) >= (min) && (value) <= (max)) ? 1 : 0 )
+#define TO_BOOL(a)  ((a != 0) ? true : false )
 
-template <class VALUE_TYPE> void SWAP(VALUE_TYPE& a, VALUE_TYPE& b)
+using uint = unsigned int;
+using uchar = unsigned char;
+using uint32 = unsigned int;
+using uint64 = unsigned long long;
+
+constexpr uint str2int(const char *str, int h = 0)
+{
+	return !str[h] ? 5381 : (str2int(str, h+1) * 33) ^ str[h];
+}
+
+constexpr uint g_BoolTypeStr2Int = str2int("bool");
+constexpr uint g_IntTypeStr2Int = str2int("int");
+constexpr uint g_UIntTypeStr2Int = str2int("uint");
+constexpr uint g_UInt2TypeStr2Int = str2int("unsigned int");
+constexpr uint g_FloatTypeStr2Int = str2int("float");
+
+
+template <class VALUE_TYPE> void SWAP(VALUE_TYPE &a, VALUE_TYPE &b)
 {
 	VALUE_TYPE tmp = a;
 	a = b;
@@ -49,20 +63,89 @@ template <class VALUE_TYPE> void SWAP(VALUE_TYPE& a, VALUE_TYPE& b)
 }
 
 // Standard string size
-#define SHORT_STR	 32
-#define MID_STR	    255
-#define HUGE_STR   8192
+constexpr auto SHORT_STR = 32;
+constexpr auto MID_STR = 255;
+constexpr auto HUGE_STR = 8192;
 
 // Joins a path and file
-inline const char* const PATH(const char* folder, const char* file)
+inline const char *PATH(const char *folder, const char *file)
 {
-	static char path[MID_STR];
-	sprintf_s(path, MID_STR, "%s/%s", folder, file);
-	return path;
+	std::string path(folder);
+	path += file;
+	const char *ret = path.c_str();
+	return ret;
 }
+
+inline const char *PATH(std::string const &folder, std::string const &file)
+{
+	return PATH(folder.c_str(), file.c_str());
+}
+
+inline std::string PATH_STR(const char *folder, const char *file)
+{
+	return std::string(folder, file);
+}
+
+inline std::string PATH_STR(std::string const &folder, std::string const &file)
+{
+	return folder + file;
+}
+
+struct StringHash
+{
+	using is_transparent = void;
+	[[nodiscard]] size_t operator()(const char *txt) const
+	{
+		return std::hash<std::string_view>{}(txt);
+	}
+	[[nodiscard]] size_t operator()(std::string_view txt) const
+	{
+		return std::hash<std::string_view>{}(txt);
+	}
+	[[nodiscard]] size_t operator()(const std::string &txt) const
+	{
+		return std::hash<std::string>{}(txt);
+	}
+};
 
 // Performance macros
 #define PERF_START(timer) timer.Start()
 #define PERF_PEEK(timer) LOG("%s took %f ms", __FUNCTION__, timer.ReadMs())
+
+template<typename T>
+T MAX(T a, T b)
+{
+	return (a > b) ? a : b;
+}
+
+template <typename T>
+T MAX(const T &a, const T &b, const std::initializer_list<T> &l)
+{
+	T max{MAX(a, b)};
+	for(auto &elem : l)
+	{
+		max = MAX(max, elem);
+	}
+
+	return max;
+}
+
+template<typename T>
+T MIN(T a, T b)
+{
+	return (a < b) ? a : b;
+}
+
+template <typename T>
+T MIN(const T &a, const T &b, const std::initializer_list<T> &l)
+{
+	T min{MIN(a, b)};
+	for(auto &elem : l)
+	{
+		min = MIN(min, elem);
+	}
+
+	return min;
+}
 
 #endif	// __DEFS_H__

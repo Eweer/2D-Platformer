@@ -1,37 +1,6 @@
 ﻿C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(503,5): warning MSB8004: Output Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Output Directory.
-  App.cpp
-C:\Users\oriol\Documents\GitHub\citm_desvj_project_template-L08\Game\Source\Render.h(47,17): error C3609: 'Render::SaveState': a 'final' function must be virtual
-  Audio.cpp
-  EntityManager.cpp
-C:\Users\oriol\Documents\GitHub\citm_desvj_project_template-L08\Game\Source\Render.h(47,17): error C3609: 'Render::SaveState': a 'final' function must be virtual
-  Input.cpp
-  Item.cpp
-C:\Users\oriol\Documents\GitHub\citm_desvj_project_template-L08\Game\Source\Render.h(47,17): error C3609: 'Render::SaveState': a 'final' function must be virtual
-  Main.cpp
   Map.cpp
-C:\Users\oriol\Documents\GitHub\citm_desvj_project_template-L08\Game\Source\Render.h(47,17): error C3609: 'Render::SaveState': a 'final' function must be virtual
-  Physics.cpp
-C:\Users\oriol\Documents\GitHub\citm_desvj_project_template-L08\Game\Source\Render.h(47,17): error C3609: 'Render::SaveState': a 'final' function must be virtual
-C:\Users\oriol\Documents\GitHub\citm_desvj_project_template-L08\Game\Source\Physics.cpp(99,23): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-C:\Users\oriol\Documents\GitHub\citm_desvj_project_template-L08\Game\Source\Physics.cpp(100,25): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-C:\Users\oriol\Documents\GitHub\citm_desvj_project_template-L08\Game\Source\Physics.cpp(136,25): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-C:\Users\oriol\Documents\GitHub\citm_desvj_project_template-L08\Game\Source\Physics.cpp(137,26): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-C:\Users\oriol\Documents\GitHub\citm_desvj_project_template-L08\Game\Source\Physics.cpp(194,21): warning C4018: '<': signed/unsigned mismatch
-C:\Users\oriol\Documents\GitHub\citm_desvj_project_template-L08\Game\Source\Physics.cpp(385,13): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-C:\Users\oriol\Documents\GitHub\citm_desvj_project_template-L08\Game\Source\Physics.cpp(386,13): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-C:\Users\oriol\Documents\GitHub\citm_desvj_project_template-L08\Game\Source\Physics.cpp(392,27): warning C4244: 'return': conversion from 'float32' to 'int', possible loss of data
-  Player.cpp
-C:\Users\oriol\Documents\GitHub\citm_desvj_project_template-L08\Game\Source\Render.h(47,17): error C3609: 'Render::SaveState': a 'final' function must be virtual
-C:\Users\oriol\Documents\GitHub\citm_desvj_project_template-L08\Game\Source\Player.cpp(73,16): warning C4244: 'argument': conversion from 'int' to 'float32', possible loss of data
-C:\Users\oriol\Documents\GitHub\citm_desvj_project_template-L08\Game\Source\Player.cpp(77,16): warning C4244: 'argument': conversion from 'int' to 'float32', possible loss of data
-  Render.cpp
-C:\Users\oriol\Documents\GitHub\citm_desvj_project_template-L08\Game\Source\Render.h(47,17): error C3609: 'Render::SaveState': a 'final' function must be virtual
-C:\Users\oriol\Documents\GitHub\citm_desvj_project_template-L08\Game\Source\Render.cpp(245,1): error C2556: 'pugi::xml_node &Render::SaveState(const pugi::xml_node &)': overloaded function differs only by return type from 'pugi::xml_node Render::SaveState(const pugi::xml_node &)'
-C:\Users\oriol\Documents\GitHub\citm_desvj_project_template-L08\Game\Source\Render.h(47,17): message : see declaration of 'Render::SaveState'
-C:\Users\oriol\Documents\GitHub\citm_desvj_project_template-L08\Game\Source\Render.cpp(244,25): error C2040: 'Render::SaveState': 'pugi::xml_node &(const pugi::xml_node &)' differs in levels of indirection from 'pugi::xml_node (const pugi::xml_node &)'
-  Scene.cpp
-C:\Users\oriol\Documents\GitHub\citm_desvj_project_template-L08\Game\Source\Render.h(47,17): error C3609: 'Render::SaveState': a 'final' function must be virtual
-  Textures.cpp
-C:\Users\oriol\Documents\GitHub\citm_desvj_project_template-L08\Game\Source\Render.h(47,17): error C3609: 'Render::SaveState': a 'final' function must be virtual
-  Window.cpp
+  pugixml.cpp
   Generating Code...
+  Game.vcxproj -> C:\Users\oriol\Documents\GitHub\CITM_Design\Build\Debug\Game.exe
+          1 file(s) copied.
