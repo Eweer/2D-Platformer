@@ -79,23 +79,6 @@ SDL_Texture* const Textures::Load(const char* path)
 	return texture;
 }
 
-// Unload texture
-bool Textures::UnLoad(SDL_Texture* texture)
-{
-	ListItem<SDL_Texture*>* item;
-
-	for(item = textures.start; item != NULL; item = item->next)
-	{
-		if(texture == item->data)
-		{
-			SDL_DestroyTexture(item->data);
-			textures.Del(item);
-			return true;
-		}
-	}
-
-	return false;
-}
 
 // Translate a surface into a texture
 SDL_Texture* const Textures::LoadSurface(SDL_Surface* surface)
@@ -112,6 +95,23 @@ SDL_Texture* const Textures::LoadSurface(SDL_Surface* surface)
 	}
 
 	return texture;
+}
+
+// Unload texture
+bool Textures::UnLoad(SDL_Texture *texture)
+{
+
+	for(ListItem<SDL_Texture *> *item = textures.start; item != NULL; item = item->next)
+	{
+		if(texture == item->data)
+		{
+			SDL_DestroyTexture(item->data);
+			textures.Del(item);
+			return true;
+		}
+	}
+
+	return false;
 }
 
 // Retrieve size of a texture

@@ -14,9 +14,7 @@ Player::Player() : Entity(EntityType::PLAYER)
 	name = "Player";
 }
 
-Player::~Player() {
-
-}
+Player::~Player() = default;
 
 bool Player::Awake() {
 

@@ -6,6 +6,7 @@
 #include "Defs.h"
 
 #include <vector>
+#include <memory>
 
 struct SDL_Texture;
 
@@ -33,11 +34,7 @@ public:
 		if(TimeSinceLastFunctionCall > FunctionCooldown) TimeSinceLastFunctionCall = 0;
 
 		//if it's not active, we just return frame
-		if(!bActive)
-		{
-			if(staticImage) return staticImage;
-			return frames[(int)currentFrame];
-		}
+		if(!bActive) return frames[(int)currentFrame];
 
 		//if it's active and finished, it's no longer finished
 		if(bFinished) bFinished = !bFinished;
@@ -45,32 +42,37 @@ public:
 		//if it's active we increase the frame
 		currentFrame += speed;
 
-		//if no more animations in std::vector<SDL_Texture*> frames
+		//if no more animations in frames[current + 1]
 		if((uint)currentFrame >= frames.size() + 1 || (int)currentFrame < 0)
 		{
 			//we do things
-			switch(animStyle)
+			switch(currentStyle)
 			{
-				case AnimIteration::FORWARD_BACKWARD:
+				using enum AnimIteration;
+				case ONCE:
+				{
+					Stop();
+					break;
+				}
+				case FORWARD_BACKWARD:
+				{
 					if(speed > 0) currentFrame = (float)frames.size() - 1;
 					else Stop();
 
 					speed *= -1;
 					break;
-
-				case AnimIteration::ONCE:
-					Stop();
-					break;
-
-				case AnimIteration::LOOP_FROM_START:
+				}
+				case LOOP_FROM_START:
+				{
 					currentFrame = 0.0f;
 					break;
-
-				case AnimIteration::LOOP_FORWARD_BACKWARD:
+				}
+				case LOOP_FORWARD_BACKWARD:
+				{
 					currentFrame = (speed < 0) ? 0 : (float)frames.size() - 1;
 					speed *= -1;
 					break;
-
+				}
 				default:
 					Stop();
 			}
@@ -81,7 +83,7 @@ public:
 				if(loopsToDo == 0)
 				{
 					Stop();
-					SetAnimStyle(AnimIteration::NEVER);
+					SetAnimStyle(baseStyle);
 				}
 			}
 		}
@@ -136,24 +138,24 @@ public:
 		speed = animSpeed;
 	}
 
-	uint GetSpeed() const
+	float GetSpeed() const
 	{
 		return speed;
 	}
 
 	void SetAnimStyle(int i)
 	{
-		animStyle = static_cast<AnimIteration>(i);
+		currentStyle = static_cast<AnimIteration>(i);
 	}
 
 	void SetAnimStyle(AnimIteration i)
 	{
-		animStyle = i;
+		currentStyle = i;
 	}
 
 	AnimIteration GetAnimStyle() const
 	{
-		return animStyle;
+		return currentStyle;
 	}
 
 	void Start()
@@ -202,7 +204,8 @@ private:
 	float TimeSinceLastFunctionCall = 0;
 	float speed = 0;
 	float currentFrame = 0;
-	AnimIteration animStyle = AnimIteration::NEVER;
+	AnimIteration currentStyle = AnimIteration::NEVER;
+	AnimIteration baseStyle = AnimIteration::NEVER;
 	bool bActive = false;
 	bool bFinished = false;
 	uint loopsToDo = 0;
