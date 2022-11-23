@@ -340,7 +340,6 @@ void Map::LogLoadedData() const
 	// Info for each loaded tileset
 	for(auto const &elem : mapData.tilesets)
 	{
-		std::cout << "[" << elem->name << " " << elem->firstgid << "]" << std::endl;
 		LOG("Name : %s	First gid : %d", elem->name.c_str(), elem->firstgid);
 		LOG("Tile width : %d				Tile height : %d", elem->tileWidth, elem->tileHeight);
 		LOG("Spacing : %d					Margin : %d", elem->spacing, elem->margin);
