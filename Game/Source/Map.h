@@ -79,7 +79,7 @@ struct MapData
 	MapTypes type;
 
 	// L05: DONE 2: Add a list/array of layers to the map
-	List<MapLayer *> mapLayers;
+	std::vector<MapLayer *> mapLayers;
 };
 
 class Map : public Module
@@ -95,10 +95,10 @@ public:
 	bool Awake(pugi::xml_node &conf);
 
 	// Called each loop iteration
-	void Draw();
+	void Draw() const;
 
 	// Called before quitting
-	bool CleanUp();
+	bool CleanUp() final;
 
 	// Load new map
 	bool Load();

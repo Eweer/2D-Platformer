@@ -29,45 +29,42 @@ Map::~Map() = default;
 bool Map::Awake(pugi::xml_node &config)
 {
 	LOG("Loading Map Parser");
-	bool ret = true;
 
 	mapFileName = config.child("mapfile").attribute("path").as_string();
 	mapFolder = config.child("mapfolder").attribute("path").as_string();
 
-	return ret;
+	return true;
 }
 
-void Map::Draw()
+void Map::Draw() const
 {
-	if(mapLoaded == false)
+	if(!mapLoaded)
 		return;
-
-	//ListItem<MapLayer*>* mapLayerItem = mapData.mapLayers.start;
-
-	//for(auto const &layer : mapData.mapLayers)
-
-	while(mapLayerItem != nullptr)
+	
+	for(auto const &layer : mapData.mapLayers)
 	{
-		if (*(std::get_if<bool>(&mapLayerItem->data->GetPropertyValue("Draw"))))
+		if(auto const drawProperty = layer->GetPropertyValue("draw");
+		   !*(std::get_if<bool>(&drawProperty)))
 		{
-			for (int x = 0; x < mapLayerItem->data->width; x++)
+			continue;
+		}
+		
+		for (int x = 0; x < layer->width; x++)
+		{
+			for (int y = 0; y < layer->height; y++)
 			{
-				for (int y = 0; y < mapLayerItem->data->height; y++)
-				{
-					// L05: DONE 9: Complete the draw function
-					int gid = mapLayerItem->data->GetGidValue(x, y);
+				// L05: DONE 9: Complete the draw function
+				int gid = layer->GetGidValue(x, y);
 
-					//L06: DONE 3: Obtain the tile set using GetTilesetFromTileId
-					TileSet* tileset = GetTilesetFromTileId(gid);
+				//L06: DONE 3: Obtain the tile set using GetTilesetFromTileId
+				TileSet* tileset = GetTilesetFromTileId(gid);
 
-					SDL_Rect r = tileset->GetTileRect(gid);
-					iPoint pos = MapToWorld(x, y);
+				SDL_Rect r = tileset->GetTileRect(gid);
+				iPoint pos = MapToWorld(x, y);
 
-					app->render->DrawTexture(tileset->texture, pos.x, pos.y,&r);
-				}
+				app->render->DrawTexture(tileset->texture, pos.x, pos.y,&r);
 			}
 		}
-		mapLayerItem = mapLayerItem->next;
 	}
 }
 
@@ -101,20 +98,12 @@ SDL_Rect TileSet::GetTileRect(int gid) const
 // L06: DONE 2: Pick the right Tileset based on a tile id
 TileSet *Map::GetTilesetFromTileId(int gid) const
 {
-	ListItem<TileSet *> *item = mapData.tilesets.start;
-	TileSet *set = nullptr;
+	for(auto &tileset : mapData.tilesets)
+		if(gid < (tileset->firstgid + tileset->tilecount))
+			return tileset;
 
-	while(item)
-	{
-		set = item->data;
-		if(gid < (item->data->firstgid + item->data->tilecount))
-		{
-			break;
-		}
-		item = item->next;
-	}
-
-	return set;
+	LOG("Tileset for gid %i not found", gid);
+	return nullptr;
 }
 
 // Called before quitting
@@ -255,7 +244,7 @@ bool Map::LoadTileSet(pugi::xml_node const &mapFile)
 		auto path = mapFolder + elem.child("image").attribute("source").as_string();
 		retTileSet->texture = app->tex->Load(path.c_str());
 
-		mapData.tilesets.Add(retTileSet.get());
+		mapData.tilesets.push_back(retTileSet.get());
 	}
 
 	return true;
@@ -264,10 +253,9 @@ bool Map::LoadTileSet(pugi::xml_node const &mapFile)
 // Iterate all layers and load each of them
 bool Map::LoadAllLayers(pugi::xml_node const &node)
 {
-	//for(auto const &layer : mapNode.child("layer"))
 	for(auto const &layer : node.child("layer"))
 	{
-		mapData.mapLayers.Add(LoadLayer(layer));
+		mapData.mapLayers.push_back(LoadLayer(layer));
 	}
 	return true;
 }
@@ -344,28 +332,21 @@ void Map::LogLoadedData() const
 
 	LOG("Tilesets----");
 
-	ListItem<TileSet *> *tileset;
-	tileset = mapData.tilesets.start;
-
-	while(tileset)
+	// Info for each loaded tileset
+	for(auto const &tileset : mapData.tilesets)
 	{
-		LOG("Name : %s			First gid : %d", tileset->data->name, tileset->data->firstgid);
-		LOG("Tile width : %d	Tile height : %d", tileset->data->tileWidth, tileset->data->tileHeight);
-		LOG("Spacing : %d		Margin : %d", tileset->data->spacing, tileset->data->margin);
-
-		tileset = tileset->next;
+		LOG("Name : %s			First gid : %d", tileset->name, tileset->firstgid);
+		LOG("Tile width : %d	Tile height : %d", tileset->tileWidth, tileset->tileHeight);
+		LOG("Spacing : %d		Margin : %d", tileset->spacing, tileset->margin);
 	}
 
 	// Info for each loaded layer
-	ListItem<MapLayer *> *mapLayer;
-	mapLayer = mapData.mapLayers.start;
-
-	while(mapLayer)
+	for(auto const &layer : mapData.mapLayers)
 	{
-		LOG("Id : %d			Name : %s", mapLayer->data->id, mapLayer->data->name);
-		LOG("Layer width : %d	Layer height : %d", mapLayer->data->width, mapLayer->data->height);
+		LOG("Id : %d			Name : %s", layer->id, layer->name);
+		LOG("Layer width : %d	Layer height : %d", layer->width, layer->height);
 
-		for(auto const &[key, value] : mapLayer->data->properties)
+		for(auto const &[key, value] : layer->properties)
 		{
 			if(value.valueless_by_exception())
 			{
@@ -392,7 +373,5 @@ void Map::LogLoadedData() const
 			}
 
 		}
-
-		mapLayer = mapLayer->next;
 	}
 }
