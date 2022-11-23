@@ -2,6 +2,7 @@
 #include "Input.h"
 #include "Window.h"
 
+#include "Point.h"
 #include "Defs.h"
 #include "Log.h"
 
@@ -147,13 +148,18 @@ bool Input::GetWindowEvent(EventWindow ev)
 	return windowEvents[ev];
 }
 
-void Input::GetMousePosition(int& x, int& y)
+iPoint Input::GetMousePosition() const
+{
+	return iPoint(mouseX, mouseY);
+}
+
+void Input::GetMousePosition(int& x, int& y) const
 {
 	x = mouseX;
 	y = mouseY;
 }
 
-void Input::GetMouseMotion(int& x, int& y)
+void Input::GetMouseMotion(int& x, int& y) const
 {
 	x = mouseMotionX;
 	y = mouseMotionY;

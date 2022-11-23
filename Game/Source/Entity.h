@@ -16,6 +16,14 @@
 
 class PhysBody;
 
+enum class SensorFunction
+{
+	DEATH = 0,
+	POWER,
+	HP_UP,
+	UNKNOWN
+};
+
 enum class EntityType
 {
 	PLAYER,
@@ -37,94 +45,42 @@ public:
 
 	explicit Entity() = default;
 
-	explicit Entity(EntityType type) : type(type) {}
+	explicit Entity(EntityType type);
 
-	explicit Entity(pugi::xml_node const &itemNode) : parameters(itemNode)
-	{
-		const std::unordered_map<std::string, EntityType, StringHash, std::equal_to<>> entityTypeStrToEnum =
-		{
-			{"player", EntityType::PLAYER},
-			{"item", EntityType::ITEM}
-		};
-
-		std::smatch m;
-		if(std::string itemName(itemNode.name()); !std::regex_search(itemName, m, std::regex(R"([A-Za-z]+)")))
-		{
-			LOG("XML %s name is not correct. [A-Za-z]+", itemNode.name());
-			return;
-		}
-
-		if(!entityTypeStrToEnum.contains(m[0]))
-		{
-			LOG("%s string does not have a mapped enum", m[0]);
-			return;
-		}
-
-		if(static_cast<uint>(entityTypeStrToEnum.at(m[0])) >= static_cast<uint>(EntityType::UNKNOWN))
-		{
-			LOG("%s does not have a valid EntityType", m[0]);
-			return;
-		}
-		this->name = m[0];
-		this->type = entityTypeStrToEnum.at(name);
-
-		renderMode = RenderModes::UNKNOWN;
-	}
+	explicit Entity(pugi::xml_node const &itemNode);
 
 	virtual ~Entity() = default;
 
-	virtual bool Awake()
-	{
-		return true;
-	}
+	virtual bool Awake();
 
-	virtual bool Start()
-	{
-		return true;
-	}
+	// Sets position, file paths and textures.
+	virtual bool SetStartingParameters();
 
-	virtual bool Update()
-	{
-		return true;
-	}
+	virtual bool Start();
 
-	virtual bool CleanUp()
-	{
-		return true;
-	}
+	virtual bool Update();
 
-	virtual bool LoadState(pugi::xml_node const &)
-	{
-		return true;
-	}
+	virtual bool CleanUp();
 
-	virtual pugi::xml_node SaveState(pugi::xml_node const &)
-	{
-		return pugi::xml_node();
-	}
+	virtual bool LoadState(pugi::xml_node const &);
 
-	void Enable()
-	{
-		if (!active)
-		{
-			active = true;
-			Start();
-		}
-	}
+	virtual pugi::xml_node SaveState(pugi::xml_node const &);
 
-	void Disable()
-	{
-		if (active)
-		{
-			active = false;
-			CleanUp();
-		}
-	}
+	void Enable();
+	
+	void Disable();
 
-	virtual void OnCollision(PhysBody* physA, PhysBody* physB) 
-	{
-		// To Override
-	};
+	void SetPaths();
+
+	void SetPathsToLevel();
+
+	void AddTexturesAndAnimationFrames();
+
+	void CreatePhysBody(Uint16 collisionCategory = 0, Uint16 collisionMask = 0);
+
+	uint GetParameterBodyType() const;
+
+	virtual void OnCollision(PhysBody *physA, PhysBody *physB) {};
 
 	bool active = true;
 

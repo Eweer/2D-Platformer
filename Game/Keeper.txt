@@ -80,3 +80,17 @@ std::string XmlParser::CreateXPath(std::string node, std::vector<std::pair<std::
         return "";
     }
 }
+
+
+namespace collisionFlags
+{
+	enum colliderLayers
+	{
+		PLATFORMS = 0x0001,
+		PLAYER = 0x0002,
+		ENEMIES = 0x0004,
+		ITEMS = 0x0008,
+		TRIGGERS = 0x0010,
+		CHECKPOINTS = 0x0020
+	};
+}

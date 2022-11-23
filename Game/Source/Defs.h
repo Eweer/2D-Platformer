@@ -1,6 +1,8 @@
 #ifndef __DEFS_H__
 #define __DEFS_H__
 
+#include "dirent.h"
+
 #include <string>
 #include <cstdio>
 #include <unordered_map>
@@ -89,6 +91,11 @@ inline std::string PATH_STR(const char *folder, const char *file)
 inline std::string PATH_STR(std::string const &folder, std::string const &file)
 {
 	return folder + file;
+}
+
+inline int DescAlphasort(const struct dirent **c, const struct dirent **d)
+{
+	return alphasort(d, c);
 }
 
 struct StringHash

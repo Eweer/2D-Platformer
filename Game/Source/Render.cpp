@@ -1,6 +1,7 @@
 #include "App.h"
 #include "Window.h"
 #include "Render.h"
+#include "EntityManager.h"
 
 #include "Defs.h"
 #include "Log.h"
@@ -49,6 +50,8 @@ bool Render::Awake(pugi::xml_node& config)
 		camera.x = 0;
 		camera.y = 0;
 	}
+	
+	app->entityManager->LoadAllTextures();
 
 	return ret;
 }
@@ -104,46 +107,69 @@ void Render::ResetViewPort()
 	SDL_RenderSetViewport(renderer, &viewport);
 }
 
-// Blit to screen
-bool Render::DrawTexture(SDL_Texture* texture, int x, int y, const SDL_Rect* section, float speed, double angle, int pivotX, int pivotY) const
+bool Render::DrawCharacterTexture(SDL_Texture *texture, const iPoint pos, const iPoint offset, const bool flip, const double angle)
 {
-	bool ret = true;
+	SDL_Rect rect{0};
+
+	SDL_QueryTexture(texture, nullptr, nullptr, &rect.w, &rect.h);
+
+	if(offset != iPoint(INT_MAX, INT_MAX))
+	{
+		rect.x = pos.x - offset.x + camera.x;
+		rect.y = pos.y - offset.y + camera.y;
+	}
+	else
+	{
+		rect.x = pos.x - rect.w/4 + camera.x;
+		rect.y = pos.y - rect.h/2 + camera.y;
+	}
+		
+	if(SDL_RenderCopyEx(renderer, texture, nullptr, &rect, angle, nullptr, (SDL_RendererFlip)flip) == -1)
+	{
+		LOG("Cannot blit to screen. SDL_RenderCopy error: %s", SDL_GetError());
+		return false;
+	}
+
+	return true;
+}
+
+// Blit to screen
+bool Render::DrawTexture(SDL_Texture* texture, int x, int y, const SDL_Rect* section, float speed, double angle, int pivotX, int pivotY, SDL_RendererFlip flip) const
+{
 	uint scale = app->win->GetScale();
 
 	SDL_Rect rect;
 	rect.x = (int)(camera.x * speed) + x * scale;
 	rect.y = (int)(camera.y * speed) + y * scale;
 
-	if(section != NULL)
+	if(section != nullptr)
 	{
 		rect.w = section->w;
 		rect.h = section->h;
 	}
 	else
 	{
-		SDL_QueryTexture(texture, NULL, NULL, &rect.w, &rect.h);
+		SDL_QueryTexture(texture, nullptr, nullptr, &rect.w, &rect.h);
 	}
 
 	rect.w *= scale;
 	rect.h *= scale;
 
-	SDL_Point* p = NULL;
-	SDL_Point pivot;
+	SDL_Point const *p{};
 
 	if(pivotX != INT_MAX && pivotY != INT_MAX)
 	{
-		pivot.x = pivotX;
-		pivot.y = pivotY;
+		SDL_Point pivot{ pivotX, pivotY };
 		p = &pivot;
 	}
 
-	if(SDL_RenderCopyEx(renderer, texture, section, &rect, angle, p, SDL_FLIP_NONE) != 0)
+	if(SDL_RenderCopyEx(renderer, texture, section, &rect, angle, p, flip) != 0)
 	{
 		LOG("Cannot blit to screen. SDL_RenderCopy error: %s", SDL_GetError());
-		ret = false;
+		return false;
 	}
 
-	return ret;
+	return true;
 }
 
 bool Render::DrawRectangle(const SDL_Rect& rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a, bool filled, bool use_camera) const

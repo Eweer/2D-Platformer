@@ -33,6 +33,8 @@ public:
 
 	void AddEntity(Entity* entity);
 
+	bool LoadAllTextures();
+
 public:
 
 	List<Entity*> entities;

@@ -21,9 +21,14 @@
 		<fx volume="128"/>
 	</audio>
 
-	<!-- L02: DONE: Add an element for the entity manager and add the player parameters -->
-	<scene>
-		<player x="150" y="672" texturepath="Assets/Textures/player1.png"/>
+	<!-- Animstyle: ONCE = 0 | LOOP_FROM_START = 1 | FORWARD_BACKWARD = 2 | LOOP_FORWARD_BACKWARD = 3 | NEVER = 4 -->
+	<scene assetpath="Assets/" texturepath="Assets/Textures/" audiopath="Assets/Audio/" fxfolder="Fx/">
+		<player x="180" y="420" renderable="true">
+			<!--<physics bodytype="dynamic" size="32" gravityscale="1" restitution="0.5" shape="circle"/>-->
+			<physics bodytype="dynamic" width="32" height="58" gravityscale="1" restitution="0d" shape="rectangle"/>
+			<animation name="idle" style="4" speed="0.2" width="272" height="264" frames="4"/>
+			<animation name="run" style="4" speed="0.2" width="32" height="32" frames="4"/>
+		</player>
 		<!--
 		<item x="256" y="515" texturepath="Assets/Textures/goldCoin.png"/>
 		<item x="416" y="512" texturepath="Assets/Textures/goldCoin.png"/>

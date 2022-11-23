@@ -132,6 +132,11 @@ public:
 			TimeSinceLastFunctionCall += 0.1f;
 		}
 	}
+	
+	uint GetFrameCount() const
+	{
+		return frames.size();
+	}
 
 	void SetSpeed(float const &animSpeed)
 	{
@@ -151,6 +156,10 @@ public:
 	void SetAnimStyle(AnimIteration i)
 	{
 		currentStyle = i;
+		if(currentStyle == AnimIteration::LOOP_FORWARD_BACKWARD || currentStyle == AnimIteration::LOOP_FROM_START)
+		{
+			Start();
+		}
 	}
 
 	AnimIteration GetAnimStyle() const
@@ -189,6 +198,13 @@ public:
 	{
 		return (uint)currentFrame == frames.size() - 1;
 	}
+	
+	iPoint GetFrameSize() const
+	{
+		iPoint ret;
+		SDL_QueryTexture(frames[0], nullptr, nullptr, &ret.x, &ret.y);
+		return ret;
+	}
 
 	void DoLoopsOfAnimation(uint loops, AnimIteration style)
 	{
@@ -209,6 +225,8 @@ private:
 	bool bActive = false;
 	bool bFinished = false;
 	uint loopsToDo = 0;
+	uint width = 0;
+	uint height = 0;
 	std::vector<SDL_Texture *> frames;
 	SDL_Texture *staticImage = nullptr;
 };

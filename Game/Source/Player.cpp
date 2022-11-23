@@ -8,51 +8,66 @@
 #include "Log.h"
 #include "Point.h"
 #include "Physics.h"
+#include "BitMask.h"
 
-Player::Player() : Entity(EntityType::PLAYER)
+Player::Player() : Character(EntityType::PLAYER)
 {
-	name = "Player";
+	name = "player";
 }
 
 Player::~Player() = default;
 
-bool Player::Awake() {
-
-	//L02: DONE 1: Initialize Player parameters
-	//pos = position;
-	position = {parameters.attribute("x").as_int(), parameters.attribute("y").as_int()};
-	texturePath = "Assets/Textures/player/idle1.png";
-
-	//L02: DONE 5: Get Player parameters from XML
-	position.x = parameters.attribute("x").as_int();
-	position.y = parameters.attribute("y").as_int();
-	texturePath = parameters.attribute("texturepath").as_string();
+bool Player::Awake() 
+{
+	scoreList.first = parameters.attribute("highscore").as_uint();
+	scoreList.second = 0;
+	
+	SetStartingParameters();
 
 	return true;
 }
 
-bool Player::Start() {
-
-	//initilize textures
-	texture = app->tex->Load(texturePath);
-
-	// L07 DONE 5: Add physics to the player - initialize physics body
-	pbody = app->physics->CreateCircle(position.x+16, position.y+16, 16, bodyType::DYNAMIC);
-
-	// L07 DONE 6: Assign player class (using "this") to the listener of the pbody. This makes the Physics module to call the OnCollision method
-	pbody->listener = this; 
-
-	// L07 DONE 7: Assign collider type
-	pbody->ctype = ColliderType::PLAYER;
-
-	//initialize audio effect - !! Path is hardcoded, should be loaded from config.xml
-	pickCoinFxId = app->audio->LoadFx("Assets/Audio/Fx/retro-video-game-coin-pickup-38299.ogg");
+bool Player::Start() 
+{
+	using enum ColliderLayers;
+	uint16 maskFlag = 0x0001;
+	maskFlag = (uint16)(PLATFORMS | ENEMIES | ITEMS | TRIGGERS | CHECKPOINTS);
+	CreatePhysBody((uint16)PLAYER, maskFlag);
+	if(texture->GetFrameCount() > 1)
+	{
+		texture->SetAnimStyle(AnimIteration::LOOP_FROM_START);
+		texture->Start();
+	}
 
 	return true;
 }
 
 bool Player::Update()
 {
+	if(timeUntilReset > 120)
+	{
+		SetStartingPosition();
+		timeUntilReset = -1;
+		if(hp <= 0)
+		{
+			if((uint)score > scoreList.first)
+			{
+				scoreList.first = (uint)score;
+				//app->SaveToConfig("scene", "Character", "highscore", std::to_string(scoreList.first));
+			}
+			scoreList.second = (uint)score;
+			ResetScore();
+			hp = 3;
+		}
+	}
+	else if(timeUntilReset >= 0)
+	{
+		timeUntilReset++;
+	}
+	else
+	{
+		score += 0.002f * (float)scoreMultiplier;
+	}
 
 	// L07 DONE 5: Add physics to the player - updated player position using physics
 
@@ -76,13 +91,15 @@ bool Player::Update()
 	}
 
 	//Set the velocity of the pbody of the player
-	pbody->body->SetLinearVelocity(vel);
+	pBody->body->SetLinearVelocity(vel);
 
 	//Update player position in pixels
-	position.x = METERS_TO_PIXELS(pbody->body->GetTransform().p.x) - 16;
-	position.y = METERS_TO_PIXELS(pbody->body->GetTransform().p.y) - 16;
+	position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x) - pBody->width/2;
+	position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y) - pBody->height/2;
 
-	app->render->DrawTexture(texture, position.x , position.y);
+	app->render->DrawCharacterTexture(texture->GetCurrentFrame(), iPoint(position.x, position.y));
+	
+	//app->render->DrawTexture(texture->GetCurrentFrame(), position.x, position.y);
 
 	return true;
 }
@@ -101,7 +118,6 @@ void Player::OnCollision(PhysBody* physA, PhysBody* physB) {
 	{
 		case ColliderType::ITEM:
 			LOG("Collision ITEM");
-			app->audio->PlayFx(pickCoinFxId);
 			break;
 		case ColliderType::PLATFORM:
 			LOG("Collision PLATFORM");

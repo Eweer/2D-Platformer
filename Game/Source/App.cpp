@@ -27,7 +27,6 @@ App::App(int argc, char* args[]) : argc(argc), args(args)
 	render = new Render();
 	tex = new Textures();
 	audio = new Audio();
-	//L07 DONE 2: Add Physics module
 	physics = new Physics();
 	scene = new Scene();
 	entityManager = new EntityManager();
@@ -39,7 +38,6 @@ App::App(int argc, char* args[]) : argc(argc), args(args)
 	AddModule(win);
 	AddModule(tex);
 	AddModule(audio);
-	//L07 DONE 2: Add Physics module
 	AddModule(physics);
 	AddModule(scene);
 	AddModule(entityManager);
@@ -338,4 +336,9 @@ bool App::SaveToFile()
 	saveGameRequested = saveDoc->save_file("save_game.xml");
 
 	return !saveGameRequested;
+}
+
+uint App::GetLevelNumber() const
+{
+	return levelNumber;
 }
