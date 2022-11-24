@@ -157,11 +157,8 @@ void Entity::AddTexturesAndAnimationFrames()
 			continue;
 		}
 
-		auto animNameToAdd = std::string(parameters.name()) + "_" 
-			+ std::string(parameters.child("animation").attribute("name").as_string());
-
 		//example: triangle_left
-		if(std::string match1 = m[1]; match1 != animNameToAdd)
+		if(std::string match1 = m[1]; match1 != std::string(parameters.name()))
 		{
 			if(foundOne) [[unlikely]] //As they are descalphasorted, once we found one but the name isn't the same
 				return;

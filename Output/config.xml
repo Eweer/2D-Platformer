@@ -25,9 +25,9 @@
 	<scene assetpath="Assets/" texturepath="Assets/Textures/" audiopath="Assets/Audio/" fxfolder="Fx/">
 		<player x="180" y="420" renderable="true">
 			<!--<physics bodytype="dynamic" size="32" gravityscale="1" restitution="0.5" shape="circle"/>-->
-			<physics bodytype="dynamic" width="32" height="58" gravityscale="1" restitution="0d" shape="rectangle"/>
-			<animation name="idle" style="4" speed="0.2" width="272" height="264" frames="4"/>
-			<animation name="run" style="4" speed="0.2" width="32" height="32" frames="4"/>
+			<physics bodytype="dynamic" width="32" height="58d" gravityscale="1" restitution="0" shape="rectangle"/>
+			<animation name="idle" style="4" speed="0.1" width="128" height="128" frames="3"/>
+			<animation name="walk" style="4" speed="0.2" width="128" height="128" frames="4"/>
 		</player>
 		<!--
 		<item x="256" y="515" texturepath="Assets/Textures/goldCoin.png"/>

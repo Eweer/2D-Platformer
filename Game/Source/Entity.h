@@ -74,7 +74,7 @@ public:
 
 	void SetPathsToLevel();
 
-	void AddTexturesAndAnimationFrames();
+	virtual void AddTexturesAndAnimationFrames();
 
 	void CreatePhysBody(Uint16 collisionCategory = 0, Uint16 collisionMask = 0);
 

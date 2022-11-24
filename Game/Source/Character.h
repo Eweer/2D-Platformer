@@ -35,6 +35,8 @@ public:
 	
 	void SetStartingPosition();
 
+	void AddTexturesAndAnimationFrames() override;
+
 	float score = 0;
 	uint scoreMultiplier = 1;
 	std::pair<uint, uint> scoreList;
@@ -44,4 +46,6 @@ public:
 	SDL_Texture *hpTexture = nullptr;
 
 	int timeUntilReset = -1;
+
+	int dir = 1;
 };

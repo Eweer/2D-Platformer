@@ -118,8 +118,6 @@ std::pair<uint, uint> Character::GetScoreList() const
 	return scoreList;
 }
 
-
-
 void Character::SetStartingPosition()
 {
 	if(pBody->body) app->physics->DestroyBody(pBody->body);
@@ -127,3 +125,96 @@ void Character::SetStartingPosition()
 	position.y = parameters.attribute("y").as_int();
 	CreatePhysBody();
 }
+
+void Character::AddTexturesAndAnimationFrames()
+{
+	texture = std::make_unique<Animation>();
+
+	if(!parameters.attribute("renderable").as_bool())
+	{
+		renderMode = RenderModes::NO_RENDER;
+		return;
+	}
+
+	struct dirent **folderList;
+	std::string entityFolder = texLevelPath + name + "/";
+
+	const char *dirPath = entityFolder.c_str();
+	int nCharacterFolder = scandir(dirPath, &folderList, nullptr, DescAlphasort);
+	
+	if(nCharacterFolder < 0) return;
+
+	/*const std::regex r(R"(([a-zA-Z]+(?:_??(?:(?!(?:_image|_static|(?:_*?anim\d+)|\d+)(?:\.png|\.jpg)))[a-zA-Z]*))_?(?:(image|static|(?:anim(?:\d+)*?)|\d+))(\d+)*(?:\.png|\.jpg))");
+	std::smatch m;
+	std::string currentAnimName;
+	if(std::string animFileName(folderList[nCharacterFolder]->d_name); std::regex_match(animFileName, m, r))
+		if(std::string match1 = m[2]; match1 != std::string(parameters.name()))
+			currentAnimName = match1;
+	*/
+	while(nCharacterFolder--)
+	{
+		if(folderList[nCharacterFolder]->d_name[0] == '.')
+		{
+			free(folderList[nCharacterFolder]);
+			continue;
+		}
+		struct dirent **nameList;
+		std::string animationPath = entityFolder + std::string(folderList[nCharacterFolder]->d_name) + "/";
+		int nAnimationContents = scandir(animationPath.c_str(), &nameList, nullptr, DescAlphasort);
+		
+		if(nAnimationContents < 0) break;
+
+		while(nAnimationContents--)
+		{
+			if(nameList[nAnimationContents]->d_name[0] == '.')
+			{
+				free(nameList[nAnimationContents]);
+				continue;
+			}
+			
+
+			renderMode = RenderModes::ANIMATION;
+			if(parameters.child("animation").attribute("speed"))
+				texture->SetSpeed(parameters.child("animation").attribute("speed").as_float());
+			else 
+				texture->SetSpeed(0.2f);
+			
+			if(parameters.child("animation").attribute("style"))
+				texture->SetAnimStyle(static_cast<AnimIteration>(parameters.child("animation").attribute("animstyle").as_int()));
+			else
+				texture->SetAnimStyle(AnimIteration::LOOP_FROM_START);
+
+			std::string frameName = nameList[nAnimationContents]->d_name;
+			std::string framesPath = animationPath + std::string(nameList[nAnimationContents]->d_name);
+
+			texture->AddFrame(framesPath.c_str(), std::string(folderList[nCharacterFolder]->d_name));
+			LOG("Loaded %s.", framesPath.c_str());
+
+			texture->SetCurrentAnimation("idle");
+
+			texture->Start();
+			
+			free(nameList[nAnimationContents]);
+		}
+		free(nameList);
+		free(folderList[nCharacterFolder]);
+	}
+	free(folderList);
+}
+
+//	Let's just say that today is november 24th. Tomorrow is my birthday. It's 4.13 AM. I can't even think.
+//	BUT I'm just gonna leave this here and hope that I can fix it later.
+//	I'm so sorry about this. But hey, at least it works.
+//	If you have any issue don't hesitate to contact me. I'll be happy to help you.
+//	r(R"((([a-zA-Z]+(?:_??(?:(?!(?:_image|_static|(?:_*?anim\d+)|\d+)(?:\.png|\.jpg)))[a-zA-Z]*))_?(?:(image|static|(?:anim\d+)|\d+))(\d+)*(?:\.png|\.jpg)))"); 
+
+// haHA it didn't work. Improved version. Only took 8 minutes to fix it. I'm so proud of myself.
+// Overall I've been working on this regex for 3 hours and a half. I'm surprised it took so little.
+// https://regex101.com/r/8CRsUh/1
+// https://regex101.com/r/viuXac/2
+// final ? https://regex101.com/r/pdLoYK/1
+// https://regex101.com/r/VDIgWc/1
+//static const std::regex r(R"((([a-zA-Z]+(?:_??(?:(?!(?:_image|_static|(?:_*?anim\d+)|\d+)(?:\.png|\.jpg)))[a-zA-Z]*))_?(?:(image|static|(?:anim(?:\d+)*?)|\d+))(\d+)*(?:\.png|\.jpg))
+//))"); //std::smatch m;
+		//and im not even gonna use it.........................
+

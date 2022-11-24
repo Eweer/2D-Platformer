@@ -107,7 +107,7 @@ void Render::ResetViewPort()
 	SDL_RenderSetViewport(renderer, &viewport);
 }
 
-bool Render::DrawCharacterTexture(SDL_Texture *texture, const iPoint pos, const iPoint offset, const bool flip, const double angle)
+bool Render::DrawCharacterTexture(SDL_Texture *texture, const iPoint pos, const bool flip, const iPoint offset, const double angle)
 {
 	SDL_Rect rect{0};
 

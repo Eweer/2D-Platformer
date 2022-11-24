@@ -81,14 +81,28 @@ bool Player::Update()
 	if (app->input->GetKey(SDL_SCANCODE_S) == KEY_REPEAT) {
 		//
 	}
-		
+
+	
 	if (app->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT) {
 		vel = b2Vec2(-speed, -GRAVITY_Y);
+		if(texture->GetCurrentAnimName() != "walk") 
+			texture->SetCurrentAnimation("walk");
+		dir = 1;
 	}
 
 	if (app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT) {
 		vel = b2Vec2(speed, -GRAVITY_Y);
+		if(texture->GetCurrentAnimName() != "walk") 
+			texture->SetCurrentAnimation("walk");
+		dir = 0;
 	}
+
+	if(app->input->GetKey(SDL_SCANCODE_A) == KEY_IDLE && app->input->GetKey(SDL_SCANCODE_D) == KEY_IDLE && texture->GetCurrentAnimName() != "idle")
+	{
+		 texture->SetCurrentAnimation("idle");
+	}
+	
+	
 
 	//Set the velocity of the pbody of the player
 	pBody->body->SetLinearVelocity(vel);
@@ -96,8 +110,7 @@ bool Player::Update()
 	//Update player position in pixels
 	position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x) - pBody->width/2;
 	position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y) - pBody->height/2;
-
-	app->render->DrawCharacterTexture(texture->GetCurrentFrame(), iPoint(position.x, position.y));
+	app->render->DrawCharacterTexture(texture->GetCurrentFrame(), iPoint(position.x, position.y), (bool) dir);
 	
 	//app->render->DrawTexture(texture->GetCurrentFrame(), position.x, position.y);
 

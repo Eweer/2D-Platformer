@@ -5,8 +5,10 @@
 #include "Textures.h"
 #include "Defs.h"
 
+#include <iostream>
 #include <vector>
 #include <memory>
+#include <unordered_map>
 
 struct SDL_Texture;
 
@@ -32,9 +34,11 @@ public:
 	{
 		if(TimeSinceLastFunctionCall > 0) TimeSinceLastFunctionCall += 0.1f;
 		if(TimeSinceLastFunctionCall > FunctionCooldown) TimeSinceLastFunctionCall = 0;
+		std::cout << currentAnimName << std::endl;
+		if(frames.at(currentAnimName).size() == 0) return nullptr;
 
 		//if it's not active, we just return frame
-		if(!bActive) return frames[(int)currentFrame];
+		if(!bActive) return frames[currentAnimName][(uint)currentFrame];
 
 		//if it's active and finished, it's no longer finished
 		if(bFinished) bFinished = !bFinished;
@@ -43,7 +47,7 @@ public:
 		currentFrame += speed;
 
 		//if no more animations in frames[current + 1]
-		if((uint)currentFrame >= frames.size() + 1 || (int)currentFrame < 0)
+		if((uint)currentFrame >= frames.at(currentAnimName).size() + 1 || (int)currentFrame < 0)
 		{
 			//we do things
 			switch(currentStyle)
@@ -56,7 +60,7 @@ public:
 				}
 				case FORWARD_BACKWARD:
 				{
-					if(speed > 0) currentFrame = (float)frames.size() - 1;
+					if(speed > 0) currentFrame = (float)frames.at(currentAnimName).size() - 1;
 					else Stop();
 
 					speed *= -1;
@@ -69,7 +73,7 @@ public:
 				}
 				case LOOP_FORWARD_BACKWARD:
 				{
-					currentFrame = (speed < 0) ? 0 : (float)frames.size() - 1;
+					currentFrame = (speed < 0) ? 0 : (float)frames.at(currentAnimName).size() - 1;
 					speed *= -1;
 					break;
 				}
@@ -87,10 +91,19 @@ public:
 				}
 			}
 		}
-		if((int)currentFrame >= frames.size())
-			return frames[(int)frames.size() - 1];
+		if((int)currentFrame >= frames.at(currentAnimName).size())
+			return frames[currentAnimName][frames.at(currentAnimName).size() - 1];
 		else
-			return frames[(int)currentFrame];
+			return frames[currentAnimName][(uint)currentFrame];
+	}
+
+	void SetCurrentAnimation(std::string const &name)
+	{
+		if(frames.contains(name))
+		{
+			currentAnimName = name;
+			currentFrame = 0.0f;
+		}
 	}
 
 	Animation *AddStaticImage(const char *pathToPNG)
@@ -101,19 +114,31 @@ public:
 
 	Animation *AddSingleFrame(const char *pathToPNG)
 	{
-		frames.push_back(app->tex->Load(pathToPNG));
+		frames["unknown"].push_back(app->tex->Load(pathToPNG));
 		return this;
 	}
-
+	
+	Animation *AddFrame(const char *pathToPNG, std::string const &name)
+	{
+		frames[name].emplace_back(std::move(app->tex->Load(pathToPNG)));
+		return this;
+	}
+	
 	Animation *AddSingleFrame(SDL_Texture *texture)
 	{
-		frames.push_back(texture);
+		frames["unknown"].push_back(texture);
 		return this;
 	}
 
 	bool CleanUp()
 	{
-		for(auto &elem : frames) app->tex->UnLoad(elem);
+		for(auto const &[key, vec]: frames)
+		{
+			for(auto &elem : vec)
+			{
+				app->tex->UnLoad(elem);
+			}
+		}
 		if(staticImage) app->tex->UnLoad(staticImage);
 		return true;
 	}
@@ -127,7 +152,7 @@ public:
 	{
 		if(TimeSinceLastFunctionCall > FunctionCooldown || TimeSinceLastFunctionCall == 0)
 		{
-			if((int)currentFrame < frames.size() - 1) currentFrame++;
+			if((int)currentFrame < frames.at(currentAnimName).size() - 1) currentFrame++;
 			else currentFrame = 0;
 			TimeSinceLastFunctionCall += 0.1f;
 		}
@@ -135,7 +160,7 @@ public:
 	
 	uint GetFrameCount() const
 	{
-		return frames.size();
+		return frames.at(currentAnimName).size();
 	}
 
 	void SetSpeed(float const &animSpeed)
@@ -167,6 +192,11 @@ public:
 		return currentStyle;
 	}
 
+	std::string GetCurrentAnimName() const
+	{
+		return currentAnimName;
+	}
+
 	void Start()
 	{
 		bActive = true;
@@ -196,14 +226,15 @@ public:
 
 	bool IsLastFrame() const
 	{
-		return (uint)currentFrame == frames.size() - 1;
+		return (uint)currentFrame == frames.at(currentAnimName).size() - 1;
 	}
 	
 	iPoint GetFrameSize() const
 	{
-		iPoint ret;
-		SDL_QueryTexture(frames[0], nullptr, nullptr, &ret.x, &ret.y);
-		return ret;
+		/*iPoint ret;
+		SDL_Texture *aux = frames[currentAnimName][0];
+		SDL_QueryTexture, nullptr, nullptr, &ret.x, &ret.y);
+		return ret;*/
 	}
 
 	void DoLoopsOfAnimation(uint loops, AnimIteration style)
@@ -220,6 +251,7 @@ private:
 	float TimeSinceLastFunctionCall = 0;
 	float speed = 0;
 	float currentFrame = 0;
+	std::string currentAnimName = "unknown";
 	AnimIteration currentStyle = AnimIteration::NEVER;
 	AnimIteration baseStyle = AnimIteration::NEVER;
 	bool bActive = false;
@@ -227,7 +259,7 @@ private:
 	uint loopsToDo = 0;
 	uint width = 0;
 	uint height = 0;
-	std::vector<SDL_Texture *> frames;
+	std::unordered_map<std::string, std::vector<SDL_Texture *>, StringHash, std::equal_to<>> frames;
 	SDL_Texture *staticImage = nullptr;
 };
 #endif	// __ANIMATION_H__
