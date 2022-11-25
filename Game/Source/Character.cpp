@@ -23,18 +23,14 @@ Character::~Character() = default;
 bool Character::Awake()
 {
 	SetStartingParameters();
-	
 	return true;
 }
 
 bool Character::Start()
 {
-
 	//initilize textures
-
-
-	
 	CreatePhysBody();
+	if(!texture->Start("idle")) LOG("Couldnt start %s anim. idle was not mapped", texture->GetCurrentAnimName());
 
 	return true;
 }
@@ -130,27 +126,40 @@ void Character::AddTexturesAndAnimationFrames()
 {
 	texture = std::make_unique<Animation>();
 
+	pugi::xml_node animDataNode = parameters.child("animationdata");
+
 	if(!parameters.attribute("renderable").as_bool())
 	{
 		renderMode = RenderModes::NO_RENDER;
 		return;
 	}
+	
+	std::string entityFolder;
+	if(animDataNode.attribute("animpath"))
+	{
+		entityFolder = animDataNode.attribute("animpath").as_string();
+	}
+	else if(animDataNode.attribute("name"))
+	{
+		entityFolder = animDataNode.attribute("name").as_string();
+	}
+	else
+	{
+		entityFolder = texLevelPath + name + "/";
+		LOG("No animation folder specified for %s, defaulting to %s", name, entityFolder);
+	}
 
+	if(currentCharacter != "") entityFolder += currentCharacter +"/";
+	
+	texture->setPivot(animDataNode.attribute("pivotx").as_int(), animDataNode.attribute("pivoty").as_int());
+	
 	struct dirent **folderList;
-	std::string entityFolder = texLevelPath + name + "/";
-
 	const char *dirPath = entityFolder.c_str();
 	int nCharacterFolder = scandir(dirPath, &folderList, nullptr, DescAlphasort);
 	
 	if(nCharacterFolder < 0) return;
 
-	/*const std::regex r(R"(([a-zA-Z]+(?:_??(?:(?!(?:_image|_static|(?:_*?anim\d+)|\d+)(?:\.png|\.jpg)))[a-zA-Z]*))_?(?:(image|static|(?:anim(?:\d+)*?)|\d+))(\d+)*(?:\.png|\.jpg))");
-	std::smatch m;
-	std::string currentAnimName;
-	if(std::string animFileName(folderList[nCharacterFolder]->d_name); std::regex_match(animFileName, m, r))
-		if(std::string match1 = m[2]; match1 != std::string(parameters.name()))
-			currentAnimName = match1;
-	*/
+	//for each file/folder in Character folder
 	while(nCharacterFolder--)
 	{
 		if(folderList[nCharacterFolder]->d_name[0] == '.')
@@ -164,6 +173,7 @@ void Character::AddTexturesAndAnimationFrames()
 		
 		if(nAnimationContents < 0) break;
 
+		//for each file in subfolders of Character folder
 		while(nAnimationContents--)
 		{
 			if(nameList[nAnimationContents]->d_name[0] == '.')
@@ -172,28 +182,29 @@ void Character::AddTexturesAndAnimationFrames()
 				continue;
 			}
 			
+			std::string frameName = nameList[nAnimationContents]->d_name;
+			std::string framesPath = animationPath + std::string(nameList[nAnimationContents]->d_name);
 
-			renderMode = RenderModes::ANIMATION;
+			LOG("Loaded %s.", framesPath.c_str());
+
+			//if it's not the first frame with such name we continue looping
+			if(texture->AddFrame(framesPath.c_str(), std::string(folderList[nCharacterFolder]->d_name)) != 1) [[likely]]
+				continue;
+
+			//if we have multiple frames we set renderMode to animation
+			if(renderMode == RenderModes::UNKNOWN) [[unlikely]]
+				renderMode = RenderModes::ANIMATION;
+
 			if(parameters.child("animation").attribute("speed"))
 				texture->SetSpeed(parameters.child("animation").attribute("speed").as_float());
-			else 
+			else
 				texture->SetSpeed(0.2f);
-			
+
 			if(parameters.child("animation").attribute("style"))
 				texture->SetAnimStyle(static_cast<AnimIteration>(parameters.child("animation").attribute("animstyle").as_int()));
 			else
 				texture->SetAnimStyle(AnimIteration::LOOP_FROM_START);
 
-			std::string frameName = nameList[nAnimationContents]->d_name;
-			std::string framesPath = animationPath + std::string(nameList[nAnimationContents]->d_name);
-
-			texture->AddFrame(framesPath.c_str(), std::string(folderList[nCharacterFolder]->d_name));
-			LOG("Loaded %s.", framesPath.c_str());
-
-			texture->SetCurrentAnimation("idle");
-
-			texture->Start();
-			
 			free(nameList[nAnimationContents]);
 		}
 		free(nameList);

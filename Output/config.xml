@@ -23,11 +23,12 @@
 
 	<!-- Animstyle: ONCE = 0 | LOOP_FROM_START = 1 | FORWARD_BACKWARD = 2 | LOOP_FORWARD_BACKWARD = 3 | NEVER = 4 -->
 	<scene assetpath="Assets/" texturepath="Assets/Textures/" audiopath="Assets/Audio/" fxfolder="Fx/">
-		<player x="180" y="420" renderable="true">
+		<player x="120" y="420" renderable="true" maxjumps = "2" jumpimpulse = "5" currentcharacter="Mage">
 			<!--<physics bodytype="dynamic" size="32" gravityscale="1" restitution="0.5" shape="circle"/>-->
-			<physics bodytype="dynamic" width="32" height="58d" gravityscale="1" restitution="0" shape="rectangle"/>
-			<animation name="idle" style="4" speed="0.1" width="128" height="128" frames="3"/>
-			<animation name="walk" style="4" speed="0.2" width="128" height="128" frames="4"/>
+			<physics bodytype="dynamic" width="46d" height="50" gravityscale="1" restitution="0" shape="rectangle"/>
+      <animationdata  width="128" height="128" pivotx="42" pivoty="85" animstyle="1" animspeed="1" animloop="true" name="player" animpath="Assets/Animations/Player/"/>
+			<animation name="idle" style="4" speed="0.1" frames="3"/>
+			<animation name="walk" style="4" speed="0.2" frames="4"/>
 		</player>
 		<!--
 		<item x="256" y="515" texturepath="Assets/Textures/goldCoin.png"/>

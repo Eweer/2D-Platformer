@@ -88,6 +88,7 @@ public:
 	EntityType type = EntityType::UNKNOWN;
 
 	iPoint position;
+	iPoint startingPosition;
 	std::unique_ptr<Animation> texture;
 	RenderModes renderMode = RenderModes::UNKNOWN;
 	PhysBody *pBody = nullptr;

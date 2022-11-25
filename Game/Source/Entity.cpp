@@ -121,8 +121,7 @@ void Entity::SetPathsToLevel()
 
 bool Entity::SetStartingParameters()
 {
-	position.x = parameters.attribute("x").as_int();
-	position.y = parameters.attribute("y").as_int();
+	startingPosition = position = {parameters.attribute("x").as_int(), parameters.attribute("y").as_int()};
 
 	SetPaths();
 
@@ -217,14 +216,14 @@ void Entity::CreatePhysBody(Uint16 collisionCategory, Uint16 collisionMask)
 	float restitution = physicsNode.attribute("restitution") ? physicsNode.attribute("restitution").as_float() : 1.0f;
 	float32 gravity = physicsNode.attribute("gravityscale") ? physicsNode.attribute("gravityscale").as_float() : 1.0f;
 
-	if(physicsNode.attribute("size"))
+	if(physicsNode.attribute("radius"))
 	{
-		int radius = physicsNode.attribute("size").as_int()/2;
-		pBody = app->physics->CreateCircle(position.x + radius, position.y + radius, radius, bodyType, restitution, collisionCategory, collisionMask);
+		int radius = physicsNode.attribute("radius").as_int()/2;
+		pBody = app->physics->CreateCircle(position.x + radius/2, position.y + radius/2, radius, bodyType, restitution, collisionCategory, collisionMask);
 	}
 	else if(physicsNode.attribute("width") && physicsNode.attribute("height"))
 	{
-		pBody = app->physics->CreateRectangle(position.x + width/2, position.y + height/2, width, height, bodyType, gravity, restitution, collisionCategory, collisionMask);
+		pBody = app->physics->CreateRectangle(position.x, position.y + height/2, width, height, bodyType, gravity, restitution, collisionCategory, collisionMask);
 	}
 	else [[unlikely]]
 	{

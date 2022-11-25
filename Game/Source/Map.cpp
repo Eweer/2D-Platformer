@@ -150,10 +150,12 @@ bool Map::Load()
 	
 	using enum ColliderLayers;
 
-	app->physics->CreateRectangle(256, 704 + 32, 576, 64, BodyType::STATIC, 1.0f, 0.0f, (uint16)PLATFORMS, (uint16)PLAYER);
-	app->physics->CreateRectangle(1473 + 272, 704 + 32, 544, 64, BodyType::STATIC, 1.0f, 0.0f, (uint16)PLATFORMS, (uint16)PLAYER);
-	app->physics->CreateRectangle(640 + 352/2, 704 + 30, 352, 61, BodyType::STATIC, 1.0f, 0.0f, (uint16)PLATFORMS, (uint16)PLAYER);
-
+	PhysBody *c1 = app->physics->CreateRectangle(256, 704 + 32, 576, 64, BodyType::STATIC, 1.0f, 0.0f, (uint16)PLATFORMS, (uint16)PLAYER);
+	PhysBody *c2 = app->physics->CreateRectangle(1473 + 272, 704 + 32, 544, 64, BodyType::STATIC, 1.0f, 0.0f, (uint16)PLATFORMS, (uint16)PLAYER);
+	PhysBody *c3 = app->physics->CreateRectangle(640 + 352/2, 704 + 30, 352, 61, BodyType::STATIC, 1.0f, 0.0f, (uint16)PLATFORMS, (uint16)PLAYER);
+	c1->ctype = ColliderType::PLATFORM;
+	c2->ctype = ColliderType::PLATFORM;
+	c3->ctype = ColliderType::PLATFORM;
 
 	app->physics->CreateRectangle(1088 + 48, 640 + 32, 96, 64, BodyType::STATIC, 1.0f, 0.0f, (uint16)PLATFORMS, (uint16)PLAYER);
 	app->physics->CreateRectangle(1280 + 48, 640 + 32, 96, 64, BodyType::STATIC, 1.0f, 0.0f, (uint16)PLATFORMS, (uint16)PLAYER);

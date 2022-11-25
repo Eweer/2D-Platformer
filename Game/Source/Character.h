@@ -1,6 +1,15 @@
 #pragma once
 #include "Entity.h"
 
+struct entityJump
+{
+	bool bJumping;
+	int currentJumps;
+	int maxJumps;
+	int timeSinceLastJump;
+	float jumpImpulse;
+};
+
 class Character : public Entity
 {
 public:
@@ -36,6 +45,8 @@ public:
 	void SetStartingPosition();
 
 	void AddTexturesAndAnimationFrames() override;
+	
+	virtual void jumpOnNextUpdate(bool bStartJumpOnUpdate) {};
 
 	float score = 0;
 	uint scoreMultiplier = 1;
@@ -48,4 +59,6 @@ public:
 	int timeUntilReset = -1;
 
 	int dir = 1;
+
+	std::string currentCharacter = "";
 };

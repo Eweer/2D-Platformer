@@ -4,6 +4,7 @@
 #include "App.h"
 #include "Textures.h"
 #include "Defs.h"
+#include "Point.h"
 
 #include <iostream>
 #include <vector>
@@ -34,8 +35,7 @@ public:
 	{
 		if(TimeSinceLastFunctionCall > 0) TimeSinceLastFunctionCall += 0.1f;
 		if(TimeSinceLastFunctionCall > FunctionCooldown) TimeSinceLastFunctionCall = 0;
-		std::cout << currentAnimName << std::endl;
-		if(frames.at(currentAnimName).size() == 0) return nullptr;
+		if(GetFrameCount() == -1) return nullptr;
 
 		//if it's not active, we just return frame
 		if(!bActive) return frames[currentAnimName][(uint)currentFrame];
@@ -118,10 +118,13 @@ public:
 		return this;
 	}
 	
-	Animation *AddFrame(const char *pathToPNG, std::string const &name)
+	//returns the number of frames with key name after inserting the new one
+	//returns -1 if name couldn't be emplaced.
+	int AddFrame(const char *pathToPNG, std::string name)
 	{
+		if(name[0] <= 'Z' && name[0] >= 'A') name[0] -= ('Z'-'z');
 		frames[name].emplace_back(std::move(app->tex->Load(pathToPNG)));
-		return this;
+		return GetFrameCount(name);
 	}
 	
 	Animation *AddSingleFrame(SDL_Texture *texture)
@@ -158,9 +161,24 @@ public:
 		}
 	}
 	
-	uint GetFrameCount() const
+	//returns -1 if currentAnimName doesn't exist
+	//otherwise it returns the number of frames in the vector
+	int GetFrameCount() const
 	{
-		return frames.at(currentAnimName).size();
+		if(frames.contains(currentAnimName))
+			return frames.at(currentAnimName).size();
+		else
+			return -1;
+	}
+
+	//returns -1 if currentAnimName doesn't exist
+	//otherwise it returns the number of frames in the vector
+	int GetFrameCount(std::string const &name) const
+	{
+		if(frames.contains(name))
+			return frames.at(name).size();
+		else
+			return -1;
 	}
 
 	void SetSpeed(float const &animSpeed)
@@ -196,10 +214,26 @@ public:
 	{
 		return currentAnimName;
 	}
+	
+	SDL_Point GetFlipPivot() const
+	{
+		return animPivot;
+	}
 
 	void Start()
 	{
 		bActive = true;
+	}
+	
+	bool Start(std::string const &name)
+	{
+		if(GetFrameCount(name) > 0)
+		{ 
+			SetCurrentAnimation(name);
+			bActive = true;
+			return true;
+		}
+		return false;
 	}
 
 	void Pause()
@@ -246,6 +280,12 @@ public:
 		Start();
 	}
 
+	void setPivot(const int &x, const int &y)
+	{
+		animPivot.x = x;
+		animPivot.y = y;
+	}
+
 private:
 	float FunctionCooldown = 1.1f;
 	float TimeSinceLastFunctionCall = 0;
@@ -256,6 +296,7 @@ private:
 	AnimIteration baseStyle = AnimIteration::NEVER;
 	bool bActive = false;
 	bool bFinished = false;
+	SDL_Point animPivot = {0, 0};
 	uint loopsToDo = 0;
 	uint width = 0;
 	uint height = 0;

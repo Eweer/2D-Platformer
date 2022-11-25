@@ -234,6 +234,7 @@ PhysBody *Physics::CreateRectangle(int x, int y, int width, int height, BodyType
 			return nullptr;
 	}
 	body.gravityScale = gravityScale;
+	body.fixedRotation = true;
 	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
 
 	// Add BODY to the world
@@ -258,8 +259,8 @@ PhysBody *Physics::CreateRectangle(int x, int y, int width, int height, BodyType
 	auto *pbody = new PhysBody();
 	pbody->body = b;
 	b->SetUserData(pbody);
-	pbody->width = width * 0.5f;
-	pbody->height = height * 0.5f;
+	pbody->width = width;
+	pbody->height = height;
 
 	// Return our PhysBody class
 	return pbody;

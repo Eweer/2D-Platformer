@@ -107,24 +107,35 @@ void Render::ResetViewPort()
 	SDL_RenderSetViewport(renderer, &viewport);
 }
 
-bool Render::DrawCharacterTexture(SDL_Texture *texture, const iPoint pos, const bool flip, const iPoint offset, const double angle)
+bool Render::DrawCharacterTexture(SDL_Texture *texture, const iPoint pos, const bool flip, SDL_Point pivot, const iPoint offset, const double angle)
 {
 	SDL_Rect rect{0};
 
 	SDL_QueryTexture(texture, nullptr, nullptr, &rect.w, &rect.h);
 
+	rect.x = pos.x + camera.x;
+	rect.y = pos.y + camera.y;
+
+	if(flip)
+	{
+		rect.x -= pivot.x;
+	}
+
 	if(offset != iPoint(INT_MAX, INT_MAX))
 	{
-		rect.x = pos.x - offset.x + camera.x;
-		rect.y = pos.y - offset.y + camera.y;
+		rect.x -= offset.x;
+		rect.y -= offset.y;
 	}
-	else
+
+	SDL_Point const *p = nullptr;
+
+	if(pivot.x != INT_MAX && pivot.y != INT_MAX)
 	{
-		rect.x = pos.x - rect.w/4 + camera.x;
-		rect.y = pos.y - rect.h/2 + camera.y;
+		SDL_Point sdlpivot{pivot.x, pivot.y};
+		p = &sdlpivot;
 	}
 		
-	if(SDL_RenderCopyEx(renderer, texture, nullptr, &rect, angle, nullptr, (SDL_RendererFlip)flip) == -1)
+	if(SDL_RenderCopyEx(renderer, texture, nullptr, &rect, angle, p, (SDL_RendererFlip)flip) == -1)
 	{
 		LOG("Cannot blit to screen. SDL_RenderCopy error: %s", SDL_GetError());
 		return false;
@@ -155,7 +166,7 @@ bool Render::DrawTexture(SDL_Texture* texture, int x, int y, const SDL_Rect* sec
 	rect.w *= scale;
 	rect.h *= scale;
 
-	SDL_Point const *p{};
+	SDL_Point const *p = nullptr;
 
 	if(pivotX != INT_MAX && pivotY != INT_MAX)
 	{
