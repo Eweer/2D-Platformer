@@ -416,7 +416,7 @@ PhysBody *Physics::CreateRectangleSensor(int x, int y, int width, int height, Bo
 	return pbody;
 }
 
-PhysBody *Physics::CreateChain(int x, int y, const int *const points, int size, BodyType type, float rest, uint16 cat, uint16 mask, int angle)
+std::shared_ptr<PhysBody> Physics::CreateChain(int x, int y, const int *const points, int size, BodyType type, float rest, uint16 cat, uint16 mask, int angle)
 {
 	// Create BODY at position x,y
 	b2BodyDef body;
@@ -455,8 +455,8 @@ PhysBody *Physics::CreateChain(int x, int y, const int *const points, int size, 
 	b2FixtureDef fixture;
 	fixture.shape = &shape;
 	fixture.density = 1.0f;
-	fixture.filter.categoryBits = (uint16)cat;
-	fixture.filter.maskBits = (uint16)mask;
+	fixture.filter.categoryBits = cat;
+	fixture.filter.maskBits = mask;
 	fixture.restitution = rest;
 
 	// Add fixture to the BODY
@@ -466,10 +466,11 @@ PhysBody *Physics::CreateChain(int x, int y, const int *const points, int size, 
 	delete[] p;
 
 	// Create our custom PhysBody class
-	auto *pbody = new PhysBody();
+
+	auto pbody = std::make_shared<PhysBody>();
 	pbody->body = b;
-	b->SetUserData(pbody);
-	pbody->width = pbody->height = 0;
+	b->SetUserData(pbody.get());
+	pbody->height = pbody->width = 0;
 
 	// Return our PhysBody class
 	return pbody;

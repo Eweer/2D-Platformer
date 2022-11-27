@@ -327,11 +327,11 @@ inline void Map::CreateCollider(int gid, int i, int j)
 	{
 		TileHitBox collider = colliderInfo->second;
 		iPoint colliderPos = MapToWorld(i, j);
-		colliderPos.x += collider.width/2 + collider.x;
-		colliderPos.y += collider.height/2 + collider.y;
 		std::shared_ptr<PhysBody> retCollider;
-		//if(collider.shape == "rectangle")
+		if(collider.shape == "rectangle")
 		{
+			colliderPos.x += collider.width/2 + collider.x;
+			colliderPos.y += collider.height/2 + collider.y;
 			retCollider = app->physics->CreateRectangle(
 														colliderPos.x,
 														colliderPos.y,
@@ -343,19 +343,20 @@ inline void Map::CreateCollider(int gid, int i, int j)
 														collider.cat
 			);
 		}
-		/*else if(collider.shape == "polygon")
+		else if(collider.shape == "polygon")
 		{
-			retCollider = app->physics->CreatePolygon(
+			colliderPos.x += collider.x;
+			colliderPos.y += collider.y;
+			retCollider = app->physics->CreateChain(
 														colliderPos.x,
 														colliderPos.y,
 														collider.data.data(),
 														collider.data.size(),
 														BodyType::STATIC,
-														1.0f,
 														0.0f,
 														collider.cat
 			);
-		}*/
+		}
 		retCollider->ctype = (ColliderLayers)collider.cat;
 		collidersOnMap.emplace_back(retCollider);
 	}

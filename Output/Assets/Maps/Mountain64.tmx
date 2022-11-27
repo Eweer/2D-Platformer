@@ -125,7 +125,7 @@
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="13" y="13" width="51" height="51">
-     <polygon points="0,0 51,0 51,39 43.1538,39 38.25,51 0,51"/>
+     <polygon points="0,0 51,0 51,39 43,39 38,51 0,51"/>
     </object>
    </objectgroup>
   </tile>
@@ -223,7 +223,7 @@
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="13" y="0" width="51" height="50">
-     <polygon points="0,0 37.74,0 41.82,11 51,15 51,50 37.74,49 13.26,36 0,4"/>
+     <polygon points="0,0 37,0 41,11 51,15 51,50 37,49 13,36 0,4"/>
     </object>
    </objectgroup>
   </tile>

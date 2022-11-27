@@ -124,7 +124,7 @@ public:
 	std::shared_ptr<PhysBody> CreateCircle(int x, int y, int radius, BodyType type, float rest = 0.0f, uint16 cat = (uint16)ColliderLayers::PLATFORMS, uint16 mask = (uint16)ColliderLayers::PLAYER);
 	std::shared_ptr<PhysBody> CreatePolygon(int x, int y, const int *const points, int size, BodyType type, float rest = 0.0f, uint16 cat = (uint16)ColliderLayers::PLATFORMS, uint16 mask = (uint16)ColliderLayers::PLAYER, int angle = 0);
 	PhysBody *CreateRectangleSensor(int x, int y, int width, int height, BodyType type, uint16 cat = (uint16)ColliderLayers::TRIGGERS, uint16 mask = (uint16)ColliderLayers::PLAYER);
-	PhysBody *CreateChain(int x, int y, const int *const points, int size, BodyType type, float rest = 0.0f, uint16 cat = (uint16)ColliderLayers::PLATFORMS, uint16 mask = (uint16)ColliderLayers::PLAYER, int angle = 0);
+	std::shared_ptr<PhysBody> CreateChain(int x, int y, const int *const points, int size, BodyType type, float rest = 0.0f, uint16 cat = (uint16)ColliderLayers::PLATFORMS, uint16 mask = (uint16)ColliderLayers::PLAYER, int angle = 0);
 
 	// Create joints
 	b2RevoluteJoint *CreateRevoluteJoint(PhysBody *anchor, PhysBody *body, iPoint anchorOffset, iPoint bodyOffset, std::vector<RevoluteJointSingleProperty> properties);
