@@ -219,11 +219,29 @@ void Entity::CreatePhysBody(Uint16 collisionCategory, Uint16 collisionMask)
 	if(physicsNode.attribute("radius"))
 	{
 		int radius = physicsNode.attribute("radius").as_int()/2;
-		pBody = app->physics->CreateCircle(position.x + radius/2, position.y + radius/2, radius, bodyType, restitution, collisionCategory, collisionMask);
+		pBody = app->physics->CreateCircle(
+			position.x + radius/2,
+			position.y + radius/2,
+			radius,
+			bodyType,
+			restitution,
+			collisionCategory,
+			collisionMask
+		);
 	}
 	else if(physicsNode.attribute("width") && physicsNode.attribute("height"))
 	{
-		pBody = app->physics->CreateRectangle(position.x, position.y + height/2, width, height, bodyType, gravity, restitution, collisionCategory, collisionMask);
+		pBody = app->physics->CreateRectangle(
+			position.x,
+			position.y + height/2,
+			width,
+			height,
+			bodyType,
+			gravity,
+			restitution,
+			collisionCategory,
+			collisionMask
+		);
 	}
 	else [[unlikely]]
 	{
@@ -231,7 +249,7 @@ void Entity::CreatePhysBody(Uint16 collisionCategory, Uint16 collisionMask)
 		return;
 	}
 	pBody->listener = this;
-	pBody->ctype = ColliderType::PLAYER;
+	pBody->ctype = (ColliderLayers)collisionCategory;
 }
 
 uint Entity::GetParameterBodyType() const

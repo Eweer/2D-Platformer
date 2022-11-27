@@ -6,6 +6,7 @@
 #include "Point.h"
 #include "Defs.h"
 #include "Log.h"
+#include "Physics.h"
 
 #include <unordered_map>
 #include <functional>
@@ -18,6 +19,17 @@
 using variantProperty = std::variant<int, bool, float, std::string>;
 using propertiesUnorderedmap = std::unordered_map<std::string, variantProperty, StringHash, std::equal_to<>>;
 
+
+struct TileHitBox
+{
+	int x = 0;
+	int y = 0;
+	std::string shape = "";
+	int width = 0;
+	int height = 0;
+	uint16 cat;
+	std::vector<int> data;
+};
 
 // L04: DONE 2: Create a struct to hold information for a TileSet
 // Ignore Terrain Types and Tile Types for now, but we want the image!
@@ -33,6 +45,7 @@ struct TileSet
 	int tilecount;
 
 	SDL_Texture *texture;
+	std::unordered_map<int, TileHitBox> colliders;
 
 	// L05: DONE 7: Create a method that receives a tile id and returns it's Rect find the Rect associated with a specific tile id
 	SDL_Rect GetTileRect(int gid) const;
@@ -114,10 +127,12 @@ private:
 
 	// L04: DONE 4: Create and call a private function to load a tileset
 	bool LoadTileSet(pugi::xml_node const &mapFile);
+	std::pair<TileHitBox, bool> LoadHitboxInfo(const pugi::xml_node &hitbox) const;
 
 	// L05
 	bool LoadAllLayers(pugi::xml_node const &mapNode);
-	std::unique_ptr<MapLayer> LoadLayer(pugi::xml_node const &node) const;
+	std::unique_ptr<MapLayer> LoadLayer(pugi::xml_node const &node);
+	void CreateCollider(int gid, int i, int j);
 	propertiesUnorderedmap LoadProperties(pugi::xml_node const &node) const;
 
 	// L06: DONE 2
@@ -128,6 +143,7 @@ private:
 	std::string mapFileName;
 	std::string mapFolder;
 	bool mapLoaded = false;
+	std::vector<std::shared_ptr<PhysBody>> collidersOnMap;
 };
 
 #endif // __MAP_H__

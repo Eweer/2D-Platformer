@@ -10,6 +10,7 @@
 
 #include "math.h"
 
+#include <memory>
 
 #include "Box2D/Box2D/Box2D.h"
 #include "SDL/include/SDL_keycode.h"
@@ -215,7 +216,7 @@ void Physics::BeginContact(b2Contact *contact)
 
 //--------------- Create Shapes and Joints
 
-PhysBody *Physics::CreateRectangle(int x, int y, int width, int height, BodyType type, float32 gravityScale, float rest, uint16 cat, uint16 mask)
+std::shared_ptr<PhysBody> Physics::CreateRectangle(int x, int y, int width, int height, BodyType type, float32 gravityScale, float rest, uint16 cat, uint16 mask)
 {
 	b2BodyDef body;
 	switch (type)
@@ -256,9 +257,9 @@ PhysBody *Physics::CreateRectangle(int x, int y, int width, int height, BodyType
 	b->CreateFixture(&fixture);
 
 	// Create our custom PhysBody class
-	auto *pbody = new PhysBody();
+	auto pbody = std::make_shared<PhysBody>();
 	pbody->body = b;
-	b->SetUserData(pbody);
+	b->SetUserData(pbody.get());
 	pbody->width = width;
 	pbody->height = height;
 
@@ -266,7 +267,7 @@ PhysBody *Physics::CreateRectangle(int x, int y, int width, int height, BodyType
 	return pbody;
 }
 
-PhysBody *Physics::CreateCircle(int x, int y, int radius, BodyType type, float rest, uint16 cat, uint16 mask)
+std::shared_ptr<PhysBody> Physics::CreateCircle(int x, int y, int radius, BodyType type, float rest, uint16 cat, uint16 mask)
 {
 	// Create BODY at position x,y
 	b2BodyDef body;
@@ -298,17 +299,17 @@ PhysBody *Physics::CreateCircle(int x, int y, int radius, BodyType type, float r
 	b2FixtureDef fixture;
 	fixture.shape = &circle;
 	fixture.density = 1.0f;
-	fixture.filter.categoryBits = (uint16)cat;
-	fixture.filter.maskBits = (uint16)mask;
+	fixture.filter.categoryBits = cat;
+	fixture.filter.maskBits = mask;
 	fixture.restitution = rest;
 
 	// Add fixture to the BODY
 	b->CreateFixture(&fixture);
 
 	// Create our custom PhysBody class
-	auto *pbody = new PhysBody();
+	auto pbody = std::make_shared<PhysBody>();
 	pbody->body = b;
-	b->SetUserData(pbody);
+	b->SetUserData(pbody.get());
 	pbody->width = radius * 2;
 	pbody->height = radius * 2;
 
@@ -316,7 +317,7 @@ PhysBody *Physics::CreateCircle(int x, int y, int radius, BodyType type, float r
 	return pbody;
 }
 
-PhysBody *Physics::CreatePolygon(int x, int y, const int *const points, int size, BodyType type, float rest, uint16 cat, uint16 mask, int angle)
+std::shared_ptr<PhysBody> Physics::CreatePolygon(int x, int y, const int *const points, int size, BodyType type, float rest, uint16 cat, uint16 mask, int angle)
 {
 	b2BodyDef body;
 	switch (type)
@@ -358,9 +359,9 @@ PhysBody *Physics::CreatePolygon(int x, int y, const int *const points, int size
 
 	b->CreateFixture(&fixture);
 
-	PhysBody *pbody = new PhysBody();
+	auto pbody = std::make_shared<PhysBody>();
 	pbody->body = b;
-	b->SetUserData(pbody);
+	b->SetUserData(pbody.get());
 	pbody->height = pbody->width = 0;
 
 	return pbody;

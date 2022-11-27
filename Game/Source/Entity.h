@@ -91,7 +91,7 @@ public:
 	iPoint startingPosition;
 	std::unique_ptr<Animation> texture;
 	RenderModes renderMode = RenderModes::UNKNOWN;
-	PhysBody *pBody = nullptr;
+	std::shared_ptr<PhysBody> pBody;
 
 	pugi::xml_node parameters;
 	std::string texturePath;

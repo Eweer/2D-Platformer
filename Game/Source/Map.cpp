@@ -6,6 +6,7 @@
 
 #include "Defs.h"
 #include "Log.h"
+#include "BitMask.h"
 
 #include <memory>
 #include <cmath>
@@ -149,18 +150,18 @@ bool Map::Load()
 	LogLoadedData();
 	
 	using enum ColliderLayers;
-
+	/*
 	PhysBody *c1 = app->physics->CreateRectangle(256, 704 + 32, 576, 64, BodyType::STATIC, 1.0f, 0.0f, (uint16)PLATFORMS, (uint16)PLAYER);
 	PhysBody *c2 = app->physics->CreateRectangle(1473 + 272, 704 + 32, 544, 64, BodyType::STATIC, 1.0f, 0.0f, (uint16)PLATFORMS, (uint16)PLAYER);
 	PhysBody *c3 = app->physics->CreateRectangle(640 + 352/2, 704 + 30, 352, 61, BodyType::STATIC, 1.0f, 0.0f, (uint16)PLATFORMS, (uint16)PLAYER);
-	c1->ctype = ColliderType::PLATFORM;
-	c2->ctype = ColliderType::PLATFORM;
-	c3->ctype = ColliderType::PLATFORM;
+	c1->ctype = ColliderLayers::PLATFORMS;
+	c2->ctype = ColliderLayers::PLATFORMS;
+	c3->ctype = ColliderLayers::PLATFORMS;
 
 	app->physics->CreateRectangle(1088 + 48, 640 + 32, 96, 64, BodyType::STATIC, 1.0f, 0.0f, (uint16)PLATFORMS, (uint16)PLAYER);
 	app->physics->CreateRectangle(1280 + 48, 640 + 32, 96, 64, BodyType::STATIC, 1.0f, 0.0f, (uint16)PLATFORMS, (uint16)PLAYER);
-
-	app->physics->CreateRectangle(224 + 128, 543 + 32, 256, 64, BodyType::STATIC, 1.0f, 0.0f, (uint16)PLATFORMS, (uint16)PLAYER);
+	*/
+/*	app->physics->CreateRectangle(224 + 128, 543 + 32, 256, 64, BodyType::STATIC, 1.0f, 0.0f, (uint16)PLATFORMS, (uint16)PLAYER);
 	app->physics->CreateRectangle(352 + 64, 384 + 32, 128, 64, BodyType::STATIC, 1.0f, 0.0f, (uint16)PLATFORMS, (uint16)PLAYER);
 	app->physics->CreateRectangle(768 + 64, 480 + 31, 128, 63, BodyType::STATIC, 1.0f, 0.0f, (uint16)PLATFORMS, (uint16)PLAYER);
 	app->physics->CreateRectangle(640 + 64, 320 + 32, 128, 64, BodyType::STATIC, 1.0f, 0.0f, (uint16)PLATFORMS, (uint16)PLAYER);
@@ -170,7 +171,7 @@ bool Map::Load()
 	app->physics->CreateRectangle(1984 + 16, 55 + 336, 32, 672, BodyType::STATIC, 1.0f, 0.0f, (uint16)PLATFORMS, (uint16)PLAYER);
 	app->physics->CreateRectangle(32 + 16, 64 + 336, 32, 672, BodyType::STATIC, 1.0f, 0.0f, (uint16)PLATFORMS, (uint16)PLAYER);
 	app->physics->CreateRectangle(64 + 960, 32 + 16, 1920, 32, BodyType::STATIC, 1.0f, 0.0f, (uint16)PLATFORMS, (uint16)PLAYER);
-
+	*/
 	mapFileXML.reset();
 
 	return mapLoaded = true;
@@ -215,11 +216,64 @@ bool Map::LoadTileSet(pugi::xml_node const &mapFile)
 
 		auto path = mapFolder + elem.child("image").attribute("source").as_string();
 		retTileSet->texture = app->tex->Load(path.c_str());
+
+		for(auto const &tileInfo : elem.children("tile"))
+		{
+			if(auto [retHitBox, success] = LoadHitboxInfo(tileInfo); success)
+				retTileSet->colliders.try_emplace(tileInfo.attribute("id").as_int(), retHitBox);
+		}
 		
 		mapData.tilesets.emplace_back(retTileSet.release());
 	}
 
 	return true;
+}
+
+std::pair<TileHitBox, bool> Map::LoadHitboxInfo(const pugi::xml_node &tileNode) const
+{
+	std::pair<TileHitBox, bool> retPair;
+
+	retPair.second = false;
+
+	pugi::xml_node tileObjectGroup = tileNode.child("objectgroup");
+	if(tileObjectGroup.empty()) return retPair;
+
+	tileObjectGroup = tileObjectGroup.first_child();
+	if(tileObjectGroup.empty()) return retPair;
+
+	retPair.second = true;
+
+	retPair.first.x = tileObjectGroup.attribute("x").as_int();
+	retPair.first.y = tileObjectGroup.attribute("y").as_int();
+	retPair.first.width = tileObjectGroup.attribute("width").as_int();
+	retPair.first.height = tileObjectGroup.attribute("height").as_int();
+
+	if(auto catProperty = tileNode.child("properties").find_child_by_attribute("propertytype", "ColliderLayers"); catProperty.empty())
+		retPair.first.cat = 0x8000;
+	else
+		retPair.first.cat = (uint16)(catProperty.attribute("value").as_int());
+
+
+	pugi::xml_node shapeInfo = tileObjectGroup.first_child();
+	if(shapeInfo.empty())
+	{
+		retPair.first.shape = "rectangle";
+		return retPair;
+	}
+
+	retPair.first.shape = shapeInfo.name();
+	const std::string xyStr = shapeInfo.attribute("points").as_string();
+	static const std::regex r("\\d{1,3}");
+	auto xyStrBegin = std::sregex_iterator(xyStr.begin(), xyStr.end(), r);
+	auto xyStrEnd = std::sregex_iterator();
+
+	for(std::sregex_iterator i = xyStrBegin; i != xyStrEnd; ++i)
+	{
+		std::smatch match = *i;
+		retPair.first.data.push_back(stoi(match.str()));
+	}
+
+	return retPair;
 }
 
 // Iterate all layers and load each of them
@@ -233,9 +287,8 @@ bool Map::LoadAllLayers(pugi::xml_node const &node)
 }
 
 // Loads a single layer
-std::unique_ptr<MapLayer> Map::LoadLayer(pugi::xml_node const &node) const
+std::unique_ptr<MapLayer> Map::LoadLayer(pugi::xml_node const &node)
 {
-
 	auto layer = std::make_unique<MapLayer>();
 
 	//Load the attributes
@@ -245,16 +298,67 @@ std::unique_ptr<MapLayer> Map::LoadLayer(pugi::xml_node const &node) const
 	layer->height = node.attribute("height").as_int();
 
 	//Iterate over all the tiles and get gid values
-	for(int i = 0; auto const &elem : node.child("data").children("tile"))
+	for(int i = 0, j= 0; auto const &elem : node.child("data").children("tile"))
 	{
-		//if(int gid = elem.attribute("gid").as_int(); gid > 0) layer->data.push_back(gid);
 		int gid = elem.attribute("gid").as_int();
 		layer->data.push_back(gid);
+
+		if(gid > 0)
+		{
+			CreateCollider(gid, i, j);
+		}
+
+		if(++i >= mapData.width)
+		{
+			j++;
+			i = 0;
+		}
 	}
 
 	layer->properties = LoadProperties(node);
 
 	return std::move(layer);
+}
+
+inline void Map::CreateCollider(int gid, int i, int j)
+{
+	TileSet *tileset = GetTilesetFromTileId(gid);
+	if(auto colliderInfo = tileset->colliders.find(gid-1); colliderInfo != tileset->colliders.end())
+	{
+		TileHitBox collider = colliderInfo->second;
+		iPoint colliderPos = MapToWorld(i, j);
+		colliderPos.x += collider.width/2 + collider.x;
+		colliderPos.y += collider.height/2 + collider.y;
+		std::shared_ptr<PhysBody> retCollider;
+		//if(collider.shape == "rectangle")
+		{
+			retCollider = app->physics->CreateRectangle(
+														colliderPos.x,
+														colliderPos.y,
+														collider.width,
+														collider.height,
+														BodyType::STATIC,
+														1.0f,
+														0.0f,
+														collider.cat
+			);
+		}
+		/*else if(collider.shape == "polygon")
+		{
+			retCollider = app->physics->CreatePolygon(
+														colliderPos.x,
+														colliderPos.y,
+														collider.data.data(),
+														collider.data.size(),
+														BodyType::STATIC,
+														1.0f,
+														0.0f,
+														collider.cat
+			);
+		}*/
+		retCollider->ctype = (ColliderLayers)collider.cat;
+		collidersOnMap.emplace_back(retCollider);
+	}
 }
 
 

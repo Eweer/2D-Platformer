@@ -41,7 +41,7 @@
 
 	<map>
 		<mapfolder path="Assets/Maps/"/>
-		<mapfile path="Assets/Maps/NewTSTest.tmx"/>
+		<mapfile path="Assets/Maps/Mountain64.tmx"/>
 	</map>
 	
 </config>

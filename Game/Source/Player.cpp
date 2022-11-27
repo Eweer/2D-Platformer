@@ -157,17 +157,17 @@ void Player::OnCollision(PhysBody* physA, PhysBody* physB) {
 
 	switch (physB->ctype)
 	{
-		case ColliderType::ITEM:
-			LOG("Collision ITEM");
+		case ColliderLayers::ITEMS:
+			LOG("Collision ITEMS");
 			break;
-		case ColliderType::PLATFORM:
-			LOG("Collision PLATFORM");
+		case ColliderLayers::PLATFORMS:
+			LOG("Collision PLATFORMS");
  			if((pBody->body->GetPosition().y < physB->body->GetPosition().y))
 			{
 				jump = {false, 0, jump.maxJumps, 0, jump.jumpImpulse};
 			}
 			break;
-		case ColliderType::UNKNOWN:
+		case ColliderLayers::UNKNOWN:
 			LOG("Collision UNKNOWN");
 			break;
 	}

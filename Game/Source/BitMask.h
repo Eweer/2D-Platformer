@@ -12,7 +12,8 @@ enum class ColliderLayers
 	ENEMIES = 0x0004,
 	ITEMS = 0x0008,
 	TRIGGERS = 0x0010,
-	CHECKPOINTS = 0x0020
+	CHECKPOINTS = 0x0020,
+	UNKNOWN = 0x8000
 };
 
 inline ColliderLayers operator|(ColliderLayers a, ColliderLayers b)

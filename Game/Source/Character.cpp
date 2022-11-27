@@ -64,25 +64,19 @@ void Character::OnCollision(PhysBody *physA, PhysBody *physB)
 	if(timeUntilReset >= 0) return;
 	switch(physB->ctype)
 	{
-		case ColliderType::ITEM:
+		case ColliderLayers::ITEMS:
 			if(score < 99999)
 			{
 				score += (float)(100 * scoreMultiplier);
 				if(score > 99999) score = 99999;
 			}
-			LOG("Collision ITEM");
+			LOG("Collision ITEMS");
 			break;
-		case ColliderType::ANIM:
-			LOG("Collision ANIM");
-			break;
-		case ColliderType::SENSOR:
-			LOG("Collision SENSOR");
-			break;
-		case ColliderType::PLATFORM:
-			LOG("Collision BOARD");
-			break;
-		case ColliderType::UNKNOWN:
+		case ColliderLayers::UNKNOWN:
 			LOG("Collision UNKNOWN");
+			break;
+		case ColliderLayers::PLATFORMS:
+			LOG("Collision BOARD");
 			break;
 		default:
 			LOG("HOW DID YOU GET HERE?!?!?!?");
