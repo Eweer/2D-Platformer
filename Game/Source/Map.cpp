@@ -61,7 +61,7 @@ void Map::Draw() const
 
 				//L06: DONE 3: Obtain the tile set using GetTilesetFromTileId
 				TileSet* tileset = GetTilesetFromTileId(gid);
-
+				
 				SDL_Rect r = tileset->GetTileRect(gid);
 				iPoint pos = MapToWorld(x, y);
 
@@ -247,7 +247,9 @@ std::unique_ptr<MapLayer> Map::LoadLayer(pugi::xml_node const &node) const
 	//Iterate over all the tiles and get gid values
 	for(int i = 0; auto const &elem : node.child("data").children("tile"))
 	{
-		if(int gid = elem.attribute("gid").as_int(); gid > 0) layer->data.push_back(gid);
+		//if(int gid = elem.attribute("gid").as_int(); gid > 0) layer->data.push_back(gid);
+		int gid = elem.attribute("gid").as_int();
+		layer->data.push_back(gid);
 	}
 
 	layer->properties = LoadProperties(node);
