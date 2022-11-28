@@ -19,7 +19,6 @@
 using variantProperty = std::variant<int, bool, float, std::string>;
 using propertiesUnorderedmap = std::unordered_map<std::string, variantProperty, StringHash, std::equal_to<>>;
 
-
 struct TileHitBox
 {
 	int x = 0;
@@ -29,6 +28,13 @@ struct TileHitBox
 	int height = 0;
 	uint16 cat;
 	std::vector<int> data;
+};
+
+struct TileInfo
+{
+	TileHitBox collider;
+	int firstAnimGid;
+	std::vector<std::pair<int, int>> tileAnim;
 };
 
 // L04: DONE 2: Create a struct to hold information for a TileSet
@@ -45,7 +51,7 @@ struct TileSet
 	int tilecount;
 
 	SDL_Texture *texture;
-	std::unordered_map<int, TileHitBox> colliders;
+	std::unordered_map<int, TileInfo> tileInfo;
 
 	// L05: DONE 7: Create a method that receives a tile id and returns it's Rect find the Rect associated with a specific tile id
 	SDL_Rect GetTileRect(int gid) const;
@@ -132,7 +138,7 @@ private:
 	// L05
 	bool LoadAllLayers(pugi::xml_node const &mapNode);
 	std::unique_ptr<MapLayer> LoadLayer(pugi::xml_node const &node);
-	void CreateCollider(int gid, int i, int j);
+	std::shared_ptr<PhysBody> CreateCollider (int gid, int i, int j, TileSet const *tileset) const;
 	propertiesUnorderedmap LoadProperties(pugi::xml_node const &node) const;
 
 	// L06: DONE 2

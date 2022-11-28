@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="10" height="10" tilewidth="64" tileheight="64" infinite="0" nextlayerid="4" nextobjectid="17">
+<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="10" height="12" tilewidth="64" tileheight="64" infinite="0" nextlayerid="5" nextobjectid="17">
  <tileset firstgid="1" name="MountainTiles64x64" tilewidth="64" tileheight="64" tilecount="121" columns="11">
   <image source="Mountain/MountainTiles64x64.png" width="704" height="704"/>
   <tile id="0">
@@ -7,7 +7,7 @@
     <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
-    <object id="1" x="12" y="13" width="52" height="51"/>
+    <object id="1" x="13" y="13" width="51" height="51"/>
    </objectgroup>
   </tile>
   <tile id="6">
@@ -23,7 +23,7 @@
     <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
-    <object id="1" x="0" y="13" width="52" height="51"/>
+    <object id="1" x="0" y="13" width="51" height="51"/>
    </objectgroup>
   </tile>
   <tile id="7">
@@ -60,7 +60,7 @@
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="6" y="16" width="52" height="48">
-     <polygon points="0,0 52,0 52,22 45,22 45,48 6,48 6,20 0,20"/>
+     <polygon points="0,0 52,0 52,22 45,22 45,48 8,48 8,20 0,20"/>
     </object>
    </objectgroup>
   </tile>
@@ -79,7 +79,9 @@
     <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
-    <object id="1" x="0" y="0" width="64" height="64"/>
+    <object id="1" x="0" y="0" width="64" height="64">
+     <polygon points="0,0 64,0 64,64 13,64 13,57 0,51"/>
+    </object>
    </objectgroup>
   </tile>
   <tile id="21">
@@ -87,7 +89,9 @@
     <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
-    <object id="1" x="0" y="0" width="64" height="64"/>
+    <object id="1" x="0" y="0" width="64" height="64">
+     <polygon points="0,0 64,0 64,51 55,52 51,64 13,64 11,56 0,51"/>
+    </object>
    </objectgroup>
   </tile>
   <tile id="19">
@@ -95,7 +99,9 @@
     <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
-    <object id="1" x="0" y="0" width="64" height="64"/>
+    <object id="1" x="0" y="0" width="64" height="64">
+     <polygon points="0,15 12,13 14,0 64,0 64,64 13,64 11,55 0,51"/>
+    </object>
    </objectgroup>
   </tile>
   <tile id="10">
@@ -135,7 +141,7 @@
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="0" y="13" width="52" height="51">
-     <polygon points="0,0 52,0 52,51 13,51 11,43 0,39"/>
+     <polygon points="0,0 51,0 51,51 13,51 11,43 0,39"/>
     </object>
    </objectgroup>
   </tile>
@@ -162,7 +168,9 @@
     <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
-    <object id="1" x="0" y="0" width="64" height="64"/>
+    <object id="1" x="0" y="0" width="64" height="64">
+     <polygon points="0,0 51,0 51,10 64,15 64,64 0,64"/>
+    </object>
    </objectgroup>
   </tile>
   <tile id="22">
@@ -170,7 +178,9 @@
     <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
-    <object id="1" x="0" y="0" width="64" height="64"/>
+    <object id="1" x="0" y="0" width="64" height="64">
+     <polygon points="13,0 64,0 64,64 0,64 0,14 12,13"/>
+    </object>
    </objectgroup>
   </tile>
   <tile id="17">
@@ -178,7 +188,9 @@
     <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
-    <object id="1" x="0" y="0" width="64" height="64"/>
+    <object id="1" x="0" y="0" width="64" height="64">
+     <polygon points="0,0 51,0 51,10 64,15 64,51 55,52 51,64 0,64"/>
+    </object>
    </objectgroup>
   </tile>
   <tile id="20">
@@ -186,7 +198,9 @@
     <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
-    <object id="1" x="0" y="0" width="64" height="64"/>
+    <object id="1" x="0" y="0" width="64" height="64">
+     <polygon points="0,15 12,13 14,0 51,0 51,10 64,15 64,64 0,64"/>
+    </object>
    </objectgroup>
   </tile>
   <tile id="3">
@@ -204,7 +218,7 @@
     <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
-    <object id="1" x="0" y="0" width="64" height="52"/>
+    <object id="1" x="0" y="0" width="64" height="51"/>
    </objectgroup>
   </tile>
   <tile id="4">
@@ -223,7 +237,7 @@
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="13" y="0" width="51" height="50">
-     <polygon points="0,0 37,0 41,11 51,15 51,50 37,49 13,36 0,4"/>
+     <polygon points="0,0 37,0 41,11 51,15 51,51 37,49 13,36 0,4"/>
     </object>
    </objectgroup>
   </tile>
@@ -233,7 +247,7 @@
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="0" y="0" width="51" height="50">
-     <polygon points="0,13 12,13 12,0 51,0 51,7 47,16 39,26 29,40 23,45 0,50"/>
+     <polygon points="0,13 12,13 12,0 51,0 51,7 47,16 39,26 29,40 23,45 0,51"/>
     </object>
    </objectgroup>
   </tile>
@@ -262,7 +276,9 @@
     <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
-    <object id="1" x="0" y="0" width="64" height="64"/>
+    <object id="1" x="0" y="0" width="64" height="64">
+     <polygon points="0,15 12,13 14,0 50,0 50,10 64,15 64,51 55,52 51,64 0,64"/>
+    </object>
    </objectgroup>
   </tile>
   <tile id="15">
@@ -270,7 +286,9 @@
     <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
-    <object id="1" x="0" y="0" width="64" height="64"/>
+    <object id="1" x="0" y="0" width="64" height="64">
+     <polygon points="0,15 12,13 14,0 50,0 50,10 64,15 64,64 13,64 11,56 0,52"/>
+    </object>
    </objectgroup>
   </tile>
   <tile id="18">
@@ -278,7 +296,9 @@
     <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
-    <object id="1" x="0" y="0" width="64" height="64"/>
+    <object id="1" x="0" y="0" width="64" height="64">
+     <polygon points="0,15 12,13 14,0 64,0 64,51 55,52 51,64 13,64 11,56 0,51"/>
+    </object>
    </objectgroup>
   </tile>
   <tile id="16">
@@ -286,7 +306,9 @@
     <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
-    <object id="1" x="0" y="0" width="64" height="64"/>
+    <object id="1" x="0" y="0" width="64" height="64">
+     <polygon points="0,0 50,0 50,10 64,15 64,51 55,52 51,64 13,64 11,56 0,51"/>
+    </object>
    </objectgroup>
   </tile>
   <tile id="2">
@@ -314,7 +336,9 @@
     <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
-    <object id="1" x="0" y="0" width="64" height="64"/>
+    <object id="1" x="0" y="0" width="64" height="64">
+     <polygon points="13,13 13,0 51,0 51,10 60,14 64,14 64,51 55,53 51,64 12,64 11,56 0,51 0,13"/>
+    </object>
    </objectgroup>
   </tile>
   <tile id="44">
@@ -439,21 +463,11 @@
   <tile id="119"/>
   <tile id="120"/>
  </tileset>
- <layer id="1" name="Tile Layer 1" width="10" height="10">
+ <layer id="4" name="Water" width="10" height="12">
   <properties>
    <property name="Draw" type="bool" value="true"/>
   </properties>
   <data>
-   <tile gid="1"/>
-   <tile gid="7"/>
-   <tile gid="2"/>
-   <tile/>
-   <tile/>
-   <tile/>
-   <tile/>
-   <tile gid="1"/>
-   <tile gid="7"/>
-   <tile gid="2"/>
    <tile/>
    <tile/>
    <tile/>
@@ -465,7 +479,125 @@
    <tile/>
    <tile/>
    <tile/>
-   <tile gid="13"/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile gid="67"/>
+   <tile gid="67"/>
+   <tile gid="67"/>
+   <tile gid="67"/>
+   <tile gid="67"/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile gid="46"/>
+   <tile gid="46"/>
+   <tile gid="46"/>
+   <tile gid="45"/>
+   <tile gid="46"/>
+   <tile/>
+  </data>
+ </layer>
+ <layer id="1" name="Platforms" width="10" height="12">
+  <properties>
+   <property name="Draw" type="bool" value="true"/>
+  </properties>
+  <data>
+   <tile/>
+   <tile/>
+   <tile/>
    <tile/>
    <tile/>
    <tile/>
@@ -504,7 +636,7 @@
    <tile/>
    <tile/>
    <tile/>
-   <tile/>
+   <tile gid="13"/>
    <tile/>
    <tile/>
    <tile gid="33"/>
@@ -533,17 +665,56 @@
    <tile/>
    <tile/>
    <tile/>
+   <tile gid="68"/>
    <tile/>
-   <tile gid="1"/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile gid="7"/>
+   <tile gid="7"/>
+   <tile gid="7"/>
    <tile gid="7"/>
    <tile gid="2"/>
    <tile/>
    <tile/>
    <tile/>
-   <tile/>
    <tile gid="1"/>
    <tile gid="7"/>
-   <tile gid="2"/>
+   <tile gid="6"/>
+   <tile gid="6"/>
+   <tile gid="6"/>
+   <tile gid="6"/>
+   <tile gid="26"/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile gid="11"/>
+   <tile gid="6"/>
+   <tile gid="6"/>
+   <tile gid="6"/>
+   <tile gid="6"/>
+   <tile gid="6"/>
+   <tile gid="26"/>
+   <tile/>
+   <tile/>
+   <tile/>
+   <tile gid="11"/>
+   <tile gid="6"/>
   </data>
  </layer>
 </map>
