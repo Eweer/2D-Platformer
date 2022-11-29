@@ -57,10 +57,10 @@ void Map::Draw() const
 		{
 			for (int y = 0; y < layer->height; y++)
 			{
-				// L05: DONE 9: Complete the draw function
-				int gid = layer->GetGidValue(x, y);
+				uint gid = layer->GetGidValue(x, y);
+				
+				if(gid <= 0) continue;
 
-				//L06: DONE 3: Obtain the tile set using GetTilesetFromTileId
 				TileSet* tileset = GetTilesetFromTileId(gid);
 				
 				SDL_Rect r = tileset->GetTileRect(gid);
@@ -72,7 +72,7 @@ void Map::Draw() const
 	}
 }
 
-// L05: DONE 8: Create a method that translates x,y coordinates from map positions to world positions
+// Ttranslates x,y coordinates from map positions to world positions
 iPoint Map::MapToWorld(int x, int y) const
 {
 	iPoint ret;
@@ -89,7 +89,6 @@ SDL_Rect TileSet::GetTileRect(int gid) const
 	SDL_Rect rect = {0};
 	int relativeIndex = gid - firstgid;
 
-	// L05: DONE 7: Get relative Tile rectangle
 	rect.w = tileWidth;
 	rect.h = tileHeight;
 	rect.x = margin + (tileWidth + spacing) * (relativeIndex % columns);
@@ -99,7 +98,7 @@ SDL_Rect TileSet::GetTileRect(int gid) const
 }
 
 
-// L06: DONE 2: Pick the right Tileset based on a tile id
+// Pick the right Tileset based on a tile id
 TileSet *Map::GetTilesetFromTileId(int gid) const
 {
 	for(auto &tileset : mapData.tilesets)
@@ -198,7 +197,6 @@ bool Map::LoadTileSet(pugi::xml_node const &mapFile)
 		{
 			bool additionalInfo = false;
 			TileInfo retTileInfo;
-			retTileInfo.firstAnimGid = -1;
 			if(auto [retHitBox, success] = LoadHitboxInfo(tileInfoNode); success)
 			{
 				retTileInfo.collider = retHitBox;
@@ -206,8 +204,7 @@ bool Map::LoadTileSet(pugi::xml_node const &mapFile)
 			}
 			for(auto const &animFrameNode : tileInfoNode.child("animation").children())
 			{
-				retTileInfo.firstAnimGid = tileInfoNode.attribute("id").as_int();
-				retTileInfo.tileAnim.push_back(
+				retTileInfo.tileAnim.frames.push_back(
 					std::make_pair(
 						animFrameNode.attribute("tileid").as_int(),
 						animFrameNode.attribute("duration").as_int()
@@ -294,23 +291,34 @@ std::unique_ptr<MapLayer> Map::LoadLayer(pugi::xml_node const &node)
 	layer->height = node.attribute("height").as_int();
 
 	//Iterate over all the tiles and get gid values
-	for(int i = 0, j = 0; auto const &elem : node.child("data").children("tile"))
-	{
-		int gid = elem.attribute("gid").as_int();
-		layer->data.push_back(gid);
-
-		if(gid > 0)
+	for(iPoint pos = {0,0} ; auto const &elem : node.child("data").children("tile"))
+	{	
+		AnimatedTile retTileAnim;
+		if(int gid = elem.attribute("gid").as_int(); gid > 0)
 		{
+			if(gid == 67 || gid == 66)
+			{
+				std::cout << "potato" << std::endl;
+			}
 			TileSet const *tileset = GetTilesetFromTileId(gid);
-			if(auto colliderCreated = CreateCollider(gid, i, j, tileset); colliderCreated)
+			if(auto colliderCreated = CreateCollider(gid, pos.x, pos.y, tileset); colliderCreated != nullptr)
 				collidersOnMap.emplace_back(colliderCreated);
 
+			retTileAnim.staticGid = gid;
+			if(const auto info = tileset->tileInfo.find(gid-1); 
+			   info != tileset->tileInfo.end() && !info->second.tileAnim.frames.empty())
+			{
+				retTileAnim.active = true;
+				retTileAnim.currentFrame = 0.0f;
+				retTileAnim.frames = std::make_shared<TileAnim>(info->second.tileAnim);
+			}
 		}
-
-		if(++i >= mapData.width)
+		layer->tileData.emplace_back(retTileAnim);
+		pos.x++;
+		if(pos.x >= mapData.width)
 		{
-			j++;
-			i = 0;
+			pos.y++;
+			pos.x = 0;
 		}
 	}
 

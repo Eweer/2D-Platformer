@@ -30,15 +30,17 @@ struct TileHitBox
 	std::vector<int> data;
 };
 
+struct TileAnim
+{
+	std::vector<std::pair<int, int>> frames;
+};
+
 struct TileInfo
 {
 	TileHitBox collider;
-	int firstAnimGid;
-	std::vector<std::pair<int, int>> tileAnim;
+	TileAnim tileAnim;
 };
 
-// L04: DONE 2: Create a struct to hold information for a TileSet
-// Ignore Terrain Types and Tile Types for now, but we want the image!
 struct TileSet
 {
 	std::string name;
@@ -51,14 +53,23 @@ struct TileSet
 	int tilecount;
 
 	SDL_Texture *texture;
+	
+	// index, TileInfo
 	std::unordered_map<int, TileInfo> tileInfo;
 
-	// L05: DONE 7: Create a method that receives a tile id and returns it's Rect find the Rect associated with a specific tile id
+	std::vector<int> animatedTiles;
+	
 	SDL_Rect GetTileRect(int gid) const;
 };
 
-//  We create an enum for map type, just for convenience,
-// NOTE: Platformer game will be of type ORTHOGONAL
+struct AnimatedTile
+{
+	uint staticGid = 0;
+	bool active = false;
+	std::shared_ptr<TileAnim> frames;
+	float currentFrame = 0.0f;
+};
+
 enum class MapTypes
 {
 	MAPTYPE_UNKNOWN = 0,
@@ -73,21 +84,18 @@ struct MapLayer
 	int id = -1;
 	int width = 0;
 	int height = 0;
-	std::vector<uint> data;
-
+	std::vector<AnimatedTile> tileData;
 	propertiesUnorderedmap properties;
-
-	// Short function to get the gid value of x,y
+	
 	inline uint GetGidValue(int x, int y) const
 	{
-		return data[(y * width) + x];
+		return tileData[(y * width) + x].staticGid;
 	}
 
 	variantProperty GetPropertyValue(const char *pName) const;
 
 };
 
-// L04: DONE 1: Create a struct needed to hold the information to Map node
 struct MapData
 {
 	int width;
@@ -97,7 +105,7 @@ struct MapData
 	std::vector<TileSet *> tilesets;
 	MapTypes type;
 
-	// L05: DONE 2: Add a list/array of layers to the map
+	// index, std::pair<id of tile, duration>
 	std::vector<std::unique_ptr<MapLayer>> mapLayers;
 };
 
@@ -122,7 +130,7 @@ public:
 	// Load new map
 	bool Load();
 
-	// L05: DONE 8: Create a method that translates x,y coordinates from map positions to world positions
+	// Translates x,y coordinates from map positions to world positions
 	iPoint MapToWorld(int x, int y) const;
 
 	MapData mapData;
@@ -130,18 +138,15 @@ public:
 private:
 
 	bool LoadMap(pugi::xml_node const &mapFile);
-
-	// L04: DONE 4: Create and call a private function to load a tileset
+	
 	bool LoadTileSet(pugi::xml_node const &mapFile);
 	std::pair<TileHitBox, bool> LoadHitboxInfo(const pugi::xml_node &hitbox) const;
-
-	// L05
+	std::shared_ptr<PhysBody> CreateCollider (int gid, int i, int j, TileSet const *tileset) const;
+	
 	bool LoadAllLayers(pugi::xml_node const &mapNode);
 	std::unique_ptr<MapLayer> LoadLayer(pugi::xml_node const &node);
-	std::shared_ptr<PhysBody> CreateCollider (int gid, int i, int j, TileSet const *tileset) const;
 	propertiesUnorderedmap LoadProperties(pugi::xml_node const &node) const;
-
-	// L06: DONE 2
+	
 	TileSet *GetTilesetFromTileId(int gid) const;
 
 	void LogLoadedData() const;

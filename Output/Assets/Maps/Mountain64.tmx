@@ -379,6 +379,14 @@
   <tile id="91"/>
   <tile id="79"/>
   <tile id="67">
+   <properties>
+    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+   </properties>
+   <objectgroup draworder="index" id="2">
+    <object id="1" x="5" y="20" width="55" height="24">
+     <polygon points="4,0 8,0 14,4 14,12 21,19 32,19 40,12 42,4 47,0 50,0 55,5 37,23 32,24 20,24 10,20 0,6"/>
+    </object>
+   </objectgroup>
    <animation>
     <frame tileid="67" duration="200"/>
     <frame tileid="68" duration="200"/>
@@ -538,7 +546,7 @@
    <tile/>
    <tile/>
    <tile/>
-   <tile/>
+   <tile gid="68"/>
    <tile/>
    <tile/>
    <tile/>
@@ -665,7 +673,7 @@
    <tile/>
    <tile/>
    <tile/>
-   <tile gid="68"/>
+   <tile/>
    <tile/>
    <tile/>
    <tile/>
