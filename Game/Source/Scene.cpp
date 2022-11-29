@@ -45,20 +45,18 @@ bool Scene::Awake(pugi::xml_node& config)
 
 // Called before the first frame
 bool Scene::Start()
-{
-	//img = app->tex->Load("Assets/Textures/test.png");
-	//app->audio->PlayMusic("Assets/Audio/Music/music_spy.ogg");
-	
-	// L03: DONE: Load map
+{	
+	// Load map
 	app->map->Load();
 
-	// L04: DONE 7: Set the window title with map/tileset info
+	// Set the window title with map/tileset info
 	SString title("Map:%dx%d Tiles:%dx%d Tilesets:%d",
-		app->map->mapData.width,
-		app->map->mapData.height,
-		app->map->mapData.tileWidth,
-		app->map->mapData.tileHeight,
-		app->map->mapData.tilesets.size());
+		app->map->GetWidth(),
+		app->map->GetHeight(),
+		app->map->GetTileWidth(),
+		app->map->GetTileHeight(),
+		app->map->GetTileSetSize()
+	);
 
 	app->win->SetTitle(title.GetString());
 

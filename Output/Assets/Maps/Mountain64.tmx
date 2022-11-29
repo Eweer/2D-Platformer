@@ -4,7 +4,7 @@
   <image source="Mountain/MountainTiles64x64.png" width="704" height="704"/>
   <tile id="0">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="13" y="13" width="51" height="51"/>
@@ -12,7 +12,7 @@
   </tile>
   <tile id="6">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="0" y="13" width="64" height="51"/>
@@ -20,7 +20,7 @@
   </tile>
   <tile id="1">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="0" y="13" width="51" height="51"/>
@@ -28,7 +28,7 @@
   </tile>
   <tile id="7">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="2" x="12" y="13" width="52" height="40">
@@ -38,7 +38,7 @@
   </tile>
   <tile id="9">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="0" y="13" width="64" height="40"/>
@@ -46,7 +46,7 @@
   </tile>
   <tile id="8">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="3">
     <object id="3" x="0" y="13" width="52" height="38">
@@ -56,7 +56,7 @@
   </tile>
   <tile id="26">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="6" y="16" width="52" height="48">
@@ -66,7 +66,7 @@
   </tile>
   <tile id="11">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="0" y="0" width="64" height="64">
@@ -76,7 +76,7 @@
   </tile>
   <tile id="23">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="0" y="0" width="64" height="64">
@@ -86,7 +86,7 @@
   </tile>
   <tile id="21">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="0" y="0" width="64" height="64">
@@ -96,7 +96,7 @@
   </tile>
   <tile id="19">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="0" y="0" width="64" height="64">
@@ -106,7 +106,7 @@
   </tile>
   <tile id="10">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="13" y="0" width="51" height="64"/>
@@ -114,12 +114,12 @@
   </tile>
   <tile id="5">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
   </tile>
   <tile id="25">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="0" y="0" width="51" height="64"/>
@@ -127,7 +127,7 @@
   </tile>
   <tile id="32">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="13" y="13" width="51" height="51">
@@ -137,7 +137,7 @@
   </tile>
   <tile id="33">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="0" y="13" width="52" height="51">
@@ -147,7 +147,7 @@
   </tile>
   <tile id="35">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="7" y="13" width="57" height="37">
@@ -157,7 +157,7 @@
   </tile>
   <tile id="28">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="13" y="0" width="38" height="64"/>
@@ -165,7 +165,7 @@
   </tile>
   <tile id="24">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="0" y="0" width="64" height="64">
@@ -175,7 +175,7 @@
   </tile>
   <tile id="22">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="0" y="0" width="64" height="64">
@@ -185,7 +185,7 @@
   </tile>
   <tile id="17">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="0" y="0" width="64" height="64">
@@ -195,7 +195,7 @@
   </tile>
   <tile id="20">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="0" y="0" width="64" height="64">
@@ -205,7 +205,7 @@
   </tile>
   <tile id="3">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="2" x="14" y="0" width="50" height="50">
@@ -215,7 +215,7 @@
   </tile>
   <tile id="29">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="0" y="0" width="64" height="51"/>
@@ -223,7 +223,7 @@
   </tile>
   <tile id="4">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="3">
     <object id="3" x="0" y="0" width="51" height="50">
@@ -233,7 +233,7 @@
   </tile>
   <tile id="31">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="13" y="0" width="51" height="50">
@@ -243,7 +243,7 @@
   </tile>
   <tile id="30">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="0" y="0" width="51" height="50">
@@ -253,7 +253,7 @@
   </tile>
   <tile id="34">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="0" y="13" width="60" height="37">
@@ -263,7 +263,7 @@
   </tile>
   <tile id="27">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="13" y="0" width="38" height="58">
@@ -273,7 +273,7 @@
   </tile>
   <tile id="14">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="0" y="0" width="64" height="64">
@@ -283,7 +283,7 @@
   </tile>
   <tile id="15">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="0" y="0" width="64" height="64">
@@ -293,7 +293,7 @@
   </tile>
   <tile id="18">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="0" y="0" width="64" height="64">
@@ -303,7 +303,7 @@
   </tile>
   <tile id="16">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="0" y="0" width="64" height="64">
@@ -313,7 +313,7 @@
   </tile>
   <tile id="2">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="2" x="12" y="13" width="52" height="40">
@@ -323,7 +323,7 @@
   </tile>
   <tile id="12">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="7" y="12" width="52" height="44">
@@ -333,7 +333,7 @@
   </tile>
   <tile id="13">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="0" y="0" width="64" height="64">
@@ -342,6 +342,10 @@
    </objectgroup>
   </tile>
   <tile id="44">
+   <properties>
+    <property name="variance_max" type="int" value="400"/>
+    <property name="variance_min" type="int" value="200"/>
+   </properties>
    <animation>
     <frame tileid="44" duration="100"/>
     <frame tileid="36" duration="100"/>
@@ -356,6 +360,10 @@
   </tile>
   <tile id="45"/>
   <tile id="58">
+   <properties>
+    <property name="variance_max" type="int" value="100"/>
+    <property name="variance_min" type="int" value="0"/>
+   </properties>
    <animation>
     <frame tileid="58" duration="100"/>
     <frame tileid="51" duration="100"/>
@@ -365,7 +373,6 @@
     <frame tileid="55" duration="100"/>
     <frame tileid="56" duration="100"/>
     <frame tileid="57" duration="100"/>
-    <frame tileid="58" duration="100"/>
    </animation>
   </tile>
   <tile id="66">
@@ -380,7 +387,7 @@
   <tile id="79"/>
   <tile id="67">
    <properties>
-    <property name="Type" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="5" y="20" width="55" height="24">
@@ -421,9 +428,27 @@
   <tile id="63"/>
   <tile id="64"/>
   <tile id="65"/>
-  <tile id="68"/>
-  <tile id="69"/>
-  <tile id="70"/>
+  <tile id="68">
+   <objectgroup draworder="index" id="2">
+    <object id="1" x="5" y="20" width="55" height="24">
+     <polygon points="4,0 8,0 14,4 14,12 21,19 32,19 40,12 42,4 47,0 50,0 55,5 37,23 32,24 20,24 10,20 0,6"/>
+    </object>
+   </objectgroup>
+  </tile>
+  <tile id="69">
+   <objectgroup draworder="index" id="2">
+    <object id="1" x="5" y="20" width="55" height="24">
+     <polygon points="4,0 8,0 14,4 14,12 21,19 32,19 40,12 42,4 47,0 50,0 55,5 37,23 32,24 20,24 10,20 0,6"/>
+    </object>
+   </objectgroup>
+  </tile>
+  <tile id="70">
+   <objectgroup draworder="index" id="2">
+    <object id="1" x="5" y="20" width="55" height="24">
+     <polygon points="4,0 8,0 14,4 14,12 21,19 32,19 40,12 42,4 47,0 50,0 55,5 37,23 32,24 20,24 10,20 0,6"/>
+    </object>
+   </objectgroup>
+  </tile>
   <tile id="72"/>
   <tile id="73"/>
   <tile id="74"/>
@@ -581,7 +606,7 @@
    <tile/>
    <tile/>
    <tile gid="67"/>
-   <tile gid="67"/>
+   <tile gid="59"/>
    <tile gid="67"/>
    <tile gid="67"/>
    <tile gid="67"/>

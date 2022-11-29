@@ -13,13 +13,22 @@
 #include <vector>
 #include <variant>
 #include <memory>
+#include <cstdlib>			//	std::rand
 
 #include "PugiXml/src/pugixml.hpp"
 
-using variantProperty = std::variant<int, bool, float, std::string>;
-using propertiesUnorderedmap = std::unordered_map<std::string, variantProperty, StringHash, std::equal_to<>>;
+using XML_Property_t = std::variant<int, bool, float, std::string>;
+using XML_Properties_Map_t = std::unordered_map<std::string, XML_Property_t, StringHash, std::equal_to<>>;
 
-struct TileHitBox
+enum class MapTypes
+{
+	MAPTYPE_UNKNOWN = 0,
+	MAPTYPE_ORTHOGONAL,
+	MAPTYPE_ISOMETRIC,
+	MAPTYPE_STAGGERED
+};
+
+struct TileColliderInfo
 {
 	int x = 0;
 	int y = 0;
@@ -27,18 +36,27 @@ struct TileHitBox
 	int width = 0;
 	int height = 0;
 	uint16 cat;
-	std::vector<int> data;
+	std::vector<int> points;
 };
 
-struct TileAnim
+struct TileAnimationInfo
 {
-	std::vector<std::pair<int, int>> frames;
+	// <gid, duration>
+	uint varianceMin = 0;
+	uint varianceMax = 0;
+	std::vector<std::pair<uint, uint>> frames;
 };
 
 struct TileInfo
 {
-	TileHitBox collider;
-	TileAnim tileAnim;
+	XML_Properties_Map_t properties;
+	TileColliderInfo collider;
+	TileAnimationInfo animation;
+	
+	explicit operator bool() const 
+	{
+		return properties.empty() || !collider.shape.empty() || !animation.frames.empty();
+	}
 };
 
 struct TileSet
@@ -62,20 +80,44 @@ struct TileSet
 	SDL_Rect GetTileRect(int gid) const;
 };
 
-struct AnimatedTile
-{
-	uint staticGid = 0;
-	bool active = false;
-	std::shared_ptr<TileAnim> frames;
-	float currentFrame = 0.0f;
-};
 
-enum class MapTypes
+
+struct TileImage
 {
-	MAPTYPE_UNKNOWN = 0,
-	MAPTYPE_ORTHOGONAL,
-	MAPTYPE_ISOMETRIC,
-	MAPTYPE_STAGGERED
+	uint gid = 0;
+	uint originalGid = 0;
+
+	bool active = false;
+	std::shared_ptr<TileAnimationInfo> anim;
+	uint currentFrame = 0;
+	uint timer = 0;
+	uint duration;
+
+	inline void AdvanceTimer()
+	{
+		timer += 1;
+		if(timer >= duration)
+		{
+			const auto &currentAnim = anim.get();
+			uint variance = 0;
+			currentFrame++;
+			if(currentFrame >= currentAnim->frames.size())
+			{
+				currentFrame = 0;
+				variance = (currentAnim->varianceMax > 0) ? 
+					((uint)std::rand() % currentAnim->varianceMax + currentAnim->varianceMin) : 
+					0;
+			}
+
+			const auto &[nextFrame, nextTimer] = currentAnim->frames[currentFrame];
+			
+			gid = nextFrame + 1;
+
+			timer = 0;
+			duration = nextTimer + variance;
+
+		}
+	}
 };
 
 struct MapLayer
@@ -84,15 +126,15 @@ struct MapLayer
 	int id = -1;
 	int width = 0;
 	int height = 0;
-	std::vector<AnimatedTile> tileData;
-	propertiesUnorderedmap properties;
+	std::vector<TileImage> tileData;
+	XML_Properties_Map_t properties;
 	
 	inline uint GetGidValue(int x, int y) const
 	{
-		return tileData[(y * width) + x].staticGid;
+		return tileData[(y * width) + x].gid;
 	}
 
-	variantProperty GetPropertyValue(const char *pName) const;
+	XML_Property_t GetPropertyValue(const char *pName) const;
 
 };
 
@@ -105,7 +147,6 @@ struct MapData
 	std::vector<TileSet *> tilesets;
 	MapTypes type;
 
-	// index, std::pair<id of tile, duration>
 	std::vector<std::unique_ptr<MapLayer>> mapLayers;
 };
 
@@ -132,25 +173,36 @@ public:
 
 	// Translates x,y coordinates from map positions to world positions
 	iPoint MapToWorld(int x, int y) const;
+	
+	int GetWidth() const;
 
-	MapData mapData;
+	int GetHeight() const;
+
+	int GetTileWidth() const;
+
+	int GetTileHeight() const;
+
+	int GetTileSetSize() const;
 
 private:
 
 	bool LoadMap(pugi::xml_node const &mapFile);
 	
 	bool LoadTileSet(pugi::xml_node const &mapFile);
-	std::pair<TileHitBox, bool> LoadHitboxInfo(const pugi::xml_node &hitbox) const;
+	TileInfo LoadTileInfo(const pugi::xml_node &tileInfoNode) const;
+	TileAnimationInfo  LoadAnimationInfo(const pugi::xml_node &tileInfoNode, XML_Properties_Map_t const &properties) const;
+	TileColliderInfo LoadHitboxInfo(const pugi::xml_node &hitbox, XML_Properties_Map_t const &properties = XML_Properties_Map_t()) const;
 	std::shared_ptr<PhysBody> CreateCollider (int gid, int i, int j, TileSet const *tileset) const;
 	
 	bool LoadAllLayers(pugi::xml_node const &mapNode);
 	std::unique_ptr<MapLayer> LoadLayer(pugi::xml_node const &node);
-	propertiesUnorderedmap LoadProperties(pugi::xml_node const &node) const;
+	XML_Properties_Map_t LoadProperties(pugi::xml_node const &node) const;
 	
 	TileSet *GetTilesetFromTileId(int gid) const;
 
 	void LogLoadedData() const;
 
+	MapData mapData;
 	std::string mapFileName;
 	std::string mapFolder;
 	bool mapLoaded = false;
@@ -158,3 +210,5 @@ private:
 };
 
 #endif // __MAP_H__
+
+

@@ -132,7 +132,7 @@ bool Player::Update()
 	
 	if(moveCamera && app->render->camera.x <= 0 && position.x >= startingPosition.x)
 	{
-		if(abs(app->render->camera.x) + cameraXCorrection <= app->map->mapData.width * app->map->mapData.tileWidth)
+		if(abs(app->render->camera.x) + cameraXCorrection <= app->map->GetWidth() * app->map->GetTileWidth())
 		{
 			app->render->camera.x -= (vel.x * 0.90);
 			if(app->render->camera.x > 0) app->render->camera.x = 0;

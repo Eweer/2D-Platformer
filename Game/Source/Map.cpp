@@ -69,6 +69,12 @@ void Map::Draw() const
 				app->render->DrawTexture(tileset->texture, pos.x, pos.y,&r);
 			}
 		}
+
+		for(auto &elem : layer->tileData)
+		{
+			if(!elem.active) continue;
+			elem.AdvanceTimer();
+		}
 	}
 }
 
@@ -195,25 +201,8 @@ bool Map::LoadTileSet(pugi::xml_node const &mapFile)
 
 		for(auto const &tileInfoNode : elem.children("tile"))
 		{
-			bool additionalInfo = false;
-			TileInfo retTileInfo;
-			if(auto [retHitBox, success] = LoadHitboxInfo(tileInfoNode); success)
-			{
-				retTileInfo.collider = retHitBox;
-				additionalInfo = true;
-			}
-			for(auto const &animFrameNode : tileInfoNode.child("animation").children())
-			{
-				retTileInfo.tileAnim.frames.push_back(
-					std::make_pair(
-						animFrameNode.attribute("tileid").as_int(),
-						animFrameNode.attribute("duration").as_int()
-					)
-				);
-				additionalInfo = true;
-			}
-			if(additionalInfo)
-				retTileSet->tileInfo.insert_or_assign(tileInfoNode.attribute("id").as_int(), retTileInfo);
+			if(auto info = LoadTileInfo(tileInfoNode); info)
+				retTileSet->tileInfo.insert_or_assign(tileInfoNode.attribute("id").as_int(), info);
 		}
 		
 		mapData.tilesets.emplace_back(retTileSet.release());
@@ -222,39 +211,70 @@ bool Map::LoadTileSet(pugi::xml_node const &mapFile)
 	return true;
 }
 
-std::pair<TileHitBox, bool> Map::LoadHitboxInfo(const pugi::xml_node &tileNode) const
+TileInfo Map::LoadTileInfo(const pugi::xml_node &tileInfoNode) const
 {
-	std::pair<TileHitBox, bool> retPair;
+	TileInfo tileInfo;
+	
+	tileInfo.properties = LoadProperties(tileInfoNode);
+	tileInfo.collider = LoadHitboxInfo(tileInfoNode, tileInfo.properties);
+	tileInfo.animation = LoadAnimationInfo(tileInfoNode, tileInfo.properties);
 
-	retPair.second = false;
+	return tileInfo;
+}
+
+TileAnimationInfo Map::LoadAnimationInfo(const pugi::xml_node &tileInfoNode, XML_Properties_Map_t const &properties) const
+{
+	TileAnimationInfo retAnim;
+
+	for(auto const &animFrameNode : tileInfoNode.child("animation").children())
+	{
+		retAnim.frames.push_back(
+			std::make_pair(
+				animFrameNode.attribute("tileid").as_int(),
+				animFrameNode.attribute("duration").as_int()/10
+			)
+		);
+		for(auto const &[name, value] : properties)
+		{
+			if(name == "variance_min") retAnim.varianceMin = (uint)*std::get_if<int>(&value);
+			if(name == "variance_max") retAnim.varianceMax = (uint)*std::get_if<int>(&value);
+
+		}
+	}
+
+	return retAnim;
+}
+
+TileColliderInfo Map::LoadHitboxInfo(const pugi::xml_node &tileNode, XML_Properties_Map_t const &properties) const
+{
+	TileColliderInfo retHitBox;
 
 	pugi::xml_node tileObjectGroup = tileNode.child("objectgroup");
-	if(tileObjectGroup.empty()) return retPair;
+	if(tileObjectGroup.empty()) 
+		return retHitBox;
 
 	tileObjectGroup = tileObjectGroup.first_child();
-	if(tileObjectGroup.empty()) return retPair;
+	if(tileObjectGroup.empty()) 
+		return retHitBox;
 
-	retPair.second = true;
+	retHitBox.x = tileObjectGroup.attribute("x").as_int();
+	retHitBox.y = tileObjectGroup.attribute("y").as_int();
+	retHitBox.width = tileObjectGroup.attribute("width").as_int();
+	retHitBox.height = tileObjectGroup.attribute("height").as_int();
 
-	retPair.first.x = tileObjectGroup.attribute("x").as_int();
-	retPair.first.y = tileObjectGroup.attribute("y").as_int();
-	retPair.first.width = tileObjectGroup.attribute("width").as_int();
-	retPair.first.height = tileObjectGroup.attribute("height").as_int();
-
-	if(auto catProperty = tileNode.child("properties").find_child_by_attribute("propertytype", "ColliderLayers"); catProperty.empty())
-		retPair.first.cat = 0x8000;
+	if(auto const collisionLayer = properties.find("ColliderLayers"); collisionLayer == properties.end())
+		retHitBox.cat = 0x8000;
 	else
-		retPair.first.cat = (uint16)(catProperty.attribute("value").as_int());
-
+		retHitBox.cat = (uint16)*std::get_if<int>(&collisionLayer->second);
 
 	pugi::xml_node shapeInfo = tileObjectGroup.first_child();
 	if(shapeInfo.empty())
 	{
-		retPair.first.shape = "rectangle";
-		return retPair;
+		retHitBox.shape = "rectangle";
+		return retHitBox;
 	}
 
-	retPair.first.shape = shapeInfo.name();
+	retHitBox.shape = shapeInfo.name();
 	const std::string xyStr = shapeInfo.attribute("points").as_string();
 	static const std::regex r("\\d{1,3}");
 	auto xyStrBegin = std::sregex_iterator(xyStr.begin(), xyStr.end(), r);
@@ -263,10 +283,10 @@ std::pair<TileHitBox, bool> Map::LoadHitboxInfo(const pugi::xml_node &tileNode) 
 	for(std::sregex_iterator i = xyStrBegin; i != xyStrEnd; ++i)
 	{
 		std::smatch match = *i;
-		retPair.first.data.push_back(stoi(match.str()));
+		retHitBox.points.push_back(stoi(match.str()));
 	}
 
-	return retPair;
+	return retHitBox;
 }
 
 // Iterate all layers and load each of them
@@ -293,24 +313,26 @@ std::unique_ptr<MapLayer> Map::LoadLayer(pugi::xml_node const &node)
 	//Iterate over all the tiles and get gid values
 	for(iPoint pos = {0,0} ; auto const &elem : node.child("data").children("tile"))
 	{	
-		AnimatedTile retTileAnim;
+		TileImage retTileAnim;
 		if(int gid = elem.attribute("gid").as_int(); gid > 0)
 		{
-			if(gid == 67 || gid == 66)
-			{
-				std::cout << "potato" << std::endl;
-			}
 			TileSet const *tileset = GetTilesetFromTileId(gid);
 			if(auto colliderCreated = CreateCollider(gid, pos.x, pos.y, tileset); colliderCreated != nullptr)
 				collidersOnMap.emplace_back(colliderCreated);
 
-			retTileAnim.staticGid = gid;
+			retTileAnim.gid = gid;
+			retTileAnim.originalGid = gid;
 			if(const auto info = tileset->tileInfo.find(gid-1); 
-			   info != tileset->tileInfo.end() && !info->second.tileAnim.frames.empty())
+			   info != tileset->tileInfo.end() && !info->second.animation.frames.empty())
 			{
 				retTileAnim.active = true;
-				retTileAnim.currentFrame = 0.0f;
-				retTileAnim.frames = std::make_shared<TileAnim>(info->second.tileAnim);
+				retTileAnim.currentFrame = 0;
+				retTileAnim.timer = 0;
+				retTileAnim.anim = std::make_shared<TileAnimationInfo>(info->second.animation);
+				retTileAnim.duration = info->second.animation.frames[0].second;
+				retTileAnim.duration += (info->second.animation.varianceMax > 0) ?
+					((uint)std::rand() % info->second.animation.varianceMax + info->second.animation.varianceMin) :
+					0;
 			}
 		}
 		layer->tileData.emplace_back(retTileAnim);
@@ -331,9 +353,9 @@ inline std::shared_ptr<PhysBody> Map::CreateCollider(int gid, int i, int j, Tile
 {
 	if(auto colliderInfo = tileset->tileInfo.find(gid-1); colliderInfo != tileset->tileInfo.end())
 	{
-		if(colliderInfo->second.collider.shape.empty() && colliderInfo->second.collider.data.size() <= 0)
+		if(colliderInfo->second.collider.shape.empty() && colliderInfo->second.collider.points.size() <= 0)
 			return nullptr;
-		TileHitBox collider = colliderInfo->second.collider;
+		TileColliderInfo collider = colliderInfo->second.collider;
 		iPoint colliderPos = MapToWorld(i, j);
 		std::shared_ptr<PhysBody> retCollider;
 		if(collider.shape == "rectangle")
@@ -358,8 +380,8 @@ inline std::shared_ptr<PhysBody> Map::CreateCollider(int gid, int i, int j, Tile
 			retCollider = app->physics->CreateChain(
 														colliderPos.x,
 														colliderPos.y,
-														collider.data.data(),
-														collider.data.size(),
+														collider.points.data(),
+														collider.points.size(),
 														BodyType::STATIC,
 														0.0f,
 														collider.cat
@@ -371,13 +393,12 @@ inline std::shared_ptr<PhysBody> Map::CreateCollider(int gid, int i, int j, Tile
 	return nullptr;
 }
 
-
-propertiesUnorderedmap Map::LoadProperties(pugi::xml_node const &node) const
+XML_Properties_Map_t Map::LoadProperties(pugi::xml_node const &node) const
 {
-	propertiesUnorderedmap properties;
+	XML_Properties_Map_t properties;
 	for(auto const &elem : node.child("properties").children("property"))
 	{
-		variantProperty valueToEmplace;
+		XML_Property_t valueToEmplace;
 		switch(str2int(elem.attribute("type").as_string()))
 		{
 			case str2int("int"):
@@ -402,7 +423,7 @@ propertiesUnorderedmap Map::LoadProperties(pugi::xml_node const &node) const
 }
 
 // Ask for the value of a custom property
-variantProperty MapLayer::GetPropertyValue(const char *pName) const
+XML_Property_t MapLayer::GetPropertyValue(const char *pName) const
 {
 	if(auto search = properties.find(pName); search != properties.end())
 		return search->second;
@@ -475,4 +496,29 @@ void Map::LogLoadedData() const
 
 		}
 	}
+}
+
+int Map::GetWidth() const
+{
+	return mapData.width;
+}
+
+int Map::GetHeight() const
+{
+	return mapData.height;
+}
+
+int Map::GetTileWidth() const
+{
+	return mapData.tileWidth;
+}
+
+int Map::GetTileHeight() const
+{
+	return mapData.tileHeight;
+}
+
+int Map::GetTileSetSize() const
+{
+	return mapData.tilesets.size();
 }
