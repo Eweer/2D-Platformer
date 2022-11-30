@@ -1,7 +1,7 @@
 #pragma once
 #include "Module.h"
 #include "Entity.h"
-#include "BitMask.h"
+#include "BitMaskColliderLayers.h"
 
 #include <unordered_map>
 
@@ -174,6 +174,6 @@ private:
 	b2Body *selected = nullptr;
 	b2MouseJoint *mouseJoint = nullptr;
 
-	static const std::unordered_map<std::string, BodyType> bodyTypeStrToEnum;
-	static const std::unordered_map<std::string, RevoluteJoinTypes> propertyToType;
+	static const std::unordered_map<std::string, BodyType, StringHash, std::equal_to<>> bodyTypeStrToEnum;
+	static const std::unordered_map<std::string, RevoluteJoinTypes, StringHash, std::equal_to<>> propertyToType;
 };

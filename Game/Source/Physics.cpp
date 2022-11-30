@@ -15,14 +15,14 @@
 #include "Box2D/Box2D/Box2D.h"
 #include "SDL/include/SDL_keycode.h"
 
-const std::unordered_map<std::string, BodyType> Physics::bodyTypeStrToEnum{
+const std::unordered_map<std::string, BodyType, StringHash, std::equal_to<>> Physics::bodyTypeStrToEnum{
 	{"dynamic", BodyType::DYNAMIC},
 	{"static", BodyType::STATIC},
 	{"kinematic", BodyType::KINEMATIC},
 	{"unknown", BodyType::UNKNOWN}
 };
 
-const std::unordered_map<std::string, RevoluteJoinTypes> Physics::propertyToType{
+const std::unordered_map<std::string, RevoluteJoinTypes, StringHash, std::equal_to<>> Physics::propertyToType{
 	{"anchor_offset", RevoluteJoinTypes::IPOINT},
 	{"body_offset", RevoluteJoinTypes::IPOINT},
 	{"enable_limit", RevoluteJoinTypes::BOOL},
@@ -70,7 +70,7 @@ bool Physics::PreUpdate()
 				newGrav = 0;
 				break;
 			}
-			newGrav = ((int)keyIterator - (int)SDL_SCANCODE_1 + 1);
+			newGrav = (float)((int)keyIterator - (int)SDL_SCANCODE_1 + 1);
 			if (app->input->GetKey(SDL_SCANCODE_LCTRL) == KEY_REPEAT) newGrav *= -1;
 			if (app->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT) newGrav *= 2;
 		}
@@ -114,7 +114,7 @@ bool Physics::PreUpdate()
 bool Physics::PostUpdate()
 {
 	// Activate or deactivate debug mode
-	if (app->input->GetKey(SDL_SCANCODE_F1) == KEY_DOWN)
+	if (app->input->GetKey(SDL_SCANCODE_F9) == KEY_DOWN)
 		debug = !debug;
 
 	if (app->input->GetKey(SDL_SCANCODE_F2) == KEY_DOWN)
@@ -341,7 +341,7 @@ std::shared_ptr<PhysBody> Physics::CreatePolygon(int x, int y, const int *const 
 
 	b2Body *b = world->CreateBody(&body);
 	b2PolygonShape box;
-	b2Vec2 *p = new b2Vec2[size / 2];
+	auto *p = new b2Vec2[size / 2];
 
 	for (uint i = 0; i < size / 2; ++i)
 	{
@@ -718,14 +718,14 @@ int PhysBody::RayCast(int x1, int y1, int x2, int y2, float &normal_x, float &no
 		if (fixture->GetShape()->RayCast(&output, input, body->GetTransform(), 0))
 		{
 			// do we want the normal ?
-			float fx = x2 - x1;
-			float fy = y2 - y1;
+			auto fx = (float)(x2 - x1);
+			auto fy = (float)(y2 - y1);
 			float dist = sqrtf((fx * fx) + (fy * fy));
 
 			normal_x = output.normal.x;
 			normal_y = output.normal.y;
 
-			return output.fraction * dist;
+			return (int)(output.fraction * dist);
 		}
 	}
 	return -1;

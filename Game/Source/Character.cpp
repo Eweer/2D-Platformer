@@ -10,11 +10,12 @@
 #include "Physics.h"
 #include "Animation.h"
 
+
 constexpr uint Character_SIZE = 30;
 
-Character::Character() : Entity(EntityType::UNKNOWN) {}
+Character::Character() : Entity(ColliderLayers::UNKNOWN) {}
 
-Character::Character(EntityType type) : Entity(type) {}
+Character::Character(ColliderLayers type) : Entity(type) {}
 
 Character::Character(pugi::xml_node const &itemNode = pugi::xml_node()) : Entity(itemNode) {}
 

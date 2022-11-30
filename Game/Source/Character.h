@@ -16,7 +16,7 @@ public:
 
 	explicit Character();
 
-	explicit Character(EntityType type);
+	explicit Character(ColliderLayers type);
 
 	explicit Character(const pugi::xml_node &itemNode);
 

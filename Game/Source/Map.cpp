@@ -6,7 +6,7 @@
 
 #include "Defs.h"
 #include "Log.h"
-#include "BitMask.h"
+#include "BitMaskColliderLayers.h"
 
 #include <memory>
 #include <cmath>

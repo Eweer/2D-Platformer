@@ -7,6 +7,7 @@
 #include "Scene.h"
 #include "EntityManager.h"
 #include "Map.h"
+#include "BitMaskColliderLayers.h"
 
 #include "Defs.h"
 #include "Log.h"
@@ -17,8 +18,7 @@ Scene::Scene() : Module()
 }
 
 // Destructor
-Scene::~Scene()
-{}
+Scene::~Scene() = default;
 
 // Called before render is available
 bool Scene::Awake(pugi::xml_node& config)
@@ -26,18 +26,16 @@ bool Scene::Awake(pugi::xml_node& config)
 	LOG("Loading Scene");
 	bool ret = true;
 
-	// iterate all objects in the scene
-	// Check https://pugixml.org/docs/quickstart.html#access
-	for (pugi::xml_node itemNode = config.child("item"); itemNode; itemNode = itemNode.next_sibling("item"))
+	// Iterate all objects in the scene
+	/*for(pugi::xml_node itemNode = config.child("item"); itemNode; itemNode = itemNode.next_sibling("item"))
 	{
-		Item* item = (Item*)app->entityManager->CreateEntity(EntityType::ITEM);
-		item->parameters = itemNode;
-	}
+	//	auto* item = (Item*)app->entityManager->CreateEntity(ColliderLayers::ITEMS);
+		//item->parameters = itemNode;
+	}*/
 
-	//L02: DONE 3: Instantiate the player using the entity manager
+	// Instantiate the player using the entity manager
 	if (config.child("player")) {
-		player = (Player*)app->entityManager->CreateEntity(EntityType::PLAYER);
-		player->parameters = config.child("player");
+		app->entityManager->CreateEntity(ColliderLayers::PLAYER, config.child("player"));
 	}
 
 	return ret;
@@ -72,7 +70,7 @@ bool Scene::PreUpdate()
 // Called each loop iteration
 bool Scene::Update(float dt)
 {
-	// L03: DONE 3: Request App to Load / Save when pressing the keys F5 (save) / F6 (load)
+	// Request App to Load / Save when pressing the keys F5 (save) / F6 (load)
 	if (app->input->GetKey(SDL_SCANCODE_F5) == KEY_DOWN)
 		app->SaveGameRequest();
 
@@ -91,13 +89,9 @@ bool Scene::Update(float dt)
 	if (app->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_REPEAT)
 		app->render->camera.x -= 1;
 
-	//app->render->DrawTexture(img, 380, 100); // Placeholder not needed any more
-
 	// Draw map
 	app->map->Draw();
-
-	// L08: TODO 3: Test World to map method
-
+	
 	return true;
 }
 

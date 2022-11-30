@@ -8,13 +8,15 @@
 #include "Log.h"
 #include "Point.h"
 #include "Physics.h"
-#include "BitMask.h"
+#include "BitMaskColliderLayers.h"
 #include "Map.h"
 
-Player::Player() : Character(EntityType::PLAYER)
+Player::Player() : Character(ColliderLayers::PLAYER)
 {
 	name = "player";
 }
+
+Player::Player(pugi::xml_node const &itemNode = pugi::xml_node()) : Character(itemNode) {}
 
 Player::~Player() = default;
 

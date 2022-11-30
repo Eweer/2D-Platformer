@@ -116,7 +116,7 @@
     <ClInclude Include="Source\dirent.h" />
     <ClInclude Include="Source\Entity.h" />
     <ClInclude Include="Source\EntityManager.h" />
-    <ClInclude Include="Source\BitMask.h" />
+    <ClInclude Include="Source\BitMaskColliderLayers.h" />
     <ClInclude Include="Source\Item.h" />
     <ClInclude Include="Source\Map.h" />
     <ClInclude Include="Source\Physics.h" />

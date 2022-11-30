@@ -7,6 +7,7 @@
 #include "Animation.h"
 #include "Log.h"
 #include "Defs.h"
+#include "BitMaskColliderLayers.h"
 
 #include <string>
 #include <regex>
@@ -24,13 +25,6 @@ enum class SensorFunction
 	UNKNOWN
 };
 
-enum class EntityType
-{
-	PLAYER,
-	ITEM,
-	UNKNOWN
-};
-
 enum class RenderModes
 {
 	IMAGE = 0,
@@ -45,7 +39,7 @@ public:
 
 	explicit Entity() = default;
 
-	explicit Entity(EntityType type);
+	explicit Entity(ColliderLayers type);
 
 	explicit Entity(pugi::xml_node const &itemNode);
 
@@ -85,7 +79,7 @@ public:
 	bool active = true;
 
 	std::string name = "unknown";
-	EntityType type = EntityType::UNKNOWN;
+	ColliderLayers type = ColliderLayers::UNKNOWN;
 
 	iPoint position;
 	iPoint startingPosition;

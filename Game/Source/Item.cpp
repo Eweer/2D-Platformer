@@ -9,7 +9,7 @@
 #include "Point.h"
 #include "Physics.h"
 
-Item::Item() : Entity(EntityType::ITEM)
+Item::Item() : Entity(ColliderLayers::ITEMS)
 {
 	name = "item";
 }

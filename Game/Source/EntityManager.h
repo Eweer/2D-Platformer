@@ -15,29 +15,29 @@ public:
 	virtual ~EntityManager();
 
 	// Called before render is available
-	bool Awake(pugi::xml_node&);
+	bool Awake(pugi::xml_node&) final;
 
 	// Called after Awake
-	bool Start();
+	bool Start() final;
 
 	// Called every frame
-	bool Update(float dt);
+	bool Update(float dt) final;
 
 	// Called before quitting
-	bool CleanUp();
+	bool CleanUp() final;
 
 	// Additional methods
-	Entity* CreateEntity(EntityType type);
+	void CreateEntity(ColliderLayers type, pugi::xml_node parameters = pugi::xml_node());
 
-	void DestroyEntity(Entity* entity);
+	bool DestroyEntity(Entity const *entity);
 
-	void AddEntity(Entity* entity);
+	bool DestroyEntity(ColliderLayers type, int id);
 
-	bool LoadAllTextures();
-
-public:
-
+	bool LoadAllTextures() const;
+	
 	List<Entity*> entities;
+
+	std::unordered_map<ColliderLayers, std::vector<std::unique_ptr<Entity>>> entities2;
 
 };
 

@@ -91,7 +91,6 @@ public:
 	Scene* scene;
 	EntityManager* entityManager;
 	Map* map;
-	//L07 DONE 2: Add Physics module
 	Physics* physics;
 
 private:
@@ -102,17 +101,13 @@ private:
 	SString organization;
 
 	List<Module*> modules;
-
-	// L01: DONE 2: Create new variables from pugui namespace:
-	// xml_document to store the config file and
-	// xml_node(s) to read specific branches of the xml
+	
 	pugi::xml_document configFile;
 	pugi::xml_node configNode;
 
 	uint frames;
 	float dt;
 
-	// L03: DONE 1: Create control variables to control that the real Load and Save happens at the end of the frame
 	bool saveGameRequested;
 	bool loadGameRequested;
 

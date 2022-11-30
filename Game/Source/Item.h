@@ -12,15 +12,16 @@ class Item : public Entity
 public:
 
 	Item();
-	virtual ~Item();
+	
+	~Item() override;
 
-	bool Awake();
+	bool Awake() override;
 
-	bool Start();
+	bool Start() override;
 
-	bool Update();
+	bool Update() override;
 
-	bool CleanUp();
+	bool CleanUp() override;
 	
 	bool isPicked = false;
 };

@@ -14,6 +14,8 @@ class Player : public Character
 public:
 
 	Player();
+
+	explicit Player(const pugi::xml_node &itemNode);
 	
 	~Player() final;
 

@@ -8,33 +8,41 @@
 #include "Defs.h"
 #include "Log.h"
 
+#include <algorithm>
+#include <vector>
+
 EntityManager::EntityManager() : Module()
 {
 	name = "entitymanager";
 }
 
 // Destructor
-EntityManager::~EntityManager()
-{}
+EntityManager::~EntityManager() = default;
 
 // Called before render is available
 bool EntityManager::Awake(pugi::xml_node& config)
 {
 	LOG("Loading Entity Manager");
-	for (ListItem<Entity*>* item = entities.start; item != nullptr; item = item->next)
+	for(auto const &[type, item] : entities2)
 	{
-		if (!item->data->active) continue;
-		if (!item->data->Awake()) return false;
+		for(auto &entity : item)
+		{
+			if(!entity->active) continue;
+			if(!entity->Awake()) return false;
+		}
 	}
 	return true;
 }
 
 bool EntityManager::Start() 
 {
-	for(ListItem<Entity *> *item = entities.start; item != nullptr; item = item->next)
+	for(auto const &[type, item] : entities2)
 	{
-		if(!item->data->active) continue;
-		if(!item->data->Start()) return false;
+		for(auto &entity : item)
+		{
+			if(!entity->active) continue;
+			if(!entity->Start()) return false;
+		}
 	}
 	return true;
 }
@@ -42,68 +50,84 @@ bool EntityManager::Start()
 // Called before quitting
 bool EntityManager::CleanUp()
 {
-	ListItem<Entity*>* item = entities.end;
-	while (item != nullptr)
+	for(auto const &[type, item] : entities2)
 	{
-		if(!item->data->CleanUp()) return false;
-		item = item->prev;
+		for(auto &entity : item)
+		{
+			if(!entity->CleanUp()) return false;
+		}
 	}
-	entities.Clear();
 
 	return true;
 }
 
-Entity* EntityManager::CreateEntity(EntityType type)
+void EntityManager::CreateEntity(ColliderLayers type, pugi::xml_node parameters)
 {
-	Entity* entity = nullptr; 
 	switch (type)
 	{
-	case EntityType::PLAYER:
-		entity = new Player();
+	case ColliderLayers::PLAYER:
+		entities2[type].push_back(std::make_unique<Player>(parameters));
 		break;
 
-	case EntityType::ITEM:
-		entity = new Item();
+	case ColliderLayers::ITEMS:
+		entities2[type].push_back(std::make_unique<Item>());
 		break;
 
-	default: break;
-	}
-
-	// Created entities are added to the list
-	AddEntity(entity);
-
-	return entity;
-}
-
-void EntityManager::DestroyEntity(Entity* entity)
-{
-	for (ListItem<Entity*>* item = entities.start; item != nullptr; item = item->next)
-	{
-		if (item->data == entity) entities.Del(item);
+	default: 
+		LOG("Entity could not be created.");
+		break;
 	}
 }
 
-void EntityManager::AddEntity(Entity* entity)
+bool EntityManager::DestroyEntity(Entity const *entity)
 {
-	if ( entity != nullptr) entities.Add(entity);
+	if(auto vec = entities2.find(entity->type); vec != entities2.end())
+	{
+		for(auto &item : vec->second)
+		{
+			if(item.get() == entity)
+			{
+				item->CleanUp();
+				item.reset();
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
-bool EntityManager::LoadAllTextures()
+bool EntityManager::DestroyEntity(ColliderLayers type, int id)
 {
-	for (ListItem<Entity *> *item = entities.start; item != nullptr; item = item->next)
+	if(id < 0) return false;
+
+	entities2[type].at(id)->CleanUp();
+	entities2[type].at(id).reset();
+
+	return false;
+}
+
+bool EntityManager::LoadAllTextures() const
+{
+	for(auto const &[type, item] : entities2)
 	{
-		if (!item->data->active) continue;
-		item->data->AddTexturesAndAnimationFrames();
+		for(auto &entity : item)
+		{
+			if(!entity->active) continue;
+			entity->AddTexturesAndAnimationFrames();
+		}
 	}
 	return true;
 }
 
 bool EntityManager::Update(float dt)
 {
-	for(ListItem<Entity *> *item = entities.start; item != nullptr; item = item->next)
+	for(auto const &[type, item] : entities2)
 	{
-		if(!item->data->active) continue;
-		if(!item->data->Update()) return false;
+		for(auto &entity : item)
+		{
+			if(!entity->active) continue;
+			if(!entity->Update()) return false;
+		}
 	}
 	return true;
 }

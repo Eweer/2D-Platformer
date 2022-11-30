@@ -16,14 +16,14 @@
 #include <memory>
 #include <variant>
 
-Entity::Entity(EntityType type) : type(type) {}
+Entity::Entity(ColliderLayers type) : type(type) {}
 
-Entity::Entity(pugi::xml_node const &itemNode)
+Entity::Entity(pugi::xml_node const &itemNode) : parameters(itemNode)
 {
-	const std::unordered_map<std::string, EntityType, StringHash, std::equal_to<>> entityTypeStrToEnum =
+	const std::unordered_map<std::string, ColliderLayers, StringHash, std::equal_to<>> entityTypeStrToEnum =
 	{
-		{"player", EntityType::PLAYER},
-		{"item", EntityType::ITEM}
+		{"player", ColliderLayers::PLAYER},
+		{"item", ColliderLayers::ITEMS}
 	};
 
 	std::smatch m;
@@ -39,9 +39,9 @@ Entity::Entity(pugi::xml_node const &itemNode)
 		return;
 	}
 
-	if(static_cast<uint>(entityTypeStrToEnum.at(m[0])) >= static_cast<uint>(EntityType::UNKNOWN))
+	if(static_cast<uint>(entityTypeStrToEnum.at(m[0])) >= static_cast<uint>(ColliderLayers::UNKNOWN))
 	{
-		LOG("%s does not have a valid EntityType", m[0]);
+		LOG("%s does not have a valid ColliderLayers", m[0]);
 		return;
 	}
 	this->name = m[0];

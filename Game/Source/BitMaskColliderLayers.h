@@ -1,5 +1,5 @@
-#ifndef __BITMASK_H__
-#define __BITMASK_H__
+#ifndef __BITMASKCOLLIDERLAYERS_H__
+#define __BITMASKCOLLIDERLAYERS_H__
 
 #include "Defs.h"
 

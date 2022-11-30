@@ -132,7 +132,7 @@
     <ClInclude Include="Source\dirent.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="Source\BitMask.h">
+    <ClInclude Include="Source\BitMaskColliderLayers.h">
       <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>
