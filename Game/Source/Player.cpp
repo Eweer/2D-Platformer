@@ -136,12 +136,12 @@ bool Player::Update()
 	{
 		if(abs(app->render->camera.x) + cameraXCorrection <= app->map->GetWidth() * app->map->GetTileWidth())
 		{
-			app->render->camera.x -= (vel.x * 0.90);
+			app->render->camera.x -= (int)(vel.x * 0.90);
 			if(app->render->camera.x > 0) app->render->camera.x = 0;
 		}
 		else if(vel.x < 0)
 		{
-			app->render->camera.x -= (vel.x * 0.90);
+			app->render->camera.x -= (int)(vel.x * 0.90);
 		}
 	}
 	return true;
@@ -159,21 +159,19 @@ void Player::OnCollision(PhysBody* physA, PhysBody* physB) {
 
 	switch (physB->ctype)
 	{
-		case ColliderLayers::ITEMS:
+		using enum ColliderLayers;
+		case ITEMS:
 			LOG("Collision ITEMS");
 			break;
-		case ColliderLayers::PLATFORMS:
+		case PLATFORMS:
 			LOG("Collision PLATFORMS");
- 			if((pBody->body->GetPosition().y < physB->body->GetPosition().y))
+ 			if(pBody->body->GetPosition().y < physB->body->GetPosition().y)
 			{
 				jump = {false, 0, jump.maxJumps, 0, jump.jumpImpulse};
 			}
 			break;
-		case ColliderLayers::UNKNOWN:
+		case UNKNOWN:
 			LOG("Collision UNKNOWN");
 			break;
 	}
-	
-
-
 }

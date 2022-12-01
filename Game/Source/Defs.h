@@ -37,7 +37,7 @@
 }
 
 
-#define IN_RANGE(value, min, max) ( ((value) >= (min) && (value) <= (max)) ? 1 : 0 )
+#define IN_RANGE(value, min, max) ((value >= min && value <= max) ? 1 : 0)
 #define TO_BOOL(a)  ((a != 0) ? true : false )
 
 using uint = unsigned int;
@@ -118,6 +118,15 @@ struct StringHash
 // Performance macros
 #define PERF_START(timer) timer.Start()
 #define PERF_PEEK(timer) LOG("%s took %f ms", __FUNCTION__, timer.ReadMs())
+
+// Usage: range<min, man>::contains(var)
+template <int min, int max> class range
+{
+	static bool contains(int i)
+	{ 
+		return min <= i  && i < max;
+	} 
+};
 
 template<typename T>
 T MAX(T a, T b)

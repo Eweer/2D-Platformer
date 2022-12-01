@@ -64,9 +64,9 @@ public:
 	
 	void Disable();
 
-	void SetPaths();
+	virtual void SetPaths();
 
-	void SetPathsToLevel();
+	virtual void SetPathsToLevel();
 
 	virtual void AddTexturesAndAnimationFrames();
 

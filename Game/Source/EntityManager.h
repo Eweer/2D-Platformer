@@ -9,6 +9,13 @@
 #include <deque>
 #include <utility>		//std::pair
 
+struct EntityInfo
+{
+	std::vector<std::unique_ptr<Entity>> entities;
+	std::deque<uint> emptyElements;
+	std::unordered_map<int, std::unique_ptr<Animation>> animation;
+};
+
 class EntityManager : public Module
 {
 public:
@@ -37,14 +44,17 @@ public:
 
 	bool DestroyEntity(ColliderLayers type, int id);
 
-	bool LoadAllTextures() const;
+	bool LoadAllTextures();
 
 	bool LoadEntities(TileInfo const *tileInfo, iPoint pos, int width, int height);
-	
-	List<Entity*> entities;
+
+	bool IsEntityActive(Entity const *entity = nullptr) const;
+
+	bool DoesEntityExist(Entity const *entity = nullptr) const;
 
 	// Type of entity, pair<entities, list of empty spots>
-	std::unordered_map<ColliderLayers, std::pair<std::vector<std::unique_ptr<Entity>>, std::deque<int>>> entities2;
+	std::unordered_map<ColliderLayers, EntityInfo> allEntities;
+
 };
 
 

@@ -8,11 +8,34 @@
 #include "Log.h"
 #include "Point.h"
 #include "Physics.h"
+#include "Map.h"
+#include "Entity.h"
 
 Item::Item() : Entity(ColliderLayers::ITEMS)
 {
 	name = "item";
 }
+
+Item::Item(TileInfo const *tileInfo, iPoint pos, int width, int height) : Entity(ColliderLayers::ITEMS), info(tileInfo), width(width), height(height)
+{
+	name = "item";
+	this->startingPosition = pos;
+}
+
+void Item::SetPaths()
+{ 
+	texturePath = "Assets/Animation/Items/";
+	fxPath = "Assets/Audio/Fx";
+}
+
+bool Item::SetStartingParameters()
+{
+	SetPaths();
+	return true;
+}
+
+//void Item::SetStartingPosition()
+
 
 Item::~Item() = default;
 
@@ -25,22 +48,28 @@ bool Item::Awake()
 
 bool Item::Start() 
 {
-
 	using enum ColliderLayers;
 	uint16 maskFlag = 0x0001;
 	maskFlag = (uint16)(PLAYER);
 	CreatePhysBody((uint16)ITEMS, maskFlag);
-
+	/*
+	texture->SetCurrentAnimation("idle");
+	if(!texture->Start("idle"))
+	{
+		LOG("Couldnt start %s anim", texture->GetCurrentAnimName());
+		return false;
+	}
+	texture->SetAnimStyle(AnimIteration::LOOP_FROM_START);
+	*/
 	return true;
 }
 
 bool Item::Update()
-{
-	// L07 DONE 4: Add a physics to an item - update the position of the object from the physics.  
-	position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x) - 16;
-	position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y) - 16;
+{  
+	//position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x) - 16;
+	//position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y) - 16;
 
-	app->render->DrawTexture(texture->GetCurrentFrame(), position.x, position.y);
+	//app->render->DrawTexture(texture->GetCurrentFrame(), position.x, position.y);
 
 	return true;
 }
@@ -48,4 +77,9 @@ bool Item::Update()
 bool Item::CleanUp()
 {
 	return true;
+}
+
+void Item::AddTexturesAndAnimationFrames()
+{
+
 }

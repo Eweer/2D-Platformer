@@ -154,6 +154,8 @@ bool Map::Load()
 	}
 
 	LogLoadedData();
+
+	app->entityManager->LoadAllTextures();
 	
 	mapFileXML.reset();
 
@@ -215,7 +217,7 @@ std::unique_ptr<TileInfo> Map::LoadTileInfo(const pugi::xml_node &tileInfoNode) 
 {
 	auto tileInfo = std::make_unique<TileInfo>();
 
-	if(!tileInfoNode.attribute("class"))
+	if(tileInfoNode.attribute("class"))
 		tileInfo->type = tileInfoNode.attribute("class").as_string();
 	tileInfo->properties = LoadProperties(tileInfoNode);
 	tileInfo->collider = LoadHitboxInfo(tileInfoNode, tileInfo->properties);
@@ -299,15 +301,20 @@ bool Map::LoadAllLayers(pugi::xml_node const &node)
 		mapData.mapLayers.push_back(LoadLayer(layer));
 	}
 	
-	for(auto const &objectNode : node.children("objectgroup"))
+	for(auto const &objectGroupNode : node.children("objectgroup"))
 	{
-		iPoint position{objectNode.attribute("x").as_int(), objectNode.attribute("y").as_int()};
-		int width = objectNode.attribute("width").as_int();
-		int height = objectNode.attribute("height").as_int();
-		TileSet const *tileset = GetTilesetFromTileId(node.attribute("id").as_int());
-		TileInfo const *tileInfo = tileset->tileInfo.find(node.attribute("id").as_int()-1)->second.get();
+		for(auto const &objectNode : objectGroupNode.children("object"))
+		{
+			iPoint position{objectNode.attribute("x").as_int(), objectNode.attribute("y").as_int()};
+			int width = objectNode.attribute("width").as_int();
+			int height = objectNode.attribute("height").as_int();
+			auto gid = objectNode.attribute("gid").as_uint();
+			TileSet const *tileset = GetTilesetFromTileId(gid);
+			auto aux = tileset->tileInfo.find(gid - tileset->firstgid);
+			TileInfo const *tileInfo = aux->second.get();
 
-		app->entityManager->LoadEntities(tileInfo, position, width, height);
+			app->entityManager->LoadEntities(tileInfo, position, width, height);
+		}
 	}
 
 	return true;
