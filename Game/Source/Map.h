@@ -14,6 +14,7 @@
 #include <variant>
 #include <memory>
 #include <cstdlib>			//	std::rand
+#include <string>
 
 #include "PugiXml/src/pugixml.hpp"
 
@@ -35,7 +36,7 @@ struct TileColliderInfo
 	std::string shape = "";
 	int width = 0;
 	int height = 0;
-	uint16 cat;
+	uint16 cat = 0x0000;
 	std::vector<int> points;
 };
 
@@ -49,33 +50,32 @@ struct TileAnimationInfo
 
 struct TileInfo
 {
+	std::string type = "";
 	XML_Properties_Map_t properties;
 	TileColliderInfo collider;
-	TileAnimationInfo animation;
+	std::shared_ptr<TileAnimationInfo> animation;
 	
 	explicit operator bool() const 
 	{
-		return properties.empty() || !collider.shape.empty() || !animation.frames.empty();
+		return type != "" || properties.empty() || !collider.shape.empty() || !animation->frames.empty();
 	}
 };
 
 struct TileSet
 {
-	std::string name;
-	int	firstgid;
-	int margin;
-	int	spacing;
-	int	tileWidth;
-	int	tileHeight;
-	int columns;
-	int tilecount;
+	std::string name = "";
+	int	firstgid = 0;
+	int margin = 0;
+	int	spacing = 0;
+	int	tileWidth = 0;
+	int	tileHeight = 0;
+	int columns = 0;
+	int tilecount = 0;
 
-	SDL_Texture *texture;
+	SDL_Texture *texture = nullptr;
 	
 	// index, TileInfo
-	std::unordered_map<int, TileInfo> tileInfo;
-
-	std::vector<int> animatedTiles;
+	std::unordered_map<int, std::unique_ptr<TileInfo>> tileInfo;
 	
 	SDL_Rect GetTileRect(int gid) const;
 };
@@ -144,7 +144,7 @@ struct MapData
 	int	height;
 	int	tileWidth;
 	int	tileHeight;
-	std::vector<TileSet *> tilesets;
+	std::vector<std::unique_ptr<TileSet>> tilesets;
 	MapTypes type;
 
 	std::vector<std::unique_ptr<MapLayer>> mapLayers;
@@ -189,8 +189,8 @@ private:
 	bool LoadMap(pugi::xml_node const &mapFile);
 	
 	bool LoadTileSet(pugi::xml_node const &mapFile);
-	TileInfo LoadTileInfo(const pugi::xml_node &tileInfoNode) const;
-	TileAnimationInfo  LoadAnimationInfo(const pugi::xml_node &tileInfoNode, XML_Properties_Map_t const &properties) const;
+	std::unique_ptr<TileInfo> LoadTileInfo(const pugi::xml_node &tileInfoNode) const;
+	std::shared_ptr<TileAnimationInfo> LoadAnimationInfo(const pugi::xml_node &tileInfoNode, XML_Properties_Map_t const &properties) const;
 	TileColliderInfo LoadHitboxInfo(const pugi::xml_node &hitbox, XML_Properties_Map_t const &properties = XML_Properties_Map_t()) const;
 	std::shared_ptr<PhysBody> CreateCollider (int gid, int i, int j, TileSet const *tileset) const;
 	

@@ -15,7 +15,7 @@ enum EventWindow
 	WE_QUIT = 0,
 	WE_HIDE = 1,
 	WE_SHOW = 2,
-	WE_COUNT
+	WE_COUNT = 3
 };
 
 enum KeyState

@@ -3,7 +3,11 @@
 
 #include "Module.h"
 #include "Entity.h"
+#include "Map.h"
 #include "List.h"
+
+#include <deque>
+#include <utility>		//std::pair
 
 class EntityManager : public Module
 {
@@ -34,11 +38,14 @@ public:
 	bool DestroyEntity(ColliderLayers type, int id);
 
 	bool LoadAllTextures() const;
+
+	bool LoadEntities(TileInfo const *tileInfo, iPoint pos, int width, int height);
 	
 	List<Entity*> entities;
 
-	std::unordered_map<ColliderLayers, std::vector<std::unique_ptr<Entity>>> entities2;
-
+	// Type of entity, pair<entities, list of empty spots>
+	std::unordered_map<ColliderLayers, std::pair<std::vector<std::unique_ptr<Entity>>, std::deque<int>>> entities2;
 };
+
 
 #endif // __ENTITYMANAGER_H__

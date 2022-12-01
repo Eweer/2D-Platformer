@@ -3,6 +3,7 @@
 #include "Textures.h"
 #include "Map.h"
 #include "Physics.h"
+#include "EntityManager.h"
 
 #include "Defs.h"
 #include "Log.h"
@@ -109,7 +110,7 @@ TileSet *Map::GetTilesetFromTileId(int gid) const
 {
 	for(auto &tileset : mapData.tilesets)
 		if(gid < (tileset->firstgid + tileset->tilecount))
-			return tileset;
+			return tileset.get();
 
 	LOG("Tileset for gid %i not found", gid);
 	return nullptr;
@@ -201,34 +202,35 @@ bool Map::LoadTileSet(pugi::xml_node const &mapFile)
 
 		for(auto const &tileInfoNode : elem.children("tile"))
 		{
-			if(auto info = LoadTileInfo(tileInfoNode); info)
-				retTileSet->tileInfo.insert_or_assign(tileInfoNode.attribute("id").as_int(), info);
+			retTileSet->tileInfo.insert_or_assign(tileInfoNode.attribute("id").as_int(), LoadTileInfo(tileInfoNode));
 		}
 		
-		mapData.tilesets.emplace_back(retTileSet.release());
+		mapData.tilesets.emplace_back(std::move(retTileSet));
 	}
 
 	return true;
 }
 
-TileInfo Map::LoadTileInfo(const pugi::xml_node &tileInfoNode) const
+std::unique_ptr<TileInfo> Map::LoadTileInfo(const pugi::xml_node &tileInfoNode) const
 {
-	TileInfo tileInfo;
-	
-	tileInfo.properties = LoadProperties(tileInfoNode);
-	tileInfo.collider = LoadHitboxInfo(tileInfoNode, tileInfo.properties);
-	tileInfo.animation = LoadAnimationInfo(tileInfoNode, tileInfo.properties);
+	auto tileInfo = std::make_unique<TileInfo>();
+
+	if(!tileInfoNode.attribute("class"))
+		tileInfo->type = tileInfoNode.attribute("class").as_string();
+	tileInfo->properties = LoadProperties(tileInfoNode);
+	tileInfo->collider = LoadHitboxInfo(tileInfoNode, tileInfo->properties);
+	tileInfo->animation = LoadAnimationInfo(tileInfoNode, tileInfo->properties);
 
 	return tileInfo;
 }
 
-TileAnimationInfo Map::LoadAnimationInfo(const pugi::xml_node &tileInfoNode, XML_Properties_Map_t const &properties) const
+std::shared_ptr<TileAnimationInfo> Map::LoadAnimationInfo(const pugi::xml_node &tileInfoNode, XML_Properties_Map_t const &properties) const
 {
-	TileAnimationInfo retAnim;
+	auto retAnim = std::make_shared<TileAnimationInfo>();
 
 	for(auto const &animFrameNode : tileInfoNode.child("animation").children())
 	{
-		retAnim.frames.push_back(
+		retAnim->frames.push_back(
 			std::make_pair(
 				animFrameNode.attribute("tileid").as_int(),
 				animFrameNode.attribute("duration").as_int()/10
@@ -236,8 +238,8 @@ TileAnimationInfo Map::LoadAnimationInfo(const pugi::xml_node &tileInfoNode, XML
 		);
 		for(auto const &[name, value] : properties)
 		{
-			if(name == "variance_min") retAnim.varianceMin = (uint)*std::get_if<int>(&value);
-			if(name == "variance_max") retAnim.varianceMax = (uint)*std::get_if<int>(&value);
+			if(name == "variance_min") retAnim->varianceMin = (uint)*std::get_if<int>(&value);
+			if(name == "variance_max") retAnim->varianceMax = (uint)*std::get_if<int>(&value);
 
 		}
 	}
@@ -296,6 +298,18 @@ bool Map::LoadAllLayers(pugi::xml_node const &node)
 	{
 		mapData.mapLayers.push_back(LoadLayer(layer));
 	}
+	
+	for(auto const &objectNode : node.children("objectgroup"))
+	{
+		iPoint position{objectNode.attribute("x").as_int(), objectNode.attribute("y").as_int()};
+		int width = objectNode.attribute("width").as_int();
+		int height = objectNode.attribute("height").as_int();
+		TileSet const *tileset = GetTilesetFromTileId(node.attribute("id").as_int());
+		TileInfo const *tileInfo = tileset->tileInfo.find(node.attribute("id").as_int()-1)->second.get();
+
+		app->entityManager->LoadEntities(tileInfo, position, width, height);
+	}
+
 	return true;
 }
 
@@ -322,16 +336,16 @@ std::unique_ptr<MapLayer> Map::LoadLayer(pugi::xml_node const &node)
 
 			retTileAnim.gid = gid;
 			retTileAnim.originalGid = gid;
-			if(const auto info = tileset->tileInfo.find(gid-1); 
-			   info != tileset->tileInfo.end() && !info->second.animation.frames.empty())
+			if(const auto &info = tileset->tileInfo.find(gid-1); 
+			   info != tileset->tileInfo.end() && !info->second->animation->frames.empty())
 			{
 				retTileAnim.active = true;
 				retTileAnim.currentFrame = 0;
 				retTileAnim.timer = 0;
-				retTileAnim.anim = std::make_shared<TileAnimationInfo>(info->second.animation);
-				retTileAnim.duration = info->second.animation.frames[0].second;
-				retTileAnim.duration += (info->second.animation.varianceMax > 0) ?
-					((uint)std::rand() % info->second.animation.varianceMax + info->second.animation.varianceMin) :
+				retTileAnim.anim = info->second->animation;
+				retTileAnim.duration = info->second->animation->frames[0].second;
+				retTileAnim.duration += (info->second->animation->varianceMax > 0) ?
+					((uint)std::rand() % info->second->animation->varianceMax + info->second->animation->varianceMin) :
 					0;
 			}
 		}
@@ -353,9 +367,9 @@ inline std::shared_ptr<PhysBody> Map::CreateCollider(int gid, int i, int j, Tile
 {
 	if(auto colliderInfo = tileset->tileInfo.find(gid-1); colliderInfo != tileset->tileInfo.end())
 	{
-		if(colliderInfo->second.collider.shape.empty() && colliderInfo->second.collider.points.size() <= 0)
+		if(colliderInfo->second->collider.shape.empty() && colliderInfo->second->collider.points.size() <= 0)
 			return nullptr;
-		TileColliderInfo collider = colliderInfo->second.collider;
+		TileColliderInfo collider = colliderInfo->second->collider;
 		iPoint colliderPos = MapToWorld(i, j);
 		std::shared_ptr<PhysBody> retCollider;
 		if(collider.shape == "rectangle")
