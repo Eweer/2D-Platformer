@@ -50,14 +50,13 @@ struct TileAnimationInfo
 
 struct TileInfo
 {
-	std::string type = "";
 	XML_Properties_Map_t properties;
 	TileColliderInfo collider;
 	std::shared_ptr<TileAnimationInfo> animation;
 	
 	explicit operator bool() const 
 	{
-		return type != "" || properties.empty() || !collider.shape.empty() || !animation->frames.empty();
+		return properties.empty() || !collider.shape.empty() || !animation->frames.empty();
 	}
 };
 

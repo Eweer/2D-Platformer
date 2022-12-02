@@ -9,6 +9,13 @@
 #include <deque>
 #include <utility>		//std::pair
 
+struct EntityInfo
+{
+	std::vector<std::unique_ptr<Entity>> entities;
+	std::deque<uint> emptyElements;
+	std::unordered_map<int, std::unique_ptr<Animation>> animation;
+};
+
 class EntityManager : public Module
 {
 public:
@@ -31,20 +38,29 @@ public:
 	bool CleanUp() final;
 
 	// Additional methods
-	void CreateEntity(ColliderLayers type, pugi::xml_node parameters = pugi::xml_node());
+	void CreateEntity(std::string const &type, pugi::xml_node parameters = pugi::xml_node());
 
-	bool DestroyEntity(Entity const *entity);
+	bool DestroyEntity(Entity const *entity, std::string const &type);
 
-	bool DestroyEntity(ColliderLayers type, int id);
+	bool DestroyEntity(std::string const &type,  int id);
 
-	bool LoadAllTextures() const;
+	bool LoadAllTextures();
 
 	bool LoadEntities(TileInfo const *tileInfo, iPoint pos, int width, int height);
-	
-	List<Entity*> entities;
 
-	// Type of entity, pair<entities, list of empty spots>
-	std::unordered_map<ColliderLayers, std::pair<std::vector<std::unique_ptr<Entity>>, std::deque<int>>> entities2;
+	void LoadItemAnimations();
+
+	bool IsEntityActive(Entity const *entity = nullptr) const;
+
+	bool DoesEntityExist(Entity const *entity = nullptr) const;
+
+	using EntityMap = std::unordered_map<std::string, EntityInfo, StringHash, std::equal_to<>>;
+	
+	// key1 = ColliderLayer
+	// value 1, key 2 = string type of entity
+	// value2 = <vector of entities, list of empty elements, map of animations>
+	EntityMap allEntities;
+
 };
 
 

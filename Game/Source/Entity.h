@@ -64,9 +64,9 @@ public:
 	
 	void Disable();
 
-	void SetPaths();
+	virtual void SetPaths();
 
-	void SetPathsToLevel();
+	virtual void SetPathsToLevel();
 
 	virtual void AddTexturesAndAnimationFrames();
 
@@ -84,6 +84,7 @@ public:
 	iPoint position;
 	iPoint startingPosition;
 	std::unique_ptr<Animation> texture;
+	int imageVariation = 0;
 	RenderModes renderMode = RenderModes::UNKNOWN;
 	std::shared_ptr<PhysBody> pBody;
 

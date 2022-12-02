@@ -9,6 +9,9 @@
 #include <variant>
 #include <stdarg.h>
 #include <initializer_list>
+#include <ranges>
+#include <algorithm>
+#include <string>
 
 //  NULL just in case ----------------------
 
@@ -37,7 +40,7 @@
 }
 
 
-#define IN_RANGE(value, min, max) ( ((value) >= (min) && (value) <= (max)) ? 1 : 0 )
+#define IN_RANGE(value, min, max) ((value >= min && value <= max) ? 1 : 0)
 #define TO_BOOL(a)  ((a != 0) ? true : false )
 
 using uint = unsigned int;
@@ -76,6 +79,12 @@ inline const char *PATH(const char *folder, const char *file)
 	path += file;
 	const char *ret = path.c_str();
 	return ret;
+}
+
+inline bool StrEquals(const std::string_view &lhs, const std::string_view &rhs)
+{
+	auto to_lower{std::ranges::views::transform(std::tolower)};
+	return std::ranges::equal(lhs | to_lower, rhs | to_lower);
 }
 
 inline const char *PATH(std::string const &folder, std::string const &file)
@@ -118,6 +127,15 @@ struct StringHash
 // Performance macros
 #define PERF_START(timer) timer.Start()
 #define PERF_PEEK(timer) LOG("%s took %f ms", __FUNCTION__, timer.ReadMs())
+
+// Usage: range<min, man>::contains(var)
+template <int min, int max> class range
+{
+	static bool contains(int i)
+	{ 
+		return min <= i  && i < max;
+	} 
+};
 
 template<typename T>
 T MAX(T a, T b)

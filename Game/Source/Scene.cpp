@@ -35,7 +35,7 @@ bool Scene::Awake(pugi::xml_node& config)
 
 	// Instantiate the player using the entity manager
 	if (config.child("player")) {
-		app->entityManager->CreateEntity(ColliderLayers::PLAYER, config.child("player"));
+		app->entityManager->CreateEntity("player", config.child("player"));
 	}
 
 	return ret;

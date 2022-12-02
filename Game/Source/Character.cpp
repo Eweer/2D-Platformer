@@ -43,11 +43,11 @@ bool Character::Update()
 	position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x) - Character_SIZE/2;
 	position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y) - Character_SIZE/2;
 
-	app->render->DrawTexture(texture->GetCurrentFrame(), position.x, position.y);
+	app->render->DrawTexture(texture->UpdateAndGetFrame(), position.x, position.y);
 
 	for(int i = 0; i < hp; i++)
 	{
-		app->render->DrawTexture(texture->GetCurrentFrame(), 710, 930 - i*(Character_SIZE + 10));
+		app->render->DrawTexture(texture->UpdateAndGetFrame(), 710, 930 - i*(Character_SIZE + 10));
 	}
 
 	return true;

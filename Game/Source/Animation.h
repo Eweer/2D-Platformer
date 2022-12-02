@@ -1,6 +1,8 @@
 #ifndef __ANIMATION_H__
 #define __ANIMATION_H__
 
+#pragma warning( disable : 4018 )
+
 #include "App.h"
 #include "Textures.h"
 #include "Defs.h"
@@ -10,6 +12,8 @@
 #include <vector>
 #include <memory>
 #include <unordered_map>
+#include <string>
+#include <cctype>
 
 struct SDL_Texture;
 
@@ -31,7 +35,7 @@ public:
 
 	~Animation() = default;
 
-	SDL_Texture *GetCurrentFrame()
+	SDL_Texture *UpdateAndGetFrame()
 	{
 		if(TimeSinceLastFunctionCall > 0) TimeSinceLastFunctionCall += 0.1f;
 		if(TimeSinceLastFunctionCall > FunctionCooldown) TimeSinceLastFunctionCall = 0;
@@ -106,6 +110,14 @@ public:
 		}
 	}
 
+	SDL_Texture *GetCurrentFrame() const
+	{
+		if((int)currentFrame >= frames.at(currentAnimName).size())
+			return frames.at(currentAnimName).at(frames.at(currentAnimName).size() - 1);
+		else
+			return frames.at(currentAnimName).at((uint)currentFrame);
+	}
+
 	Animation *AddStaticImage(const char *pathToPNG)
 	{
 		staticImage = app->tex->Load(pathToPNG);
@@ -120,10 +132,12 @@ public:
 	
 	//returns the number of frames with key name after inserting the new one
 	//returns -1 if name couldn't be emplaced.
-	int AddFrame(const char *pathToPNG, std::string name)
+	int AddFrame(const char *pathToPNG, const std::string &animName)
 	{
-		if(name[0] <= 'Z' && name[0] >= 'A') name[0] -= ('Z'-'z');
+		std::string name = animName;
+		name[0] = (char)std::tolower(animName[0]);
 		frames[name].emplace_back(std::move(app->tex->Load(pathToPNG)));
+		if(currentAnimName == "unknown") currentAnimName = name;
 		return GetFrameCount(name);
 	}
 	
