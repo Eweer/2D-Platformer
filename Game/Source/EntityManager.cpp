@@ -5,13 +5,15 @@
 #include "Textures.h"
 #include "Scene.h"
 #include "BitMaskColliderLayers.h"
+#include "Animation.h"
 
 #include "Defs.h"
 #include "Log.h"
 
-#include <algorithm>	//range::for_each
+#include <algorithm>
 #include <vector>
 #include <regex>
+#include <variant>
 
 EntityManager::EntityManager() : Module()
 {
@@ -25,11 +27,11 @@ EntityManager::~EntityManager() = default;
 bool EntityManager::Awake(pugi::xml_node& config)
 {
 	LOG("Loading Entity Manager");
-	for(auto const &[type, item] : allEntities)
+	for(auto const &[entityType, entityInfo] : allEntities)
 	{
-		for(auto &entity : item.entities)
+		for(auto const &entity : entityInfo.entities)
 		{
-			if(!entity.get() || !entity->active) continue;
+			if(!IsEntityActive(entity.get())) continue;
 			if(!entity->Awake()) return false;
 		}
 	}
@@ -38,11 +40,11 @@ bool EntityManager::Awake(pugi::xml_node& config)
 
 bool EntityManager::Start() 
 {
-	for(auto const &[type, item] : allEntities)
+	for(auto const &[entityType, entityInfo] : allEntities)
 	{
-		for(auto &entity : item.entities)
+		for(auto const &entity : entityInfo.entities)
 		{
-			if(!entity.get() || !entity->active) continue;
+			if(!IsEntityActive(entity.get())) continue;
 			if(!entity->Start()) return false;
 		}
 	}
@@ -52,15 +54,14 @@ bool EntityManager::Start()
 // Called before quitting
 bool EntityManager::CleanUp()
 {
-	for(auto const &[type, item] : allEntities)
+	for(auto const &[entityType, entityInfo] : allEntities)
 	{
-		for(auto &entity : item.entities)
+		for(auto const &entity : entityInfo.entities)
 		{
-			if(!entity.get()) continue;
+			if(!DoesEntityExist(entity.get())) continue;
 			if(!entity->CleanUp()) return false;
 		}
 	}
-
 	return true;
 }
 
@@ -115,7 +116,7 @@ bool EntityManager::DestroyEntity(Entity const *entity)
 	return false;
 }
 
-bool EntityManager::DestroyEntity(ColliderLayers type, int id)
+bool EntityManager::DestroyEntity(std::string type, int id)
 {
 	if(id < 0) return false;
 
@@ -155,47 +156,98 @@ bool EntityManager::LoadAllTextures()
 
 bool EntityManager::LoadEntities(TileInfo const *tileInfo, iPoint pos, int width, int height)
 {
-	auto aux = (ColliderLayers)*(std::get_if<int>(&tileInfo->properties.find("ColliderLayers")->second));
-	auto variationNumber = *(std::get_if<int>(&tileInfo->properties.at("ImageVariation")));
+	std::string aux = *(std::get_if<std::string>(&tileInfo->properties.find("Type")->second));
 	
 	allEntities[aux].entities.push_back(std::make_unique<Item>(tileInfo, pos, width, height));
-
-	if(auto variation = allEntities[aux].animation.find(variationNumber); 
-		variation == allEntities[aux].animation.end())
-	{
-		allEntities[aux].animation[variationNumber] = std::make_unique<Animation>();
-		LoadItemAnimation(tileInfo, aux, variationNumber);
-	}
-
+	LoadItemAnimations(tileInfo);
 
 	return true;
 }
 
-void EntityManager::LoadItemAnimation(TileInfo const *tileInfo, ColliderLayers layer, int variation)
+void EntityManager::LoadItemAnimations(TileInfo const *tileInfo)
 {
-	auto currentAnim = allEntities[layer].animation[variation].get();
-	
+	std::string layer = *(std::get_if<std::string>(&tileInfo->properties.find("Type")->second));
+
 	struct dirent **folderList;
-	const char *dirPath = allEntities[layer].entities.at(0).get()->texturePath.c_str();
+	const char *dirPath = "Assets/Animations/Items/"; //allEntities[layer].entities.at(0).get()->texturePath.c_str();
 	int nItemFolder = scandir(dirPath, &folderList, nullptr, DescAlphasort);
-	static const std::regex r(R"(([A-Za-z]+)(\d*)_anim\d{0-3}.(?:png)|(?:jpg))");
-	std::string rAux = "(Coin" + std::to_string(variation) + "_anim\d{0-3}.(?:png)|(?:jpg))";
-	static const std::regex r2(R"(rAux)");
+
+	// https://regex101.com/r/L9Wa29/1
+	// Looks for a file named:
+	// m[0] = file name
+	// m[1] = (ItemType) -> Coin, Gem, Potion... Any word
+	// m[2] = (From 0 to 3 digis) -> Image Variation
+	// m[3] = (?:0 or 1 underscores)(AnimationName) -> Idle, rotating... Might not be one
+	// _anim -> The word anim
+	// m[4] = (0 to 3 digits) -> Frame number
+	// (.png or .jpg) -> File extension
+
+	std::regex r2(R"(([A-aZ-z]+)(\d{1,3})(?:_?([A-aZ-z]*))_anim(\d{0,3})\.(?:png|jpg))");
 
 	if (nItemFolder < 0) return;
 
 	while (nItemFolder--)
 	{
+		
 		std::smatch m;
+
+		// Check if file matches the regex
 		if (std::string animFileName(folderList[nItemFolder]->d_name); 
-			!std::regex_match(animFileName, m, rAux))
+			!std::regex_match(animFileName, m, r2))
 		{
 			free(folderList[nItemFolder]);
 			continue;
 		}
-		//if(std::string match1 = m[1]; match1 != std::string(parameters.name()))
-	}
+		
+		// Check if we have an entiy with m[1] type
+		if(auto entityTypeInfo = allEntities.find(m[1]); 
+		   entityTypeInfo == allEntities.end())
+			continue;
 
+		// Check if we have an entity with m[2] animation number
+		bool bVariationFound = false;
+		int variation;
+		for(auto const &elem : allEntities[m[1]].entities)
+		{
+			if(variation = elem.get()->imageVariation; 
+			   variation == stoul(m[2]))
+			{
+				bVariationFound = true;
+				break;
+			}
+		}
+		if(!bVariationFound) continue;
+
+		// Check if we already have the animation on the Animation map
+		if(auto anim = allEntities[m[1]].animation.find(stoul(m[2]));
+		   anim != allEntities[m[1]].animation.end())
+			continue;
+		
+		// If we don't have the animation, we create a new one
+		allEntities[m[1]].animation.emplace(std::make_unique<Animation>());
+
+		// Add the frame to animation map
+		// if there's no name (ex: coin0_anim000.png), it will be stored with the name "single"
+		if(allEntities[m[1]].animation[variation]->AddFrame((std::string(dirPath) + std::string(m[0])).c_str(), std::string(m[3])) != 1) [[likely]]
+			continue;
+
+
+		// if it's the first frame we add with m[3] name, set up animation variables
+		if(auto speed = tileInfo->properties.find("AnimationSpeed");
+		   speed != tileInfo->properties.end() && std::get<float>(speed->second) > 0)
+			allEntities[layer].animation[variation]->SetSpeed(std::get<float>(speed->second));
+		else
+			allEntities[layer].animation[variation]->SetSpeed(0.2f);
+
+		if(auto speed = tileInfo->properties.find("AnimationStyle");
+		   speed != tileInfo->properties.end() && std::get<int>(speed->second) > 0)
+			allEntities[layer].animation[variation]->SetAnimStyle(static_cast<AnimIteration>(std::get<int>(speed->second)));
+		else
+			allEntities[layer].animation[variation]->SetAnimStyle(AnimIteration::LOOP_FROM_START);
+
+		free(folderList[nItemFolder]);
+	}
+	free(folderList);
 }
 
 bool EntityManager::IsEntityActive(Entity const *entity) const
@@ -215,10 +267,13 @@ bool EntityManager::Update(float dt)
 {
 	for(auto const &[type, item] : allEntities)
 	{
-		for(auto &entity : item.entities)
+		for(auto const &[entityType, entityInfo] : item)
 		{
-			if(!entity.get() || !entity->active) continue;
-			if(!entity->Update()) return false;
+			for(auto const &entity : entityInfo.entities)
+			{
+				if(!IsEntityActive(entity.get())) continue;
+				if(!entity->Update()) return false;
+			}
 		}
 	}
 	return true;

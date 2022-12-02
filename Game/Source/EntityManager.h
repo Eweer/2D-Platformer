@@ -42,20 +42,23 @@ public:
 
 	bool DestroyEntity(Entity const *entity);
 
-	bool DestroyEntity(ColliderLayers type, int id);
+	bool DestroyEntity(std::string type,  int id);
 
 	bool LoadAllTextures();
 
 	bool LoadEntities(TileInfo const *tileInfo, iPoint pos, int width, int height);
 
-	void LoadItemAnimation(TileInfo const *tileInfo, ColliderLayers layer, int variation);
+	void LoadItemAnimations(TileInfo const *tileInfo);
 
 	bool IsEntityActive(Entity const *entity = nullptr) const;
 
 	bool DoesEntityExist(Entity const *entity = nullptr) const;
 
-	// Type of entity, pair<entities, list of empty spots>
-	std::unordered_map<ColliderLayers, EntityInfo> allEntities;
+	using EntityMap = std::unordered_map<std::string, EntityInfo, StringHash, std::equal_to<>>;
+	// key1 = ColliderLayer
+	// value 1, key 2 = string type of entity
+	// value2 = <vector of entities, list of empty elements, map of animations>
+	EntityMap allEntities;
 
 };
 

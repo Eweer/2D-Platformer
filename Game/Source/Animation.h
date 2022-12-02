@@ -122,6 +122,7 @@ public:
 	//returns -1 if name couldn't be emplaced.
 	int AddFrame(const char *pathToPNG, std::string name)
 	{
+		if(name.empty()) name = "single";
 		if(name[0] <= 'Z' && name[0] >= 'A') name[0] -= ('Z'-'z');
 		frames[name].emplace_back(std::move(app->tex->Load(pathToPNG)));
 		return GetFrameCount(name);

@@ -217,8 +217,6 @@ std::unique_ptr<TileInfo> Map::LoadTileInfo(const pugi::xml_node &tileInfoNode) 
 {
 	auto tileInfo = std::make_unique<TileInfo>();
 
-	if(tileInfoNode.attribute("class"))
-		tileInfo->type = tileInfoNode.attribute("class").as_string();
 	tileInfo->properties = LoadProperties(tileInfoNode);
 	tileInfo->collider = LoadHitboxInfo(tileInfoNode, tileInfo->properties);
 	tileInfo->animation = LoadAnimationInfo(tileInfoNode, tileInfo->properties);
@@ -316,6 +314,8 @@ bool Map::LoadAllLayers(pugi::xml_node const &node)
 			app->entityManager->LoadEntities(tileInfo, position, width, height);
 		}
 	}
+
+	app->entityManager->LoadItemAnimations();
 
 	return true;
 }
@@ -433,9 +433,8 @@ XML_Properties_Map_t Map::LoadProperties(pugi::xml_node const &node) const
 				valueToEmplace = elem.attribute("value").as_bool();
 				break;
 			default:
-				LOG("Variant doesn't have %s type", elem.attribute("type").as_string());
 				valueToEmplace = elem.attribute("value").as_string();
-				continue;
+				break;
 		}
 		
 		properties.try_emplace(elem.attribute("name").as_string(), valueToEmplace);

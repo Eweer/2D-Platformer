@@ -19,6 +19,8 @@ Item::Item() : Entity(ColliderLayers::ITEMS)
 Item::Item(TileInfo const *tileInfo, iPoint pos, int width, int height) : Entity(ColliderLayers::ITEMS), info(tileInfo), width(width), height(height)
 {
 	name = "item";
+	this->type2 = *(std::get_if<std::string>(&tileInfo->properties.find("Type")->second));
+	this->imageVariation = *(std::get_if<int>(&tileInfo->properties.find("ImageVariation")->second));
 	this->startingPosition = pos;
 }
 

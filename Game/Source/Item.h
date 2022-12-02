@@ -35,9 +35,10 @@ public:
 	bool isPicked = false;
 
 	TileInfo const *info = nullptr;
-	int width;
-	int height;
+	int width = 0;
+	int height = 0;
 	const Animation *anim;
+	std::string type2 = "Unknown";
 };
 
 #endif // __ITEM_H__

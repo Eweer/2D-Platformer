@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.8" tiledversion="1.8.6" orientation="orthogonal" renderorder="right-down" width="10" height="12" tilewidth="64" tileheight="64" infinite="0" nextlayerid="6" nextobjectid="24">
+<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="10" height="12" tilewidth="64" tileheight="64" infinite="0" nextlayerid="6" nextobjectid="26">
  <tileset firstgid="1" name="MountainTiles64x64" tilewidth="64" tileheight="64" tilecount="121" columns="11">
   <image source="BaseTiles.png" width="704" height="704"/>
   <tile id="0">
@@ -502,6 +502,7 @@
    <properties>
     <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
     <property name="ImageVariation" type="int" propertytype="ImageVariation" value="0"/>
+    <property name="Type" propertytype="ItemType" value="Unknown"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="2" x="11" y="2">
@@ -513,6 +514,7 @@
    <properties>
     <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
     <property name="ImageVariation" type="int" propertytype="ImageVariation" value="0"/>
+    <property name="Type" propertytype="ItemType" value="Unknown"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="2" y="12" width="28" height="20">
@@ -524,6 +526,7 @@
    <properties>
     <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
     <property name="ImageVariation" type="int" propertytype="ImageVariation" value="1"/>
+    <property name="Type" propertytype="ItemType" value="Unknown"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="2" y="12" width="28" height="20">
@@ -535,6 +538,7 @@
    <properties>
     <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
     <property name="ImageVariation" type="int" propertytype="ImageVariation" value="2"/>
+    <property name="Type" propertytype="ItemType" value="Unknown"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="2" y="12" width="28" height="20">
@@ -546,6 +550,7 @@
    <properties>
     <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
     <property name="ImageVariation" type="int" propertytype="ImageVariation" value="3"/>
+    <property name="Type" propertytype="ItemType" value="Unknown"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="2" y="12" width="28" height="20">
@@ -557,6 +562,7 @@
    <properties>
     <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
     <property name="ImageVariation" type="int" propertytype="ImageVariation" value="0"/>
+    <property name="Type" propertytype="ItemType" value="Gem"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="2" y="3" width="27" height="26">
@@ -568,6 +574,7 @@
    <properties>
     <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
     <property name="ImageVariation" type="int" propertytype="ImageVariation" value="1"/>
+    <property name="Type" propertytype="ItemType" value="Gem"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="2" y="2" width="28" height="28">
@@ -579,6 +586,7 @@
    <properties>
     <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
     <property name="ImageVariation" type="int" propertytype="ImageVariation" value="0"/>
+    <property name="Type" propertytype="ItemType" value="Heart"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="3" y="5" width="27" height="24">
@@ -590,6 +598,7 @@
    <properties>
     <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
     <property name="ImageVariation" type="int" propertytype="ImageVariation" value="1"/>
+    <property name="Type" propertytype="ItemType" value="Heart"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="2" y="4" width="27" height="24">
@@ -601,6 +610,7 @@
    <properties>
     <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
     <property name="ImageVariation" type="int" propertytype="ImageVariation" value="2"/>
+    <property name="Type" propertytype="ItemType" value="Heart"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="2" y="4" width="27" height="24">
@@ -612,6 +622,7 @@
    <properties>
     <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
     <property name="ImageVariation" type="int" propertytype="ImageVariation" value="2"/>
+    <property name="Type" propertytype="ItemType" value="Gem"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="4" y="3" width="25" height="28">
@@ -623,6 +634,7 @@
    <properties>
     <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
     <property name="ImageVariation" type="int" propertytype="ImageVariation" value="3"/>
+    <property name="Type" propertytype="ItemType" value="Gem"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="3" y="3" width="26" height="26">
@@ -634,6 +646,7 @@
    <properties>
     <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
     <property name="ImageVariation" type="int" propertytype="ImageVariation" value="0"/>
+    <property name="Type" propertytype="ItemType" value="Cross"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="2" y="2" width="28" height="28">
@@ -645,6 +658,7 @@
    <properties>
     <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
     <property name="ImageVariation" type="int" propertytype="ImageVariation" value="1"/>
+    <property name="Type" propertytype="ItemType" value="Cross"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="3" y="3" width="28" height="28">
@@ -656,6 +670,7 @@
    <properties>
     <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
     <property name="ImageVariation" type="int" propertytype="ImageVariation" value="2"/>
+    <property name="Type" propertytype="ItemType" value="Cross"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="2" y="2" width="28" height="28">
@@ -667,6 +682,7 @@
    <properties>
     <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
     <property name="ImageVariation" type="int" propertytype="ImageVariation" value="0"/>
+    <property name="Type" propertytype="ItemType" value="Coin"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="3" y="3" width="27" height="27">
@@ -678,6 +694,7 @@
    <properties>
     <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
     <property name="ImageVariation" type="int" propertytype="ImageVariation" value="1"/>
+    <property name="Type" propertytype="ItemType" value="Coin"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="2" y="2" width="27" height="27">
@@ -689,6 +706,7 @@
    <properties>
     <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
     <property name="ImageVariation" type="int" propertytype="ImageVariation" value="0"/>
+    <property name="Type" propertytype="ItemType" value="Arrow"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="4" y="2" width="23" height="27">
@@ -700,6 +718,7 @@
    <properties>
     <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
     <property name="ImageVariation" type="int" propertytype="ImageVariation" value="1"/>
+    <property name="Type" propertytype="ItemType" value="Arrow"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="4" y="3" width="23" height="27">
@@ -711,6 +730,7 @@
    <properties>
     <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
     <property name="ImageVariation" type="int" propertytype="ImageVariation" value="2"/>
+    <property name="Type" propertytype="ItemType" value="Arrow"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="5" y="3" width="23" height="27">
@@ -722,6 +742,7 @@
    <properties>
     <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
     <property name="ImageVariation" type="int" propertytype="ImageVariation" value="2"/>
+    <property name="Type" propertytype="ItemType" value="Coin"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="2" y="3" width="27" height="27">
@@ -733,6 +754,7 @@
    <properties>
     <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
     <property name="ImageVariation" type="int" propertytype="ImageVariation" value="3"/>
+    <property name="Type" propertytype="ItemType" value="Coin"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="2" y="3" width="27" height="27">
@@ -744,6 +766,7 @@
    <properties>
     <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
     <property name="ImageVariation" type="int" propertytype="ImageVariation" value="0"/>
+    <property name="Type" propertytype="ItemType" value="Star"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="15" y="2">
@@ -755,6 +778,7 @@
    <properties>
     <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
     <property name="ImageVariation" type="int" propertytype="ImageVariation" value="1"/>
+    <property name="Type" propertytype="ItemType" value="Star"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="1" x="16" y="3">
@@ -766,6 +790,7 @@
    <properties>
     <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
     <property name="ImageVariation" type="int" propertytype="ImageVariation" value="2"/>
+    <property name="Type" propertytype="ItemType" value="Star"/>
    </properties>
    <objectgroup draworder="index" id="2">
     <object id="2" x="15" y="3">
