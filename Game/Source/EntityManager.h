@@ -48,6 +48,8 @@ public:
 
 	bool LoadEntities(TileInfo const *tileInfo, iPoint pos, int width, int height);
 
+	void LoadItemAnimation(TileInfo const *tileInfo, ColliderLayers layer, int variation);
+
 	bool IsEntityActive(Entity const *entity = nullptr) const;
 
 	bool DoesEntityExist(Entity const *entity = nullptr) const;

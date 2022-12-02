@@ -11,6 +11,7 @@
 
 #include <algorithm>	//range::for_each
 #include <vector>
+#include <regex>
 
 EntityManager::EntityManager() : Module()
 {
@@ -135,7 +136,7 @@ bool EntityManager::LoadAllTextures()
 			{
 				for(auto &entity : item.entities)
 				{
-					if(IsEntityActive(entity.get())) continue;
+					if(!IsEntityActive(entity.get())) continue;
 					entity->AddTexturesAndAnimationFrames();
 				}
 				break;
@@ -156,22 +157,52 @@ bool EntityManager::LoadEntities(TileInfo const *tileInfo, iPoint pos, int width
 {
 	auto aux = (ColliderLayers)*(std::get_if<int>(&tileInfo->properties.find("ColliderLayers")->second));
 	auto variationNumber = *(std::get_if<int>(&tileInfo->properties.at("ImageVariation")));
+	
+	allEntities[aux].entities.push_back(std::make_unique<Item>(tileInfo, pos, width, height));
 
 	if(auto variation = allEntities[aux].animation.find(variationNumber); 
 		variation == allEntities[aux].animation.end())
 	{
 		allEntities[aux].animation[variationNumber] = std::make_unique<Animation>();
+		LoadItemAnimation(tileInfo, aux, variationNumber);
 	}
 
-	allEntities[aux].entities.push_back(std::make_unique<Item>(tileInfo, pos, width, height));
 
 	return true;
 }
 
+void EntityManager::LoadItemAnimation(TileInfo const *tileInfo, ColliderLayers layer, int variation)
+{
+	auto currentAnim = allEntities[layer].animation[variation].get();
+	
+	struct dirent **folderList;
+	const char *dirPath = allEntities[layer].entities.at(0).get()->texturePath.c_str();
+	int nItemFolder = scandir(dirPath, &folderList, nullptr, DescAlphasort);
+	static const std::regex r(R"(([A-Za-z]+)(\d*)_anim\d{0-3}.(?:png)|(?:jpg))");
+	std::string rAux = "(Coin" + std::to_string(variation) + "_anim\d{0-3}.(?:png)|(?:jpg))";
+	static const std::regex r2(R"(rAux)");
+
+	if (nItemFolder < 0) return;
+
+	while (nItemFolder--)
+	{
+		std::smatch m;
+		if (std::string animFileName(folderList[nItemFolder]->d_name); 
+			!std::regex_match(animFileName, m, rAux))
+		{
+			free(folderList[nItemFolder]);
+			continue;
+		}
+		//if(std::string match1 = m[1]; match1 != std::string(parameters.name()))
+	}
+
+}
+
 bool EntityManager::IsEntityActive(Entity const *entity) const
 {
-	if(entity->active) return true;
-	return false;
+	if(!entity) return false;
+	if(!entity->active) return false;
+	return true;
 }
 
 bool EntityManager::DoesEntityExist(Entity const *entity) const
