@@ -84,7 +84,7 @@ public:
 	iPoint position;
 	iPoint startingPosition;
 	std::unique_ptr<Animation> texture;
-	uint imageVariation = 0;
+	int imageVariation = 0;
 	RenderModes renderMode = RenderModes::UNKNOWN;
 	std::shared_ptr<PhysBody> pBody;
 

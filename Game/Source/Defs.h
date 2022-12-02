@@ -81,12 +81,11 @@ inline const char *PATH(const char *folder, const char *file)
 	return ret;
 }
 
-bool iequals(const std::string_view &lhs, const std::string_view &rhs)
+inline bool StrEquals(const std::string_view &lhs, const std::string_view &rhs)
 {
 	auto to_lower{std::ranges::views::transform(std::tolower)};
 	return std::ranges::equal(lhs | to_lower, rhs | to_lower);
 }
-
 
 inline const char *PATH(std::string const &folder, std::string const &file)
 {

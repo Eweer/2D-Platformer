@@ -9,11 +9,14 @@
 
 #include "Defs.h"
 #include "Log.h"
+#include "dirent.h"
 
 #include <algorithm>
 #include <vector>
 #include <regex>
 #include <variant>
+#include <string>		//std::string, std::stoi
+#include <cctype>		//std::tolower
 
 EntityManager::EntityManager() : Module()
 {
@@ -65,11 +68,10 @@ bool EntityManager::CleanUp()
 	return true;
 }
 
-void EntityManager::CreateEntity(ColliderLayers type, pugi::xml_node parameters)
+void EntityManager::CreateEntity(std::string const &type, pugi::xml_node parameters)
 {
-	switch (type)
+	if(StrEquals(type, "player"))
 	{
-	case ColliderLayers::PLAYER:
 		if(allEntities[type].emptyElements.empty()) [[likely]]
 		{
 			allEntities[type].entities.push_back(std::make_unique<Player>(parameters));
@@ -79,9 +81,9 @@ void EntityManager::CreateEntity(ColliderLayers type, pugi::xml_node parameters)
 			allEntities[type].entities[allEntities[type].emptyElements.front()].reset(new Player(parameters));
 			allEntities[type].emptyElements.pop_front();
 		}
-		break;
-
-	case ColliderLayers::ITEMS:
+	}
+	else if(StrEquals(type, "item"))
+	{
 		if(allEntities[type].emptyElements.empty()) [[likely]]
 		{
 			allEntities[type].entities.push_back(std::make_unique<Item>());
@@ -91,17 +93,16 @@ void EntityManager::CreateEntity(ColliderLayers type, pugi::xml_node parameters)
 			allEntities[type].entities[allEntities[type].emptyElements.front()].reset(new Item());
 			allEntities[type].emptyElements.pop_front();
 		}
-		break;
-
-	default: 
-		LOG("Entity could not be created.");
-		break;
+	}
+	else
+	{
+		LOG("Entity %s could not be created.", type);
 	}
 }
 
-bool EntityManager::DestroyEntity(Entity const *entity)
+bool EntityManager::DestroyEntity(Entity const *entity, std::string const &type)
 {
-	if(auto vec = allEntities.find(entity->type); vec != allEntities.end())
+	if(auto vec = allEntities.find(type); vec != allEntities.end())
 	{
 		for(auto &item : vec->second.entities)
 		{
@@ -116,7 +117,7 @@ bool EntityManager::DestroyEntity(Entity const *entity)
 	return false;
 }
 
-bool EntityManager::DestroyEntity(std::string type, int id)
+bool EntityManager::DestroyEntity(std::string const &type, int id)
 {
 	if(id < 0) return false;
 
@@ -128,27 +129,12 @@ bool EntityManager::DestroyEntity(std::string type, int id)
 
 bool EntityManager::LoadAllTextures()
 {
-	for(auto const &[type, item] : allEntities)
+	if(auto const &it = allEntities.find("player"); it != allEntities.end())
 	{
-		using enum ColliderLayers;
-		switch(type)
+		for(auto const &entity : it->second.entities)
 		{
-			case PLAYER:
-			{
-				for(auto &entity : item.entities)
-				{
-					if(!IsEntityActive(entity.get())) continue;
-					entity->AddTexturesAndAnimationFrames();
-				}
-				break;
-			}
-			case ITEMS:
-			{
-
-				break;
-			}
-			default:
-				break;
+			if(!IsEntityActive(entity.get())) continue;
+			entity->AddTexturesAndAnimationFrames();
 		}
 	}
 	return true;
@@ -157,93 +143,110 @@ bool EntityManager::LoadAllTextures()
 bool EntityManager::LoadEntities(TileInfo const *tileInfo, iPoint pos, int width, int height)
 {
 	std::string aux = *(std::get_if<std::string>(&tileInfo->properties.find("Type")->second));
+	aux[0] = std::tolower(aux[0]);
 	
 	allEntities[aux].entities.push_back(std::make_unique<Item>(tileInfo, pos, width, height));
-	LoadItemAnimations(tileInfo);
 
 	return true;
 }
 
-void EntityManager::LoadItemAnimations(TileInfo const *tileInfo)
+void EntityManager::LoadItemAnimations()
 {
-	std::string layer = *(std::get_if<std::string>(&tileInfo->properties.find("Type")->second));
-
-	struct dirent **folderList;
-	const char *dirPath = "Assets/Animations/Items/"; //allEntities[layer].entities.at(0).get()->texturePath.c_str();
-	int nItemFolder = scandir(dirPath, &folderList, nullptr, DescAlphasort);
-
-	// https://regex101.com/r/L9Wa29/1
+	// https://regex101.com/r/96aJfl/3
 	// Looks for a file named:
-	// m[0] = file name
-	// m[1] = (ItemType) -> Coin, Gem, Potion... Any word
-	// m[2] = (From 0 to 3 digis) -> Image Variation
-	// m[3] = (?:0 or 1 underscores)(AnimationName) -> Idle, rotating... Might not be one
-	// _anim -> The word anim
-	// m[4] = (0 to 3 digits) -> Frame number
+	// itemAnimMatch[0] = file name
+	// itemAnimMatch[1] = (ItemType) -> Coin, Gem, Potion... Any word
+	// itemAnimMatch[2] = (From 0 to 3 digis) -> Image Variation
+	// Non-capturing = (?:0 or 1 underscores)
+	// itemAnimMatch[3] = (AnimationName) -> Idle, rotating...
+	// itemAnimMatch[4] = (0 to 3 digits) -> Frame number
 	// (.png or .jpg) -> File extension
 
-	std::regex r2(R"(([A-aZ-z]+)(\d{1,3})(?:_?([A-aZ-z]*))_anim(\d{0,3})\.(?:png|jpg))");
+	static const std::regex r2(R"(([A-aZ-z]+)(\d{1,3})_([A-aZ-z]+)(\d{0,3})\.(?:png|jpg))");
+
+	struct dirent **folderList;
+	std::string entityFolder = "Assets/Animations/Items/";
+	const char *dirPath = entityFolder.c_str();
+
+	int nItemFolder = scandir(dirPath, &folderList, nullptr, DescAlphasort);
 
 	if (nItemFolder < 0) return;
 
 	while (nItemFolder--)
 	{
-		
-		std::smatch m;
+		std::smatch itemAnimMatch;
 
 		// Check if file matches the regex
 		if (std::string animFileName(folderList[nItemFolder]->d_name); 
-			!std::regex_match(animFileName, m, r2))
+			!std::regex_match(animFileName, itemAnimMatch, r2))
 		{
 			free(folderList[nItemFolder]);
 			continue;
 		}
 		
-		// Check if we have an entiy with m[1] type
-		if(auto entityTypeInfo = allEntities.find(m[1]); 
+		std::string entityType = itemAnimMatch[1];
+		entityType[0] = (char)std::tolower(entityType[0]);
+
+		// Check if we have an entiy with itemAnimMatch[1] type
+		if(auto entityTypeInfo = allEntities.find(entityType); 
 		   entityTypeInfo == allEntities.end())
 			continue;
 
-		// Check if we have an entity with m[2] animation number
-		bool bVariationFound = false;
-		int variation;
-		for(auto const &elem : allEntities[m[1]].entities)
+		// Check if we have an entity with itemAnimMatch[2] animation number
+		Item const *entity = nullptr;
+		int variation = 0;
+
+		for(auto const &elem : allEntities[entityType].entities)
 		{
 			if(variation = elem.get()->imageVariation; 
-			   variation == stoul(m[2]))
+			   variation == std::stoi(itemAnimMatch.str(2)))
 			{
-				bVariationFound = true;
+				entity = dynamic_cast<Item*>(elem.get());
 				break;
 			}
 		}
-		if(!bVariationFound) continue;
+		if(!DoesEntityExist(entity)) continue;
+
 
 		// Check if we already have the animation on the Animation map
-		if(auto anim = allEntities[m[1]].animation.find(stoul(m[2]));
-		   anim != allEntities[m[1]].animation.end())
-			continue;
-		
-		// If we don't have the animation, we create a new one
-		allEntities[m[1]].animation.emplace(std::make_unique<Animation>());
+		// If we don't, we create a new one
+		if(auto anim = allEntities[entityType].animation.find(std::stoi(itemAnimMatch.str(2)));
+		   anim == allEntities[entityType].animation.end())
+			allEntities[entityType].animation[variation] = std::make_unique<Animation>();
 
 		// Add the frame to animation map
-		// if there's no name (ex: coin0_anim000.png), it will be stored with the name "single"
-		if(allEntities[m[1]].animation[variation]->AddFrame((std::string(dirPath) + std::string(m[0])).c_str(), std::string(m[3])) != 1) [[likely]]
+		std::string match0 = entityFolder + std::string(itemAnimMatch[0]);
+
+		auto animationName = std::string(itemAnimMatch[3]);
+		if(auto const frameCount = allEntities[entityType].animation[variation]->AddFrame(
+			match0.c_str(),
+			animationName); 
+			frameCount != 1) [[likely]]
 			continue;
 
+		// if it's the first frame of m[1]
+	/*	if(auto speed = entity->info->properties.find("AnimationSpeed");
+		   speed != entity->info->properties.end() && std::get<float>(speed->second) > 0)
+			allEntities[entityType].animation[variation]->SetSpeed(std::get<float>(speed->second));
+		else*/
+			allEntities[entityType].animation[variation]->SetSpeed(0.2f);
 
-		// if it's the first frame we add with m[3] name, set up animation variables
-		if(auto speed = tileInfo->properties.find("AnimationSpeed");
-		   speed != tileInfo->properties.end() && std::get<float>(speed->second) > 0)
-			allEntities[layer].animation[variation]->SetSpeed(std::get<float>(speed->second));
-		else
-			allEntities[layer].animation[variation]->SetSpeed(0.2f);
+/*		if(auto speed = entity->info->properties.find("AnimationStyle");
+		   speed != entity->info->properties.end() && std::get<int>(speed->second) > 0)
+			allEntities[entityType].animation[variation]->SetAnimStyle(static_cast<AnimIteration>(std::get<int>(speed->second)));
+		else*/
+			allEntities[entityType].animation[variation]->SetAnimStyle(AnimIteration::LOOP_FROM_START);
 
-		if(auto speed = tileInfo->properties.find("AnimationStyle");
-		   speed != tileInfo->properties.end() && std::get<int>(speed->second) > 0)
-			allEntities[layer].animation[variation]->SetAnimStyle(static_cast<AnimIteration>(std::get<int>(speed->second)));
-		else
-			allEntities[layer].animation[variation]->SetAnimStyle(AnimIteration::LOOP_FROM_START);
+		for(auto const &elem : allEntities[entityType].entities)
+		{
+			auto *itemEntity = dynamic_cast<Item *>(elem.get());
+			if(!itemEntity || itemEntity->anim) continue;
+			if(variation = itemEntity->imageVariation;
+			   variation == std::stoi(itemAnimMatch.str(2)))
+			{
+				itemEntity->anim = allEntities[entityType].animation[variation].get();
+			}
+		}
 
 		free(folderList[nItemFolder]);
 	}
@@ -259,21 +262,25 @@ bool EntityManager::IsEntityActive(Entity const *entity) const
 
 bool EntityManager::DoesEntityExist(Entity const *entity) const
 {
-	if(entity != nullptr) return false;
+	if(entity) return true;
 	return false;
 }
 
 bool EntityManager::Update(float dt)
 {
-	for(auto const &[type, item] : allEntities)
+	for(auto const &[entityType, entityInfo] : allEntities)
 	{
-		for(auto const &[entityType, entityInfo] : item)
+		if(!StrEquals(entityType, "player"))
 		{
-			for(auto const &entity : entityInfo.entities)
+			for(auto const &[key, anim] : entityInfo.animation)
 			{
-				if(!IsEntityActive(entity.get())) continue;
-				if(!entity->Update()) return false;
+				anim->UpdateAndGetFrame();
 			}
+		}
+		for(auto const &entity : entityInfo.entities)
+		{
+			if(!IsEntityActive(entity.get())) continue;
+			if(!entity->Update()) return false;
 		}
 	}
 	return true;

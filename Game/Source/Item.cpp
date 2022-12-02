@@ -11,6 +11,8 @@
 #include "Map.h"
 #include "Entity.h"
 
+#include <cctype> //tolower;
+
 Item::Item() : Entity(ColliderLayers::ITEMS)
 {
 	name = "item";
@@ -19,9 +21,11 @@ Item::Item() : Entity(ColliderLayers::ITEMS)
 Item::Item(TileInfo const *tileInfo, iPoint pos, int width, int height) : Entity(ColliderLayers::ITEMS), info(tileInfo), width(width), height(height)
 {
 	name = "item";
-	this->type2 = *(std::get_if<std::string>(&tileInfo->properties.find("Type")->second));
-	this->imageVariation = *(std::get_if<int>(&tileInfo->properties.find("ImageVariation")->second));
-	this->startingPosition = pos;
+	type2 = (*(std::get_if<std::string>(&tileInfo->properties.find("Type")->second)));
+	type2[0] = std::tolower(type2[0]);
+	imageVariation = *(std::get_if<int>(&tileInfo->properties.find("ImageVariation")->second));
+	startingPosition = pos;
+	position = startingPosition;
 }
 
 void Item::SetPaths()
@@ -54,15 +58,7 @@ bool Item::Start()
 	uint16 maskFlag = 0x0001;
 	maskFlag = (uint16)(PLAYER);
 	CreatePhysBody((uint16)ITEMS, maskFlag);
-	/*
-	texture->SetCurrentAnimation("idle");
-	if(!texture->Start("idle"))
-	{
-		LOG("Couldnt start %s anim", texture->GetCurrentAnimName());
-		return false;
-	}
-	texture->SetAnimStyle(AnimIteration::LOOP_FROM_START);
-	*/
+	
 	return true;
 }
 
@@ -71,7 +67,7 @@ bool Item::Update()
 	//position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x) - 16;
 	//position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y) - 16;
 
-	//app->render->DrawTexture(texture->GetCurrentFrame(), position.x, position.y);
+	app->render->DrawTexture(anim->GetCurrentFrame(), position.x, position.y - height);
 
 	return true;
 }
