@@ -51,7 +51,7 @@ public:
 		currentFrame += speed;
 
 		//if no more animations in frames[current + 1]
-		if((uint)currentFrame >= frames.at(currentAnimName).size() + 1 || (int)currentFrame < 0)
+		if((uint)currentFrame >= frames.at(currentAnimName).size()|| (int)currentFrame < 0)
 		{
 			//we do things
 			switch(currentStyle)

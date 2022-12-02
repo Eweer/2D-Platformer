@@ -361,8 +361,8 @@
   <tile id="45"/>
   <tile id="58">
    <properties>
-    <property name="variance_max" type="int" value="100"/>
-    <property name="variance_min" type="int" value="0"/>
+    <property name="variance_max" type="int" value="400"/>
+    <property name="variance_min" type="int" value="200"/>
    </properties>
    <animation>
     <frame tileid="58" duration="100"/>

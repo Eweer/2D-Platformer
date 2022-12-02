@@ -218,18 +218,16 @@ void EntityManager::LoadItemAnimations()
 		std::string match0 = entityFolder + std::string(itemAnimMatch[0]);
 
 		auto animationName = std::string(itemAnimMatch[3]);
-		if(auto const frameCount = allEntities[entityType].animation[variation]->AddFrame(
-			match0.c_str(),
-			animationName); 
-			frameCount != 1) [[likely]]
-			continue;
+		if(auto const frameCount = allEntities[entityType].animation[variation]->AddFrame(match0.c_str(), animationName);
+		   frameCount != 1) [[likely]]
+				continue;
 
 		// if it's the first frame of m[1]
 	/*	if(auto speed = entity->info->properties.find("AnimationSpeed");
 		   speed != entity->info->properties.end() && std::get<float>(speed->second) > 0)
 			allEntities[entityType].animation[variation]->SetSpeed(std::get<float>(speed->second));
 		else*/
-			allEntities[entityType].animation[variation]->SetSpeed(0.2f);
+			allEntities[entityType].animation[variation]->SetSpeed(0.1f);
 
 /*		if(auto speed = entity->info->properties.find("AnimationStyle");
 		   speed != entity->info->properties.end() && std::get<int>(speed->second) > 0)
