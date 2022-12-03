@@ -51,12 +51,12 @@ struct TileAnimationInfo
 struct TileInfo
 {
 	XML_Properties_Map_t properties;
-	TileColliderInfo collider;
+	std::vector<TileColliderInfo> collider;
 	std::shared_ptr<TileAnimationInfo> animation;
 	
 	explicit operator bool() const 
 	{
-		return properties.empty() || !collider.shape.empty() || !animation->frames.empty();
+		return properties.empty() || !collider.empty() || !animation->frames.empty();
 	}
 };
 
@@ -190,7 +190,7 @@ private:
 	bool LoadTileSet(pugi::xml_node const &mapFile);
 	std::unique_ptr<TileInfo> LoadTileInfo(const pugi::xml_node &tileInfoNode) const;
 	std::shared_ptr<TileAnimationInfo> LoadAnimationInfo(const pugi::xml_node &tileInfoNode, XML_Properties_Map_t const &properties) const;
-	TileColliderInfo LoadHitboxInfo(const pugi::xml_node &hitbox, XML_Properties_Map_t const &properties = XML_Properties_Map_t()) const;
+	std::vector<TileColliderInfo> LoadHitboxInfo(const pugi::xml_node &hitbox, XML_Properties_Map_t const &properties = XML_Properties_Map_t()) const;
 	std::shared_ptr<PhysBody> CreateCollider (int gid, int i, int j, TileSet const *tileset) const;
 	
 	bool LoadAllLayers(pugi::xml_node const &mapNode);

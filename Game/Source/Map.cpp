@@ -219,6 +219,7 @@ std::unique_ptr<TileInfo> Map::LoadTileInfo(const pugi::xml_node &tileInfoNode) 
 
 	tileInfo->properties = LoadProperties(tileInfoNode);
 	tileInfo->collider = LoadHitboxInfo(tileInfoNode, tileInfo->properties);
+	std::ranges::reverse(tileInfo->collider);
 	tileInfo->animation = LoadAnimationInfo(tileInfoNode, tileInfo->properties);
 
 	return tileInfo;
@@ -247,48 +248,52 @@ std::shared_ptr<TileAnimationInfo> Map::LoadAnimationInfo(const pugi::xml_node &
 	return retAnim;
 }
 
-TileColliderInfo Map::LoadHitboxInfo(const pugi::xml_node &tileNode, XML_Properties_Map_t const &properties) const
+std::vector<TileColliderInfo> Map::LoadHitboxInfo(const pugi::xml_node &tileNode, XML_Properties_Map_t const &properties) const
 {
-	TileColliderInfo retHitBox;
+	std::vector<TileColliderInfo> retVec;
 
-	pugi::xml_node tileObjectGroup = tileNode.child("objectgroup");
-	if(tileObjectGroup.empty()) 
-		return retHitBox;
+	if(pugi::xml_node tileObjectGroup = tileNode.child("objectgroup"); 
+	   tileObjectGroup.empty())
+		return retVec;
 
-	tileObjectGroup = tileObjectGroup.first_child();
-	if(tileObjectGroup.empty()) 
-		return retHitBox;
-
-	retHitBox.x = tileObjectGroup.attribute("x").as_int();
-	retHitBox.y = tileObjectGroup.attribute("y").as_int();
-	retHitBox.width = tileObjectGroup.attribute("width").as_int();
-	retHitBox.height = tileObjectGroup.attribute("height").as_int();
-
-	if(auto const collisionLayer = properties.find("ColliderLayers"); collisionLayer == properties.end())
-		retHitBox.cat = 0x8000;
-	else
-		retHitBox.cat = (uint16)*std::get_if<int>(&collisionLayer->second);
-
-	pugi::xml_node shapeInfo = tileObjectGroup.first_child();
-	if(shapeInfo.empty())
+	for(auto const &elem : tileNode.child("objectgroup").children())
 	{
-		retHitBox.shape = "rectangle";
-		return retHitBox;
+		TileColliderInfo retHitBox;
+
+		retHitBox.x = elem.attribute("x").as_int();
+		retHitBox.y = elem.attribute("y").as_int();
+		retHitBox.width = elem.attribute("width").as_int();
+		retHitBox.height = elem.attribute("height").as_int();
+
+		if(auto const collisionLayer = properties.find("ColliderLayers"); collisionLayer == properties.end())
+			retHitBox.cat = 0x8000;
+		else
+			retHitBox.cat = (uint16)*std::get_if<int>(&collisionLayer->second);
+
+		pugi::xml_node shapeInfo = elem.first_child();
+		if(shapeInfo.empty())
+		{
+			retHitBox.shape = "rectangle";
+			retVec.emplace_back(retHitBox);
+			return retVec;
+		}
+
+		retHitBox.shape = shapeInfo.name();
+		const std::string xyStr = shapeInfo.attribute("points").as_string();
+		static const std::regex r("\\d{1,3}");
+		auto xyStrBegin = std::sregex_iterator(xyStr.begin(), xyStr.end(), r);
+		auto xyStrEnd = std::sregex_iterator();
+
+		for(std::sregex_iterator i = xyStrBegin; i != xyStrEnd; ++i)
+		{
+			std::smatch match = *i;
+			retHitBox.points.push_back(stoi(match.str()));
+		}
+		retVec.emplace_back(retHitBox);
+
 	}
-
-	retHitBox.shape = shapeInfo.name();
-	const std::string xyStr = shapeInfo.attribute("points").as_string();
-	static const std::regex r("\\d{1,3}");
-	auto xyStrBegin = std::sregex_iterator(xyStr.begin(), xyStr.end(), r);
-	auto xyStrEnd = std::sregex_iterator();
-
-	for(std::sregex_iterator i = xyStrBegin; i != xyStrEnd; ++i)
-	{
-		std::smatch match = *i;
-		retHitBox.points.push_back(stoi(match.str()));
-	}
-
-	return retHitBox;
+		
+	return retVec;
 }
 
 // Iterate all layers and load each of them
@@ -374,9 +379,11 @@ inline std::shared_ptr<PhysBody> Map::CreateCollider(int gid, int i, int j, Tile
 {
 	if(auto colliderInfo = tileset->tileInfo.find(gid-1); colliderInfo != tileset->tileInfo.end())
 	{
-		if(colliderInfo->second->collider.shape.empty() && colliderInfo->second->collider.points.size() <= 0)
+		if(colliderInfo->second->collider.empty()) return nullptr;
+		
+		if(colliderInfo->second->collider[0].shape.empty() && colliderInfo->second->collider[0].points.size() <= 0)
 			return nullptr;
-		TileColliderInfo collider = colliderInfo->second->collider;
+		TileColliderInfo collider = colliderInfo->second->collider[0];
 		iPoint colliderPos = MapToWorld(i, j);
 		std::shared_ptr<PhysBody> retCollider;
 		if(collider.shape == "rectangle")
