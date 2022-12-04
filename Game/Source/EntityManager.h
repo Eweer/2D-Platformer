@@ -9,6 +9,12 @@
 #include <deque>
 #include <utility>		//std::pair
 
+struct EntityAnimation
+{
+	std::unique_ptr<Animation> animation;
+	std::vector<b2Fixture> fixtures;
+};
+
 struct EntityInfo
 {
 	std::vector<std::unique_ptr<Entity>> entities;
@@ -53,6 +59,8 @@ public:
 	bool IsEntityActive(Entity const *entity = nullptr) const;
 
 	bool DoesEntityExist(Entity const *entity = nullptr) const;
+
+	void CreateAllColliders();
 
 	using EntityMap = std::unordered_map<std::string, EntityInfo, StringHash, std::equal_to<>>;
 	

@@ -43,6 +43,8 @@ bool EntityManager::Awake(pugi::xml_node& config)
 
 bool EntityManager::Start() 
 {
+	CreateAllColliders();
+
 	for(auto const &[entityType, entityInfo] : allEntities)
 	{
 		for(auto const &entity : entityInfo.entities)
@@ -143,7 +145,7 @@ bool EntityManager::LoadAllTextures()
 bool EntityManager::LoadEntities(TileInfo const *tileInfo, iPoint pos, int width, int height)
 {
 	std::string aux = *(std::get_if<std::string>(&tileInfo->properties.find("Type")->second));
-	aux[0] = std::tolower(aux[0]);
+	aux[0] = (char)std::tolower(aux[0]);
 	
 	allEntities[aux].entities.push_back(std::make_unique<Item>(tileInfo, pos, width, height));
 
@@ -282,4 +284,19 @@ bool EntityManager::Update(float dt)
 		}
 	}
 	return true;
+}
+
+void EntityManager::CreateAllColliders()
+{
+	for(auto const &[entityType, entityInfo] : allEntities)
+	{
+		if(StrEquals(entityType, "player")) continue;
+
+		for(auto const &entity : entityInfo.entities)
+		{
+			if(!IsEntityActive(entity.get())) continue;
+			
+			
+		}
+	}
 }

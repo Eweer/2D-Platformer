@@ -390,15 +390,11 @@ inline std::shared_ptr<PhysBody> Map::CreateCollider(int gid, int i, int j, Tile
 		{
 			colliderPos.x += collider.width/2 + collider.x;
 			colliderPos.y += collider.height/2 + collider.y;
-			retCollider = app->physics->CreateRectangle(
-														colliderPos.x,
-														colliderPos.y,
-														collider.width,
-														collider.height,
-														BodyType::STATIC,
-														1.0f,
-														0.0f,
-														collider.cat
+			ShapeData box("rectangle", std::vector<int>{collider.width, collider.height});
+			retCollider = app->physics->CreateQuickPlatform(
+				box,
+				{colliderPos.x, colliderPos.y},
+				{collider.width, collider.height}
 			);
 		}
 		else if(collider.shape == "polygon")

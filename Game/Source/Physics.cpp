@@ -10,6 +10,7 @@
 
 #include "math.h"
 
+#include <variant>
 #include <memory>
 
 #include "Box2D/Box2D/Box2D.h"
@@ -216,58 +217,31 @@ void Physics::BeginContact(b2Contact *contact)
 
 //--------------- Create Shapes and Joints
 
-std::shared_ptr<PhysBody> Physics::CreateRectangle(int x, int y, int width, int height, BodyType type, float32 gravityScale, float rest, uint16 cat, uint16 mask)
+std::unique_ptr<PhysBody> Physics::CreateQuickPlatform(ShapeData &shapeData, iPoint pos, iPoint width_height, BodyType bodyType, uint16 cat, uint16 mask, bool sensor)
 {
-	b2BodyDef body;
-	switch (type)
-	{
-		case BodyType::DYNAMIC:
-			body.type = b2_dynamicBody;
-			break;
-		case BodyType::STATIC:
-			body.type = b2_staticBody;
-			break;
-		case BodyType::KINEMATIC:
-			body.type = b2_kinematicBody;
-			break;
-		case BodyType::UNKNOWN:
-			LOG("CreateRectangle Received UNKNOWN BodyType");
-			return nullptr;
-	}
-	body.gravityScale = gravityScale;
-	body.fixedRotation = true;
-	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
-
-	// Add BODY to the world
-	b2Body *b = world->CreateBody(&body);
-
-	// Create SHAPE
-	b2PolygonShape box;
-	box.SetAsBox(PIXEL_TO_METERS(width) * 0.5f, PIXEL_TO_METERS(height) * 0.5f);
-
-	// Create FIXTURE
-	b2FixtureDef fixture;
-	fixture.shape = &box;
-	fixture.density = 1.0f;
-	fixture.restitution = rest;
-	fixture.filter.categoryBits = cat;
-	fixture.filter.maskBits = mask;
-
-	// Add fixture to the BODY
-	b->CreateFixture(&fixture);
-
-	// Create our custom PhysBody class
-	auto pbody = std::make_shared<PhysBody>();
-	pbody->body = b;
-	b->SetUserData(pbody.get());
-	pbody->width = width;
-	pbody->height = height;
-
-	// Return our PhysBody class
-	return pbody;
+	auto body = CreateBody(pos, bodyType);
+	auto fixtureDef = CreateFixtureDef(shapeData, cat, mask);
+	body->CreateFixture(fixtureDef.get());
+	return CreatePhysBody(body, {shapeData.data[0], shapeData.data[1]});
 }
 
-std::shared_ptr<PhysBody> Physics::CreateCircle(int x, int y, int radius, BodyType type, float rest, uint16 cat, uint16 mask)
+std::unique_ptr<PhysBody> Physics::CreateRectangle(int x, int y, int width, int height, BodyType type, float32 gravityScale, float rest, uint16 cat, uint16 mask)
+{
+	auto body = CreateBody(iPoint(x, y), type);
+
+	ShapeData box("rectangle", std::vector<int>{width, height});
+
+	// Create FIXTURE
+	auto fixture = CreateFixtureDef(box, cat, mask);
+
+	// Add fixture to the BODY
+	body->CreateFixture(fixture.get());
+
+	// Return our PhysBody class
+	return CreatePhysBody(body, iPoint(width, height));
+}
+
+std::unique_ptr<PhysBody> Physics::CreateCircle(int x, int y, int radius, BodyType type, float rest, uint16 cat, uint16 mask)
 {
 	// Create BODY at position x,y
 	b2BodyDef body;
@@ -307,7 +281,7 @@ std::shared_ptr<PhysBody> Physics::CreateCircle(int x, int y, int radius, BodyTy
 	b->CreateFixture(&fixture);
 
 	// Create our custom PhysBody class
-	auto pbody = std::make_shared<PhysBody>();
+	auto pbody = std::make_unique<PhysBody>();
 	pbody->body = b;
 	b->SetUserData(pbody.get());
 	pbody->width = radius * 2;
@@ -317,7 +291,7 @@ std::shared_ptr<PhysBody> Physics::CreateCircle(int x, int y, int radius, BodyTy
 	return pbody;
 }
 
-std::shared_ptr<PhysBody> Physics::CreatePolygon(int x, int y, const int *const points, int size, BodyType type, float rest, uint16 cat, uint16 mask, int angle)
+std::unique_ptr<PhysBody> Physics::CreatePolygon(int x, int y, const int *const points, int size, BodyType type, float rest, uint16 cat, uint16 mask, int angle)
 {
 	b2BodyDef body;
 	switch (type)
@@ -359,7 +333,7 @@ std::shared_ptr<PhysBody> Physics::CreatePolygon(int x, int y, const int *const 
 
 	b->CreateFixture(&fixture);
 
-	auto pbody = std::make_shared<PhysBody>();
+	auto pbody = std::make_unique<PhysBody>();
 	pbody->body = b;
 	b->SetUserData(pbody.get());
 	pbody->height = pbody->width = 0;
@@ -416,7 +390,7 @@ PhysBody *Physics::CreateRectangleSensor(int x, int y, int width, int height, Bo
 	return pbody;
 }
 
-std::shared_ptr<PhysBody> Physics::CreateChain(int x, int y, const int *const points, int size, BodyType type, float rest, uint16 cat, uint16 mask, int angle)
+std::unique_ptr<PhysBody> Physics::CreateChain(int x, int y, const int *const points, int size, BodyType type, float rest, uint16 cat, uint16 mask, int angle)
 {
 	// Create BODY at position x,y
 	b2BodyDef body;
@@ -467,13 +441,127 @@ std::shared_ptr<PhysBody> Physics::CreateChain(int x, int y, const int *const po
 
 	// Create our custom PhysBody class
 
-	auto pbody = std::make_shared<PhysBody>();
+	auto pbody = std::make_unique<PhysBody>();
 	pbody->body = b;
 	b->SetUserData(pbody.get());
 	pbody->height = pbody->width = 0;
 
 	// Return our PhysBody class
 	return pbody;
+}
+
+/*
+ShapeData *Physics::CreateShape(ShapeData &shapeData)
+{
+	switch(shapeData.shape.get()->GetType())
+	{
+		case b2Shape::Type::e_circle:
+		{
+			if(!shapeData.data.empty())
+				dynamic_cast<b2CircleShape *>(shapeData.shape.get())->m_radius = PIXEL_TO_METERS(shapeData.data[0]);
+			else
+				LOG("Radius for creating circle shape not found.");
+			break;
+		}
+		case b2Shape::Type::e_edge:
+		{
+			break;
+		}
+		case b2Shape::Type::e_polygon:
+		{
+			// if it's a polygon with only 2 points
+			// it means it's a rectangle, where data[0] == width && data[1] == height
+			if(shapeData.data.size() == 2)
+			{
+				dynamic_cast<b2PolygonShape *>(shapeData.shape.get())->SetAsBox(
+					PIXEL_TO_METERS(shapeData.data[0]) * 0.5f,
+					PIXEL_TO_METERS(shapeData.data[1]) * 0.5f
+				);
+				break;
+			}
+			else //if it's not a rectangle, it's a plain polygon
+			{
+				auto p = std::vector<b2Vec2>(shapeData.data.size()/2);
+				for(uint i = 0; i < shapeData.data.size()/2; ++i)
+				{
+					p.push_back(b2Vec2(
+						PIXEL_TO_METERS(shapeData.data[i * 2 + 0]),
+						PIXEL_TO_METERS(shapeData.data[i * 2 + 1])
+					));
+				}
+				dynamic_cast<b2PolygonShape *>(shapeData.shape.get())->Set(p.data(), shapeData.data.size()/2);
+			}
+			break;
+		}
+		case b2Shape::Type::e_chain:
+		{
+			auto p = std::vector<b2Vec2>(shapeData.data.size()/2);
+			for(uint i = 0; i < shapeData.data.size()/2; ++i)
+			{
+				p.push_back(b2Vec2(
+					PIXEL_TO_METERS(shapeData.data[i * 2 + 0]),
+					PIXEL_TO_METERS(shapeData.data[i * 2 + 1])
+				));
+			}
+			dynamic_cast<b2ChainShape *>(shapeData.shape.get())->CreateLoop(p.data(), shapeData.data.size()/2);
+			break;
+		}
+		default:
+			break;
+	}
+	return &shapeData;
+}
+*/
+b2Body *Physics::CreateBody(iPoint pos, BodyType type, float angle, fPoint damping, float gravityScale, bool fixedRotation, bool bullet) const
+{
+	b2BodyDef body;
+	switch(type)
+	{
+		using enum BodyType;
+		case DYNAMIC:
+			body.type = b2_dynamicBody;
+			break;
+		case STATIC:
+			body.type = b2_staticBody;
+			break;
+		case KINEMATIC:
+			body.type = b2_kinematicBody;
+			break;
+		case UNKNOWN:
+			LOG("CreateBoidy received UNKNOWN BodyType");
+			break;
+	}
+	body.position.Set(PIXEL_TO_METERS(pos.x), PIXEL_TO_METERS(pos.y));
+	body.angle = DEGTORAD * angle;
+	body.linearDamping = damping.x;
+	body.angularDamping = damping.y;
+	body.gravityScale = gravityScale;
+	body.fixedRotation = fixedRotation;
+	body.bullet = bullet;
+
+	return world->CreateBody(&body);
+}
+
+std::unique_ptr<b2FixtureDef> Physics::CreateFixtureDef(ShapeData &shapeData, uint16 cat, uint16 mask, bool isSensor, float density, float friction, float restitution) const
+{
+	auto fixture = std::make_unique<b2FixtureDef>();
+	fixture->shape = shapeData.CreateShape();
+	fixture->density = density;
+	fixture->friction = friction;
+	fixture->restitution = restitution;
+	fixture->filter.categoryBits = cat;
+	fixture->filter.maskBits = mask;
+	fixture->isSensor = isSensor;
+
+	return fixture;
+}
+
+std::unique_ptr<PhysBody> Physics::CreatePhysBody(b2Body *body, iPoint width_height, ColliderLayers cType) const
+{
+	auto pBody = std::make_unique<PhysBody>(body, width_height, cType);
+	body->SetUserData(pBody.get());
+
+	return pBody;
 }
 
 b2RevoluteJoint *Physics::CreateRevoluteJoint(PhysBody *anchor, PhysBody *body, iPoint anchorOffset, iPoint bodyOffset, std::vector<RevoluteJointSingleProperty> properties)

@@ -1,9 +1,12 @@
 #pragma once
 #include "Module.h"
 #include "Entity.h"
+#include "Defs.h"
 #include "BitMaskColliderLayers.h"
 
 #include <unordered_map>
+#include <variant>
+#include <utility>
 
 #include "Box2D/Box2D/Box2D.h"
 
@@ -26,6 +29,112 @@
 
 #define DEGTORAD 0.0174532925199432957f
 #define RADTODEG 57.295779513082320876f
+
+// if type = "circle" -> data[0] = radius
+// if type = "edge" -> data[0] = point1, data[1] = point2
+// if type = "rectangle" -> data[0] = width, data[1] = height
+// if type = "polygon" || "chain" -> data = points
+struct ShapeData
+{
+	std::unique_ptr<b2Shape> shape;
+	std::vector<int> data;
+
+	ShapeData() = delete;
+	explicit ShapeData(std::string const &name, std::vector<int> const &newData = std::vector<int>()) : data(newData)
+	{
+		if (StrEquals(name, "circle"))			shape = std::make_unique<b2CircleShape>();
+		else if (StrEquals(name, "edge"))		shape = std::make_unique<b2EdgeShape>();
+		else if (StrEquals(name, "rectangle"))	shape = std::make_unique<b2PolygonShape>();
+		else if (StrEquals(name, "polygon"))	shape = std::make_unique<b2PolygonShape>();
+		else if (StrEquals(name, "chain"))		shape = std::make_unique<b2ChainShape>();
+		else LOG("Error in creating Shape (ShapeData). No shape with name %s exists", name);
+	}
+	explicit ShapeData(b2Shape const *newShape, std::vector<int> const &newData = std::vector<int>()) : data(newData)
+	{
+		if (newShape == nullptr) LOG("Error in creating Shape (ShapeData). Shape constructor is nullptr");
+		else
+		{
+			switch (newShape->GetType())
+			{
+				case b2Shape::Type::e_circle:
+					shape = std::make_unique<b2CircleShape>();
+					break;
+				case b2Shape::Type::e_edge:
+					shape = std::make_unique<b2EdgeShape>();
+					break;
+				case b2Shape::Type::e_polygon:
+					shape = std::make_unique<b2PolygonShape>();
+					break;
+				case b2Shape::Type::e_chain:
+					shape = std::make_unique<b2ChainShape>();
+					break;
+				default:
+					break;
+			}
+		}
+	}
+	~ShapeData() = default;
+	b2Shape *CreateShape()
+	{
+		switch (shape.get()->GetType())
+		{
+			case b2Shape::Type::e_circle:
+			{
+				if (!data.empty())
+					dynamic_cast<b2CircleShape *>(shape.get())->m_radius = PIXEL_TO_METERS(data[0]);
+				else
+					LOG("Radius for creating circle shape not found.");
+				break;
+			}
+			case b2Shape::Type::e_edge:
+			{
+				break;
+			}
+			case b2Shape::Type::e_polygon:
+			{
+				// if it's a polygon with only 2 points
+				// it means it's a rectangle, where data[0] == width && data[1] == height
+				if (data.size() == 2)
+				{
+					dynamic_cast<b2PolygonShape *>(shape.get())->SetAsBox(
+						PIXEL_TO_METERS(data[0]) * 0.5f,
+						PIXEL_TO_METERS(data[1]) * 0.5f
+					);
+					break;
+				}
+				else //if it's not a rectangle, it's a plain polygon
+				{
+					auto p = std::vector<b2Vec2>(data.size() / 2);
+					for (uint i = 0; i < data.size() / 2; ++i)
+					{
+						p.push_back(b2Vec2(
+							PIXEL_TO_METERS(data[i * 2 + 0]),
+							PIXEL_TO_METERS(data[i * 2 + 1])
+						));
+					}
+					dynamic_cast<b2PolygonShape *>(shape.get())->Set(p.data(), data.size() / 2);
+				}
+				break;
+			}
+			case b2Shape::Type::e_chain:
+			{
+				auto p = std::vector<b2Vec2>(data.size() / 2);
+				for (uint i = 0; i < data.size() / 2; ++i)
+				{
+					p.push_back(b2Vec2(
+						PIXEL_TO_METERS(data[i * 2 + 0]),
+						PIXEL_TO_METERS(data[i * 2 + 1])
+					));
+				}
+				dynamic_cast<b2ChainShape *>(shape.get())->CreateLoop(p.data(), data.size() / 2);
+				break;
+			}
+			default:
+				break;
+		}
+		return shape.get();
+	}
+};
 
 // types of bodies
 enum class BodyType
@@ -88,7 +197,13 @@ struct RevoluteJointSingleProperty
 class PhysBody
 {
 public:
-	PhysBody() = default;
+	explicit PhysBody() = default;
+	explicit PhysBody(b2Body *newBody, iPoint width_height = iPoint(0, 0), ColliderLayers cType = ColliderLayers::UNKNOWN) :
+		width(width_height.x),
+		height(width_height.y),
+		body(newBody),
+		ctype(cType)
+	{}
 
 	~PhysBody() = default;
 
@@ -97,9 +212,9 @@ public:
 	bool Contains(int x, int y) const;
 	int RayCast(int x1, int y1, int x2, int y2, float &normal_x, float &normal_y) const;
 
-	int width = 0;
-	int height = 0;
-	b2Body *body = nullptr;
+	int width;
+	int height;
+	b2Body *body;
 	Entity *listener = nullptr;
 	ColliderLayers ctype = ColliderLayers::UNKNOWN;
 };
@@ -120,11 +235,50 @@ public:
 	bool CleanUp() final;
 
 	// Create basic physics objects
-	std::shared_ptr<PhysBody> CreateRectangle(int x, int y, int width, int height, BodyType type, float32 gravityScale = 1.0f, float rest = 0.0f, uint16 cat = (uint16)ColliderLayers::PLATFORMS, uint16 mask = (uint16)ColliderLayers::PLAYER);
-	std::shared_ptr<PhysBody> CreateCircle(int x, int y, int radius, BodyType type, float rest = 0.0f, uint16 cat = (uint16)ColliderLayers::PLATFORMS, uint16 mask = (uint16)ColliderLayers::PLAYER);
-	std::shared_ptr<PhysBody> CreatePolygon(int x, int y, const int *const points, int size, BodyType type, float rest = 0.0f, uint16 cat = (uint16)ColliderLayers::PLATFORMS, uint16 mask = (uint16)ColliderLayers::PLAYER, int angle = 0);
+	std::unique_ptr<PhysBody> CreateRectangle(int x, int y, int width, int height, BodyType type, float32 gravityScale = 1.0f, float rest = 0.0f, uint16 cat = (uint16)ColliderLayers::PLATFORMS, uint16 mask = (uint16)ColliderLayers::PLAYER);
+	std::unique_ptr<PhysBody> CreateCircle(int x, int y, int radius, BodyType type, float rest = 0.0f, uint16 cat = (uint16)ColliderLayers::PLATFORMS, uint16 mask = (uint16)ColliderLayers::PLAYER);
+	std::unique_ptr<PhysBody> CreatePolygon(int x, int y, const int *const points, int size, BodyType type, float rest = 0.0f, uint16 cat = (uint16)ColliderLayers::PLATFORMS, uint16 mask = (uint16)ColliderLayers::PLAYER, int angle = 0);
+	std::unique_ptr<PhysBody> CreateChain(int x, int y, const int *const points, int size, BodyType type, float rest = 0.0f, uint16 cat = (uint16)ColliderLayers::PLATFORMS, uint16 mask = (uint16)ColliderLayers::PLAYER, int angle = 0);
 	PhysBody *CreateRectangleSensor(int x, int y, int width, int height, BodyType type, uint16 cat = (uint16)ColliderLayers::TRIGGERS, uint16 mask = (uint16)ColliderLayers::PLAYER);
-	std::shared_ptr<PhysBody> CreateChain(int x, int y, const int *const points, int size, BodyType type, float rest = 0.0f, uint16 cat = (uint16)ColliderLayers::PLATFORMS, uint16 mask = (uint16)ColliderLayers::PLAYER, int angle = 0);
+	
+	
+	//ShapeData *CreateShape(ShapeData &shapeData);
+
+	std::unique_ptr<PhysBody> CreateQuickPlatform(
+		ShapeData &shapeData,
+		iPoint pos,
+		iPoint width_height = iPoint(0, 0),
+		BodyType bodyType = BodyType::STATIC,
+		uint16 cat = (uint16)ColliderLayers::PLATFORMS,
+		uint16 mask = (uint16)ColliderLayers::PLAYER,
+		bool sensor = false
+	);
+
+	b2Body *CreateBody(
+		iPoint pos,
+		BodyType type = BodyType::STATIC,
+		float angle = 0.0f,
+		fPoint damping = {0.0f, 0.01f},
+		float gravityScale = 1.0f,
+		bool fixedRotation = true,
+		bool bullet = false
+	) const;
+
+	std::unique_ptr<b2FixtureDef> CreateFixtureDef(
+		ShapeData &shapeData,
+		uint16 cat = (uint16)ColliderLayers::PLATFORMS,
+		uint16 mask = (uint16)ColliderLayers::PLAYER,
+		bool isSensor = false,
+		float density = 1.0f,
+		float friction = 1.0f,
+		float restitution = 0.0f
+	) const;
+
+	std::unique_ptr<PhysBody> CreatePhysBody(
+		b2Body *body = nullptr,
+		iPoint width_height = iPoint(0,0),
+		ColliderLayers cType = ColliderLayers::UNKNOWN
+	) const;
 
 	// Create joints
 	b2RevoluteJoint *CreateRevoluteJoint(PhysBody *anchor, PhysBody *body, iPoint anchorOffset, iPoint bodyOffset, std::vector<RevoluteJointSingleProperty> properties);
@@ -175,5 +329,5 @@ private:
 	b2MouseJoint *mouseJoint = nullptr;
 
 	static const std::unordered_map<std::string, BodyType, StringHash, std::equal_to<>> bodyTypeStrToEnum;
-	static const std::unordered_map<std::string, RevoluteJoinTypes, StringHash, std::equal_to<>> propertyToType;
+	static const std::unordered_map<std::string, RevoluteJoinTypes, StringHash, std::equal_to<>> propertyToType;	
 };
