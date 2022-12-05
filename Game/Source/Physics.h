@@ -18,17 +18,19 @@
 #pragma comment( lib, "../Game/Source/External/Box2D/libx86/ReleaseLib/Box2D.lib" )
 #endif
 
-#define GRAVITY_X 0.0f
-#define GRAVITY_Y -8.0f
+constexpr auto GRAVITY_X = 0.0f;
+constexpr auto GRAVITY_Y = -8.0f;
 
-#define PIXELS_PER_METER 50.0f // if touched change METER_PER_PIXEL too
-#define METER_PER_PIXEL 0.02f // this is 1 / PIXELS_PER_METER !
+// Screen -> Box2D
+constexpr auto PIXELS_PER_METER = 50.0f;
+// Box2D -> Screen
+constexpr auto METER_PER_PIXEL = 1.0f/PIXELS_PER_METER;
 
 #define METERS_TO_PIXELS(m) ((int) floor(PIXELS_PER_METER * m))
 #define PIXEL_TO_METERS(p)  ((float) METER_PER_PIXEL * p)
 
-#define DEGTORAD 0.0174532925199432957f
-#define RADTODEG 57.295779513082320876f
+constexpr auto DEGTORAD = 0.0174532925199432957f;
+constexpr auto RADTODEG = 57.295779513082320876f;
 
 // if type = "circle" -> data[0] = radius
 // if type = "edge" -> data[0] = point1, data[1] = point2
@@ -37,10 +39,10 @@
 struct ShapeData
 {
 	std::unique_ptr<b2Shape> shape;
-	std::vector<int> data;
+	std::vector<b2Vec2> data;
 
 	ShapeData() = delete;
-	explicit ShapeData(std::string const &name, std::vector<int> const &newData = std::vector<int>()) : data(newData)
+	explicit ShapeData(std::string const &name, std::vector<b2Vec2> const &newData = std::vector<b2Vec2>()) : data(newData)
 	{
 		if (StrEquals(name, "circle"))			shape = std::make_unique<b2CircleShape>();
 		else if (StrEquals(name, "edge"))		shape = std::make_unique<b2EdgeShape>();
@@ -49,7 +51,7 @@ struct ShapeData
 		else if (StrEquals(name, "chain"))		shape = std::make_unique<b2ChainShape>();
 		else LOG("Error in creating Shape (ShapeData). No shape with name %s exists", name);
 	}
-	explicit ShapeData(b2Shape const *newShape, std::vector<int> const &newData = std::vector<int>()) : data(newData)
+	explicit ShapeData(b2Shape const *newShape, std::vector<b2Vec2> const &newData = std::vector<b2Vec2>()) : data(newData)
 	{
 		if (!newShape) LOG("Error in creating Shape (ShapeData). Shape constructor is nullptr");
 		else
@@ -82,7 +84,7 @@ struct ShapeData
 			case b2Shape::Type::e_circle:
 			{
 				if (!data.empty())
-					dynamic_cast<b2CircleShape *>(shape.get())->m_radius = PIXEL_TO_METERS(data[0]);
+					dynamic_cast<b2CircleShape *>(shape.get())->m_radius = PIXEL_TO_METERS(data[0].x);
 				else
 					LOG("Radius for creating circle shape not found.");
 				break;
@@ -94,40 +96,24 @@ struct ShapeData
 			case b2Shape::Type::e_polygon:
 			{
 				// if it's a polygon with only 2 points
-				// it means it's a rectangle, where data[0] == width && data[1] == height
-				if (data.size() == 2)
+				// it means it's a rectangle, where data[0].x == width && data[0].y == height
+				if (data.size() == 1)
 				{
 					dynamic_cast<b2PolygonShape *>(shape.get())->SetAsBox(
-						PIXEL_TO_METERS(data[0]),
-						PIXEL_TO_METERS(data[1])
+						PIXEL_TO_METERS(data[0].x),
+						PIXEL_TO_METERS(data[0].y)
 					);
 					break;
 				}
 				else //if it's not a rectangle, it's a plain polygon
 				{
-					auto p = std::vector<b2Vec2>();
-					for (uint i = 0; i < data.size() / 2; ++i)
-					{
-						p.push_back(b2Vec2(
-							PIXEL_TO_METERS(data[i * 2 + 0]),
-							PIXEL_TO_METERS(data[i * 2 + 1])
-						));
-					}
-					dynamic_cast<b2PolygonShape *>(shape.get())->Set(p.data(), p.size());
+					dynamic_cast<b2PolygonShape *>(shape.get())->Set(data.data(), data.size());
 				}
 				break;
 			}
 			case b2Shape::Type::e_chain:
 			{
-				auto p = std::vector<b2Vec2>();
-				for (uint i = 0; i < data.size() / 2; ++i)
-				{
-					p.push_back(b2Vec2(
-						PIXEL_TO_METERS(data[i * 2 + 0]),
-						PIXEL_TO_METERS(data[i * 2 + 1])
-					));
-				}
-				dynamic_cast<b2ChainShape *>(shape.get())->CreateLoop(p.data(), p.size());
+				dynamic_cast<b2ChainShape *>(shape.get())->CreateLoop(data.data(), data.size());
 				break;
 			}
 			default:
@@ -146,54 +132,6 @@ enum class BodyType
 	UNKNOWN
 };
 
-enum class RevoluteJoinTypes
-{
-	IPOINT,
-	BOOL,
-	FLOAT,
-	INT,
-	UNKNOWN
-};
-
-struct RevoluteJointSingleProperty
-{
-	RevoluteJoinTypes type;
-	union
-	{
-		iPoint p;
-		bool b;
-		float f;
-		int i;
-	};
-
-	RevoluteJointSingleProperty() {};
-	RevoluteJointSingleProperty(const RevoluteJointSingleProperty &r) : type(r.type)
-	{
-		switch(type)
-		{
-			case RevoluteJoinTypes::BOOL:
-				b = r.b;
-				break;
-
-			case RevoluteJoinTypes::FLOAT:
-				f = r.f;
-				break;
-
-			case RevoluteJoinTypes::INT:
-				i = r.i;
-				break;
-
-			case RevoluteJoinTypes::IPOINT:
-				p = r.p;
-				break;
-			case RevoluteJoinTypes::UNKNOWN:
-				LOG("Something went wrong in InteractiveParts doing the revolute joint");
-				break;
-		}
-	};
-	~RevoluteJointSingleProperty() {};
-};
-
 // Small class to return to other modules to track position and rotation of physics bodies
 class PhysBody
 {
@@ -207,15 +145,15 @@ public:
 	{}
 
 	~PhysBody() = default;
-
+	
 	void GetPosition(int &x, int &y) const;
 	float GetRotation() const;
 	bool Contains(int x, int y) const;
 	int RayCast(int x1, int y1, int x2, int y2, float &normal_x, float &normal_y) const;
 
-	int width;
-	int height;
-	b2Body *body;
+	int width = 0;
+	int height = 0;
+	b2Body *body = nullptr;
 	Entity *listener = nullptr;
 	ColliderLayers ctype = ColliderLayers::UNKNOWN;
 };
@@ -272,8 +210,6 @@ public:
 	) const;
 
 	// Create joints
-	b2RevoluteJoint *CreateRevoluteJoint(PhysBody *anchor, PhysBody *body, iPoint anchorOffset, iPoint bodyOffset, std::vector<RevoluteJointSingleProperty> properties);
-	b2PrismaticJoint *CreatePrismaticJoint(PhysBody *anchor, PhysBody *body, iPoint anchorOffset, iPoint bodyOffset, std::vector<RevoluteJointSingleProperty> properties);
 	b2MouseJoint *CreateMouseJoint(PhysBody *ground, PhysBody *target, b2Vec2 position, float dampingRatio = 0.5f, float frequecyHz = 2.0f, float maxForce = 100.0f);
 	b2MouseJoint *CreateMouseJoint(b2Body *ground, b2Body *target, b2Vec2 position, float dampingRatio = 0.5f, float frequecyHz = 2.0f, float maxForce = 100.0f);
 
@@ -293,8 +229,6 @@ public:
 
 	// Get Info
 	bool IsDebugActive() const;
-	BodyType GetEnumFromStr(const std::string &s) const;
-	RevoluteJoinTypes GetTypeFromProperty(const std::string &s) const;
 
 private:
 
@@ -313,12 +247,10 @@ private:
 
 	// Box2D World
 	b2World *world = nullptr;
-	b2Body *ground;
+	b2Body *ground = nullptr;
 
 	// Mouse Joint
 	b2Body *selected = nullptr;
 	b2MouseJoint *mouseJoint = nullptr;
-
-	static const std::unordered_map<std::string, BodyType, StringHash, std::equal_to<>> bodyTypeStrToEnum;
-	static const std::unordered_map<std::string, RevoluteJoinTypes, StringHash, std::equal_to<>> propertyToType;	
+	
 };

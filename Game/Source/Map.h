@@ -37,7 +37,7 @@ struct TileColliderInfo
 	int width = 0;
 	int height = 0;
 	uint16 cat = 0x0000;
-	std::vector<int> points;
+	std::vector<b2Vec2> points;
 };
 
 struct TileAnimationInfo

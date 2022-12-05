@@ -276,22 +276,31 @@ std::vector<TileColliderInfo> Map::LoadHitboxInfo(const pugi::xml_node &tileNode
 			retHitBox.shape = "rectangle";
 			retHitBox.x += retHitBox.width / 2;
 			retHitBox.y += retHitBox.height / 2;
-			retHitBox.points.push_back(retHitBox.width / 2);
-			retHitBox.points.push_back(retHitBox.height / 2);
+			retHitBox.points.push_back(
+				{ 
+					(float32)(retHitBox.width / 2),
+					(float32)(retHitBox.height / 2)
+				}
+			);
 			retVec.emplace_back(retHitBox);
 			return retVec;
 		}
 
 		retHitBox.shape = shapeInfo.name();
 		const std::string xyStr = shapeInfo.attribute("points").as_string();
-		static const std::regex r("\\d{1,3}");
+		static const std::regex r(R"((-?\d{1,3})(?:\.\d+)*,(-?\d{1,3})(?:\.\d+)*)");
 		auto xyStrBegin = std::sregex_iterator(xyStr.begin(), xyStr.end(), r);
 		auto xyStrEnd = std::sregex_iterator();
 
 		for(std::sregex_iterator i = xyStrBegin; i != xyStrEnd; ++i)
 		{
 			std::smatch match = *i;
-			retHitBox.points.push_back(stoi(match.str()));
+			retHitBox.points.push_back(
+				{
+					PIXEL_TO_METERS(stoi(match[1].str())),
+					PIXEL_TO_METERS(stoi(match[2].str()))
+				}
+			);
 		}
 
 		if(StrEquals(retHitBox.shape, "polygon") && retHitBox.points.size() > b2_maxPolygonVertices * 2)

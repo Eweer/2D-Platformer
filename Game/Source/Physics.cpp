@@ -16,24 +16,6 @@
 #include "Box2D/Box2D/Box2D.h"
 #include "SDL/include/SDL_keycode.h"
 
-const std::unordered_map<std::string, BodyType, StringHash, std::equal_to<>> Physics::bodyTypeStrToEnum{
-	{"dynamic", BodyType::DYNAMIC},
-	{"static", BodyType::STATIC},
-	{"kinematic", BodyType::KINEMATIC},
-	{"unknown", BodyType::UNKNOWN}
-};
-
-const std::unordered_map<std::string, RevoluteJoinTypes, StringHash, std::equal_to<>> Physics::propertyToType{
-	{"anchor_offset", RevoluteJoinTypes::IPOINT},
-	{"body_offset", RevoluteJoinTypes::IPOINT},
-	{"enable_limit", RevoluteJoinTypes::BOOL},
-	{"max_angle", RevoluteJoinTypes::FLOAT},
-	{"min_angle", RevoluteJoinTypes::FLOAT},
-	{"enable_motor", RevoluteJoinTypes::BOOL},
-	{"motor_speed", RevoluteJoinTypes::INT},
-	{"max_torque", RevoluteJoinTypes::INT}
-};
-
 Physics::Physics() : Module()
 {
 }
@@ -229,7 +211,7 @@ std::unique_ptr<PhysBody> Physics::CreateRectangle(int x, int y, int width, int 
 {
 	auto body = CreateBody(iPoint(x, y), type);
 
-	ShapeData box("rectangle", std::vector<int>{width, height});
+	ShapeData box("rectangle", std::vector<b2Vec2>{ { (float)width, (float)height }});
 
 	// Create FIXTURE
 	auto fixture = CreateFixtureDef(box, cat, mask);
@@ -348,58 +330,6 @@ std::unique_ptr<PhysBody> Physics::CreatePhysBody(b2Body *body, iPoint width_hei
 
 
 //--------------- Joints
-
-//---- Standard
-b2RevoluteJoint *Physics::CreateRevoluteJoint(PhysBody *anchor, PhysBody *body, iPoint anchorOffset, iPoint bodyOffset, std::vector<RevoluteJointSingleProperty> properties)
-{
-	b2RevoluteJointDef rJoint;
-	rJoint.bodyA = anchor->body;
-	rJoint.bodyB = body->body;
-	rJoint.collideConnected = false;
-
-	rJoint.localAnchorA = b2Vec2(PIXEL_TO_METERS(anchorOffset.x), PIXEL_TO_METERS(anchorOffset.y));
-	rJoint.localAnchorB = b2Vec2(PIXEL_TO_METERS(bodyOffset.x), PIXEL_TO_METERS(bodyOffset.y));
-
-	if ((rJoint.enableLimit = properties[0].b))
-	{
-		rJoint.upperAngle = DEGTORAD * (properties[1].f);
-		rJoint.lowerAngle = DEGTORAD * (properties[2].f);
-	}
-	if ((rJoint.enableMotor = properties[3].b))
-	{
-		rJoint.motorSpeed = (float)properties[4].i;
-		rJoint.maxMotorTorque = (float)properties[5].i;
-	}
-
-	auto *returnJoint = ((b2RevoluteJoint *)world->CreateJoint(&rJoint));
-	return returnJoint;
-}
-
-b2PrismaticJoint *Physics::CreatePrismaticJoint(PhysBody *anchor, PhysBody *body, iPoint anchorOffset, iPoint bodyOffset, std::vector<RevoluteJointSingleProperty> properties)
-{
-	b2PrismaticJointDef pJoint;
-	pJoint.bodyA = anchor->body;
-	pJoint.bodyB = body->body;
-	pJoint.collideConnected = false;
-
-	pJoint.localAnchorA = b2Vec2(PIXEL_TO_METERS(anchorOffset.x), PIXEL_TO_METERS(anchorOffset.y));
-	pJoint.localAnchorB = b2Vec2(PIXEL_TO_METERS(bodyOffset.x), PIXEL_TO_METERS(bodyOffset.y));
-
-	pJoint.localAxisA = b2Vec2(0, 1);
-
-	if ((pJoint.enableLimit = properties[0].b))
-	{
-		pJoint.lowerTranslation = DEGTORAD * (properties[1].f);
-		pJoint.upperTranslation = DEGTORAD * (properties[2].f);
-	}
-	if ((pJoint.enableMotor = properties[3].b))
-	{
-		pJoint.motorSpeed = (float)properties[4].i;
-		pJoint.maxMotorForce = (float)properties[5].i;
-	}
-
-	return (b2PrismaticJoint *)world->CreateJoint(&pJoint);
-}
 
 //---- Mouse
 b2MouseJoint *Physics::CreateMouseJoint(PhysBody *origin, PhysBody *target, b2Vec2 position, float dampingRatio, float frequecyHz, float maxForce)
@@ -533,28 +463,6 @@ void Physics::DestroyPhysBody(PhysBody *b)
 	if (b) delete b;
 
 }
-
-//---- Map manipulation
-BodyType Physics::GetEnumFromStr(const std::string &s) const
-{
-	if (!bodyTypeStrToEnum.count(s))
-	{
-		LOG("Physics::GetEnumFromStr didn't find %s attribute.", s);
-		return BodyType::UNKNOWN;
-	}
-	return bodyTypeStrToEnum.at(s);
-}
-
-RevoluteJoinTypes Physics::GetTypeFromProperty(const std::string &s) const
-{
-	if (!propertyToType.count(s))
-	{
-		LOG("Physics::GetTypeFromProperty didn't find %s attribute.", s);
-		return RevoluteJoinTypes::UNKNOWN;
-	}
-	return propertyToType.at(s);
-}
-
 
 //--------------- PhysBody
 
