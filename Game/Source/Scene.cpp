@@ -12,6 +12,9 @@
 #include "Defs.h"
 #include "Log.h"
 
+#include <format>
+#include <string>
+
 Scene::Scene() : Module()
 {
 	name = "scene";
@@ -41,12 +44,14 @@ bool Scene::Start()
 	app->map->Load();
 
 	// Set the window title with map/tileset info
-	std::string title = "Map:%dx%d Tiles:%dx%d Tilesets:%d"
-						+ app->map->GetWidth()
-						+ app->map->GetHeight()
-						+ app->map->GetTileWidth()
-						+ app->map->GetTileHeight()
-						+ app->map->GetTileSetSize();
+	std::string title = std::format(
+		"Map:{}x{} Tiles:{}x{} Tilesets:{}",
+		std::to_string(app->map->GetWidth()),
+		std::to_string(app->map->GetHeight()),
+		std::to_string(app->map->GetTileWidth()),
+		std::to_string(app->map->GetTileHeight()),
+		std::to_string(app->map->GetTileSetSize())
+	); 
 
 	app->win->SetTitle(title.c_str());
 

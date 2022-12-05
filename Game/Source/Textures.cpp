@@ -5,6 +5,10 @@
 #include "Defs.h"
 #include "Log.h"
 
+#include <functional>
+#include <list>
+#include <memory>
+
 #include "SDL_image/include/SDL_image.h"
 //#pragma comment(lib, "../Game/Source/External/SDL_image/libx86/SDL2_image.lib")
 
@@ -14,8 +18,7 @@ Textures::Textures() : Module()
 }
 
 // Destructor
-Textures::~Textures()
-{}
+Textures::~Textures() = default;
 
 // Called before render is available
 bool Textures::Awake(pugi::xml_node& config)
@@ -23,10 +26,7 @@ bool Textures::Awake(pugi::xml_node& config)
 	LOG("Init Image library");
 
 	// Load support for the PNG image format
-	int flags = IMG_INIT_PNG;
-	int init = IMG_Init(flags);
-
-	if((init & flags) != flags)
+	if(int flags = IMG_INIT_PNG; (IMG_Init(flags) & flags) != flags)
 	{
 		LOG("Could not initialize Image lib. IMG_Init: %s", IMG_GetError());
 		return false;
@@ -46,23 +46,17 @@ bool Textures::Start()
 bool Textures::CleanUp()
 {
 	LOG("Freeing textures and Image library");
-	
-	for (auto const &item : textures)
-	{
-		SDL_DestroyTexture(item);
-	}
-	
+
 	IMG_Quit();
 	return true;
 }
 
 // Load new texture from file path
-SDL_Texture* const Textures::Load(const char* path)
+SDL_Texture* Textures::Load(const char* path)
 {
 	SDL_Texture* texture = nullptr;
-	SDL_Surface* surface = IMG_Load(path);
 
-	if(surface) 
+	if(SDL_Surface* surface = IMG_Load(path)) 
 	{
 		texture = LoadSurface(surface);
 		SDL_FreeSurface(surface);
@@ -74,25 +68,32 @@ SDL_Texture* const Textures::Load(const char* path)
 
 
 // Translate a surface into a texture
-SDL_Texture* const Textures::LoadSurface(SDL_Surface* surface)
+SDL_Texture* Textures::LoadSurface(SDL_Surface* surface)
 {
-	SDL_Texture* texture = SDL_CreateTextureFromSurface(app->render->renderer, surface);
 
-	if(texture) textures.push_back(texture);
+	if(std::unique_ptr<SDL_Texture, std::function<void(SDL_Texture *)>>texturePtr(
+			SDL_CreateTextureFromSurface(app->render->renderer, surface),
+			[](SDL_Texture *tex) { if(tex) SDL_DestroyTexture(tex); }
+		);
+		texturePtr != nullptr)
+	{
+		textures.emplace_back(std::move(texturePtr));
+	}
 	else LOG("Unable to create texture from surface! SDL Error: %s\n", SDL_GetError());
 
-	return texture;
+	return textures.back().get();
 }
 
 // Unload texture
-bool Textures::UnLoad(SDL_Texture *texture)
+bool Textures::UnLoad(SDL_Texture const *texture)
 {
-	for (std::list<SDL_Texture *>::iterator it = textures.begin(); it != textures.end();)
+	for(auto it = textures.begin(); it != textures.end(); it++)
 	{
-		if (*it == texture)
+		if ((*it).get() == texture)
 		{
-			SDL_DestroyTexture(*it);
-			it = textures.erase(it);
+			(*it).reset();
+			textures.erase(it);
+			texture = nullptr;
 			return true;
 		}
 	}
@@ -101,7 +102,7 @@ bool Textures::UnLoad(SDL_Texture *texture)
 }
 
 // Retrieve size of a texture
-void Textures::GetSize(const SDL_Texture* texture, uint& width, uint& height) const
+void Textures::GetSize(SDL_Texture* const texture, uint &width, uint &height) const
 {
-	SDL_QueryTexture((SDL_Texture*)texture, nullptr, nullptr, (int*) &width, (int*) &height);
+	SDL_QueryTexture(texture, nullptr, nullptr, (int*) &width, (int*) &height);
 }

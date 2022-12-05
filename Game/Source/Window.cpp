@@ -57,21 +57,21 @@ bool Window::Awake(pugi::xml_node& config)
 			height,
 			flags
 		),
-		[](SDL_Window *window) { SDL_DestroyWindow(window); }
+		[](SDL_Window *win) { if(win) SDL_DestroyWindow(win); }
 	);
 
 	window = std::move(windowPtr);
-
+	
 	if (!window)
 	{
 		LOG("Window could not be created! SDL_Error: %s\n", SDL_GetError());
 		return false;
 	}
-
+	
 	// Get window surface
 	std::unique_ptr<SDL_Surface, std::function<void(SDL_Surface *)>>surfacePtr(
 		SDL_GetWindowSurface(window.get()),
-		[](SDL_Surface *surface) { SDL_FreeSurface(surface);  }
+		[](SDL_Surface *surface) { if(surface) SDL_FreeSurface(surface);  }
 	);
 
 	screenSurface = std::move(surfacePtr);

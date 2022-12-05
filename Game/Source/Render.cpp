@@ -26,7 +26,6 @@ Render::~Render() = default;
 bool Render::Awake(pugi::xml_node& config)
 {
 	LOG("Create SDL rendering context");
-	bool ret = true;
 
 	Uint32 flags = SDL_RENDERER_ACCELERATED;
 
@@ -38,20 +37,20 @@ bool Render::Awake(pugi::xml_node& config)
 
 	renderer = SDL_CreateRenderer(app->win->GetWindow(), -1, flags);
 
-	if(renderer == nullptr)
-	{
-		LOG("Could not create the renderer! SDL_Error: %s\n", SDL_GetError());
-		ret = false;
-	}
-	else
+	if(renderer)
 	{
 		camera.w = app->win->GetSurface()->w;
 		camera.h = app->win->GetSurface()->h;
 		camera.x = 0;
 		camera.y = 0;
 	}
+	else
+	{
+		LOG("Could not create the renderer! SDL_Error: %s\n", SDL_GetError());
+		return false;
+	}
 
-	return ret;
+	return true;
 }
 
 // Called before the first frame
