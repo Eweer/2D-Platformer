@@ -3,6 +3,7 @@
 
 #include "Defs.h"
 #include "Log.h"
+#include <memory>
 
 // NOTE: Recommended using: Additional Include Directories,
 // instead of 'hardcoding' library location path in code logic
@@ -14,7 +15,6 @@
 
 Audio::Audio() : Module()
 {
-	music = NULL;
 	name = "audio";
 }
 
@@ -26,17 +26,15 @@ Audio::~Audio()
 bool Audio::Awake(pugi::xml_node& config)
 {
 	LOG("Loading Audio Mixer");
-	bool ret = true;
 	SDL_Init(0);
 
 	if(SDL_InitSubSystem(SDL_INIT_AUDIO) < 0)
 	{
 		LOG("SDL_INIT_AUDIO could not initialize! SDL_Error: %s\n", SDL_GetError());
 		active = false;
-		ret = true;
 	}
 
-	// Load support for the JPG and PNG image formats
+	// Load support for the OGG audio format
 	int flags = MIX_INIT_OGG;
 	int init = Mix_Init(flags);
 
@@ -44,7 +42,6 @@ bool Audio::Awake(pugi::xml_node& config)
 	{
 		LOG("Could not initialize Mixer lib. Mix_Init: %s", Mix_GetError());
 		active = false;
-		ret = true;
 	}
 
 	// Initialize SDL_mixer
@@ -52,30 +49,22 @@ bool Audio::Awake(pugi::xml_node& config)
 	{
 		LOG("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
 		active = false;
-		ret = true;
 	}
 
-	return ret;
+	return true;
 }
 
 // Called before quitting
 bool Audio::CleanUp()
 {
-	if(!active)
-		return true;
+	if(!active) return true;
 
 	LOG("Freeing sound FX, closing Mixer and Audio subsystem");
 
-	if(music != NULL)
-	{
-		Mix_FreeMusic(music);
-	}
+	if(music) Mix_FreeMusic(music);
 
-	ListItem<Mix_Chunk*>* item;
-	for(item = fx.start; item != NULL; item = item->next)
-		Mix_FreeChunk(item->data);
-
-	fx.Clear();
+	for (auto const &item : fx)
+		Mix_FreeChunk(item.get());
 
 	Mix_CloseAudio();
 	Mix_Quit();
@@ -87,21 +76,12 @@ bool Audio::CleanUp()
 // Play a music file
 bool Audio::PlayMusic(const char* path, float fadeTime)
 {
-	bool ret = true;
+	if(!active) return false;
 
-	if(!active)
-		return false;
-
-	if(music != NULL)
+	if(music)
 	{
-		if(fadeTime > 0.0f)
-		{
-			Mix_FadeOutMusic(int(fadeTime * 1000.0f));
-		}
-		else
-		{
-			Mix_HaltMusic();
-		}
+		if(fadeTime > 0.0f)	Mix_FadeOutMusic(int(fadeTime * 1000.0f));
+		else Mix_HaltMusic();
 
 		// this call blocks until fade out is done
 		Mix_FreeMusic(music);
@@ -109,70 +89,61 @@ bool Audio::PlayMusic(const char* path, float fadeTime)
 
 	music = Mix_LoadMUS(path);
 
-	if(music == NULL)
+	if(!music)
 	{
 		LOG("Cannot load music %s. Mix_GetError(): %s\n", path, Mix_GetError());
-		ret = false;
+		return false;
+	}
+
+	if(fadeTime > 0.0f)
+	{
+		if(Mix_FadeInMusic(music, -1, (int) (fadeTime * 1000.0f)) < 0)
+		{
+			LOG("Cannot fade in music %s. Mix_GetError(): %s", path, Mix_GetError());
+			return false;
+		}
 	}
 	else
 	{
-		if(fadeTime > 0.0f)
+		if(Mix_PlayMusic(music, -1) < 0)
 		{
-			if(Mix_FadeInMusic(music, -1, (int) (fadeTime * 1000.0f)) < 0)
-			{
-				LOG("Cannot fade in music %s. Mix_GetError(): %s", path, Mix_GetError());
-				ret = false;
-			}
-		}
-		else
-		{
-			if(Mix_PlayMusic(music, -1) < 0)
-			{
-				LOG("Cannot play in music %s. Mix_GetError(): %s", path, Mix_GetError());
-				ret = false;
-			}
+			LOG("Cannot play in music %s. Mix_GetError(): %s", path, Mix_GetError());
+			return false;
 		}
 	}
-
+	
 	LOG("Successfully playing %s", path);
-	return ret;
+	return true;
 }
 
 // Load WAV
 unsigned int Audio::LoadFx(const char* path)
 {
-	unsigned int ret = 0;
+	if(!active) return 0;
 
-	if(!active)
-		return 0;
-
-	Mix_Chunk* chunk = Mix_LoadWAV(path);
-
-	if(chunk == NULL)
+	fx.push_back(std::unique_ptr<Mix_Chunk>(Mix_LoadWAV(path)));
+	if (!fx.back())
 	{
 		LOG("Cannot load wav %s. Mix_GetError(): %s", path, Mix_GetError());
-	}
-	else
-	{
-		fx.Add(chunk);
-		ret = fx.Count();
+		fx.pop_back();
 	}
 
-	return ret;
+	return fx.size();
 }
 
 // Play WAV
 bool Audio::PlayFx(unsigned int id, int repeat)
 {
-	bool ret = false;
+	if(!active) return false;
 
-	if(!active)
-		return false;
-
-	if(id > 0 && id <= fx.Count())
+	if(id > 0 && id <= fx.size())
 	{
-		Mix_PlayChannel(-1, fx[id - 1], repeat);
+		for (int i = 0; auto const &item : fx)
+		{
+			//if (i == id) Mix_PlayChannel(-1, item.get(), repeat);
+			++i;
+		}
 	}
 
-	return ret;
+	return true;
 }

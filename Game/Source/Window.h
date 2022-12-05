@@ -4,6 +4,9 @@
 #include "Module.h"
 #include "Defs.h"
 
+#include <memory>
+#include <functional>
+
 struct SDL_Window;
 struct SDL_Surface;
 
@@ -37,10 +40,10 @@ public:
 
 private:
 	// The window we'll be rendering to
-	SDL_Window* window = nullptr;
+	std::unique_ptr<SDL_Window, std::function<void(SDL_Window *)>> window;
 
 	// The surface contained by the window
-	SDL_Surface* screenSurface = nullptr;
+	std::unique_ptr<SDL_Surface, std::function<void(SDL_Surface *)>> screenSurface;
 
 	std::string title = "";
 	uint width;

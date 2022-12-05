@@ -129,8 +129,8 @@ void App::PrepareUpdate()
 void App::FinishUpdate()
 {
 	// L03: DONE 1: This is a good place to call Load / Save methods
-	if (loadGameRequested == true) LoadFromFile();
-	if (saveGameRequested == true) SaveToFile();
+	if (loadGameRequested) LoadFromFile();
+	if (saveGameRequested) SaveToFile();
 }
 
 // Call modules before each loop iteration

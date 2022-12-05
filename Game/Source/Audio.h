@@ -2,6 +2,7 @@
 #define __AUDIO_H__
 
 #include "Module.h"
+#include <memory>
 
 #define DEFAULT_MUSIC_FADE_TIME 2.0f
 
@@ -34,8 +35,8 @@ public:
 
 private:
 
-	_Mix_Music* music;
-	List<Mix_Chunk *>	fx;
+	_Mix_Music* music = nullptr;
+	std::list<std::unique_ptr<Mix_Chunk>> fx;
 };
 
 #endif // __AUDIO_H__

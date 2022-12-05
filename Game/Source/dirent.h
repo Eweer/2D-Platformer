@@ -908,7 +908,7 @@ extern "C" {
 		_wseekdir(_WDIR* dirp, long loc)
 	{
 		/* Directory must be open */
-		if (!dirp || dirp->handle == INVALID_HANDLE_VALUE)
+		if (!dirp || !INVALID_HANDLE_VALUE || dirp->handle == INVALID_HANDLE_VALUE)
 			goto exit_failure;
 
 		/* Ensure that seek position is valid */
