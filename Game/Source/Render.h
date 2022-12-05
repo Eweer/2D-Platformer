@@ -33,7 +33,6 @@ public:
 	void SetViewPort(const SDL_Rect& rect);
 	void ResetViewPort();
 
-
 	// Drawing
 	bool DrawTexture(SDL_Texture* texture, int x, int y, const SDL_Rect* section = nullptr, float speed = 1.0f, double angle = 0, int pivotX = INT_MAX, int pivotY = INT_MAX, SDL_RendererFlip flip = SDL_FLIP_NONE) const;
 	bool DrawCharacterTexture(SDL_Texture *texture, const iPoint pos, const bool flip = false, SDL_Point pivot = SDL_Point(INT_MAX, INT_MAX), const iPoint offset = iPoint(INT_MAX, INT_MAX), const double angle = 0);
@@ -44,7 +43,6 @@ public:
 	// Set background color
 	void SetBackgroundColor(SDL_Color color);
 
-	// L03: DONE 6: Declare Load / Save methods
 	bool LoadState(pugi::xml_node const &) final;
 	pugi::xml_node SaveState(pugi::xml_node const &) const final;
 
