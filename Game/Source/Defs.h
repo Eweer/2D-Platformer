@@ -13,26 +13,6 @@
 #include <algorithm>
 #include <string>
 
-// Deletes a buffer
-#define RELEASE( x )		\
-{							\
-	if( x != nullptr )		\
-	{						\
-		delete x;			\
-		x = nullptr;		\
-	}						\
-}
-
-// Deletes an array of buffers
-#define RELEASE_ARRAY( x )	\
-{							\
-	if( x != nullptr )		\
-	{						\
-		delete[] x;			\
-		x = nullptr;		\
-	}						\
-}
-
 #define IN_RANGE(value, min, max) ((value >= min && value <= max) ? 1 : 0)
 #define TO_BOOL(a)  ((a != 0) ? true : false )
 
