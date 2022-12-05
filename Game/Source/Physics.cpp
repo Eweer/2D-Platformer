@@ -217,12 +217,12 @@ void Physics::BeginContact(b2Contact *contact)
 
 //--------------- Create Shapes and Joints
 
-std::unique_ptr<PhysBody> Physics::CreateQuickPlatform(ShapeData &shapeData, iPoint pos, iPoint width_height, BodyType bodyType, uint16 cat, uint16 mask, bool sensor)
+std::unique_ptr<PhysBody> Physics::CreateQuickPlatform(ShapeData &shapeData, iPoint pos, iPoint width_height)
 {
-	auto body = CreateBody(pos, bodyType);
-	auto fixtureDef = CreateFixtureDef(shapeData, cat, mask);
+	auto body = CreateBody(pos);
+	auto fixtureDef = CreateFixtureDef(shapeData);
 	body->CreateFixture(fixtureDef.get());
-	return CreatePhysBody(body, {shapeData.data[0], shapeData.data[1]});
+	return CreatePhysBody(body, width_height, ColliderLayers::PLATFORMS);
 }
 
 std::unique_ptr<PhysBody> Physics::CreateRectangle(int x, int y, int width, int height, BodyType type, float32 gravityScale, float rest, uint16 cat, uint16 mask)
@@ -291,227 +291,9 @@ std::unique_ptr<PhysBody> Physics::CreateCircle(int x, int y, int radius, BodyTy
 	return pbody;
 }
 
-std::unique_ptr<PhysBody> Physics::CreatePolygon(int x, int y, const int *const points, int size, BodyType type, float rest, uint16 cat, uint16 mask, int angle)
-{
-	b2BodyDef body;
-	switch (type)
-	{
-		case BodyType::DYNAMIC:
-			body.type = b2_dynamicBody;
-			break;
-		case BodyType::STATIC:
-			body.type = b2_staticBody;
-			break;
-		case BodyType::KINEMATIC:
-			body.type = b2_kinematicBody;
-			break;
-		case BodyType::UNKNOWN:
-			LOG("Create Polygon Received UNKNOWN BodyType");
-			return nullptr;
-	}
 
-	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
-	body.angle = DEGTORAD * (float)angle;
+//--------------- Body
 
-	b2Body *b = world->CreateBody(&body);
-	b2PolygonShape box;
-	auto *p = new b2Vec2[size / 2];
-
-	for (uint i = 0; i < size / 2; ++i)
-	{
-		p[i].x = PIXEL_TO_METERS(points[i * 2 + 0]);
-		p[i].y = PIXEL_TO_METERS(points[i * 2 + 1]);
-	}
-	box.Set(p, size / 2);
-
-	b2FixtureDef fixture;
-	fixture.shape = &box;
-	fixture.density = 1.0f;
-	fixture.filter.categoryBits = cat;
-	fixture.filter.maskBits = mask;
-	fixture.restitution = rest;
-
-	b->CreateFixture(&fixture);
-
-	auto pbody = std::make_unique<PhysBody>();
-	pbody->body = b;
-	b->SetUserData(pbody.get());
-	pbody->height = pbody->width = 0;
-
-	return pbody;
-}
-
-PhysBody *Physics::CreateRectangleSensor(int x, int y, int width, int height, BodyType type, uint16 cat, uint16 mask)
-{
-	// Create BODY at position x,y
-	b2BodyDef body;
-	switch (type)
-	{
-		case BodyType::DYNAMIC:
-			body.type = b2_dynamicBody;
-			break;
-		case BodyType::STATIC:
-			body.type = b2_staticBody;
-			break;
-		case BodyType::KINEMATIC:
-			body.type = b2_kinematicBody;
-			break;
-		case BodyType::UNKNOWN:
-			LOG("CreateRectangle Received UNKNOWN BodyType");
-			return nullptr;
-	}
-	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
-
-	// Add BODY to the world
-	b2Body *b = world->CreateBody(&body);
-
-	// Create SHAPE
-	b2PolygonShape box;
-	box.SetAsBox(PIXEL_TO_METERS(width) * 0.5f, PIXEL_TO_METERS(height) * 0.5f);
-
-	// Create FIXTURE
-	b2FixtureDef fixture;
-	fixture.shape = &box;
-	fixture.density = 1.0f;
-	fixture.isSensor = true;
-	fixture.filter.categoryBits = cat;
-	fixture.filter.maskBits = mask;
-
-	b->CreateFixture(&fixture);
-
-
-	auto *pbody = new PhysBody();
-	pbody->body = b;
-	b->SetUserData(pbody);
-	pbody->width = width;
-	pbody->height = height;
-
-
-	return pbody;
-}
-
-std::unique_ptr<PhysBody> Physics::CreateChain(int x, int y, const int *const points, int size, BodyType type, float rest, uint16 cat, uint16 mask, int angle)
-{
-	// Create BODY at position x,y
-	b2BodyDef body;
-	switch (type)
-	{
-		case BodyType::DYNAMIC:
-			body.type = b2_dynamicBody;
-			break;
-		case BodyType::STATIC:
-			body.type = b2_staticBody;
-			break;
-		case BodyType::KINEMATIC:
-			body.type = b2_kinematicBody;
-			break;
-		case BodyType::UNKNOWN:
-			LOG("CreateRectangle Received UNKNOWN BodyType");
-			return nullptr;
-	}
-	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
-	body.angle = DEGTORAD * (float)angle;
-
-	// Add BODY to the world
-	b2Body *b = world->CreateBody(&body);
-
-	// Create SHAPE
-	b2ChainShape shape;
-	auto *p = new b2Vec2[size / 2];
-	for (uint i = 0; i < size / 2; ++i)
-	{
-		p[i].x = PIXEL_TO_METERS(points[i * 2 + 0]);
-		p[i].y = PIXEL_TO_METERS(points[i * 2 + 1]);
-	}
-	shape.CreateLoop(p, size / 2);
-
-	// Create FIXTURE
-	b2FixtureDef fixture;
-	fixture.shape = &shape;
-	fixture.density = 1.0f;
-	fixture.filter.categoryBits = cat;
-	fixture.filter.maskBits = mask;
-	fixture.restitution = rest;
-
-	// Add fixture to the BODY
-	b->CreateFixture(&fixture);
-
-	// Clean-up temp array
-	delete[] p;
-
-	// Create our custom PhysBody class
-
-	auto pbody = std::make_unique<PhysBody>();
-	pbody->body = b;
-	b->SetUserData(pbody.get());
-	pbody->height = pbody->width = 0;
-
-	// Return our PhysBody class
-	return pbody;
-}
-
-/*
-ShapeData *Physics::CreateShape(ShapeData &shapeData)
-{
-	switch(shapeData.shape.get()->GetType())
-	{
-		case b2Shape::Type::e_circle:
-		{
-			if(!shapeData.data.empty())
-				dynamic_cast<b2CircleShape *>(shapeData.shape.get())->m_radius = PIXEL_TO_METERS(shapeData.data[0]);
-			else
-				LOG("Radius for creating circle shape not found.");
-			break;
-		}
-		case b2Shape::Type::e_edge:
-		{
-			break;
-		}
-		case b2Shape::Type::e_polygon:
-		{
-			// if it's a polygon with only 2 points
-			// it means it's a rectangle, where data[0] == width && data[1] == height
-			if(shapeData.data.size() == 2)
-			{
-				dynamic_cast<b2PolygonShape *>(shapeData.shape.get())->SetAsBox(
-					PIXEL_TO_METERS(shapeData.data[0]) * 0.5f,
-					PIXEL_TO_METERS(shapeData.data[1]) * 0.5f
-				);
-				break;
-			}
-			else //if it's not a rectangle, it's a plain polygon
-			{
-				auto p = std::vector<b2Vec2>(shapeData.data.size()/2);
-				for(uint i = 0; i < shapeData.data.size()/2; ++i)
-				{
-					p.push_back(b2Vec2(
-						PIXEL_TO_METERS(shapeData.data[i * 2 + 0]),
-						PIXEL_TO_METERS(shapeData.data[i * 2 + 1])
-					));
-				}
-				dynamic_cast<b2PolygonShape *>(shapeData.shape.get())->Set(p.data(), shapeData.data.size()/2);
-			}
-			break;
-		}
-		case b2Shape::Type::e_chain:
-		{
-			auto p = std::vector<b2Vec2>(shapeData.data.size()/2);
-			for(uint i = 0; i < shapeData.data.size()/2; ++i)
-			{
-				p.push_back(b2Vec2(
-					PIXEL_TO_METERS(shapeData.data[i * 2 + 0]),
-					PIXEL_TO_METERS(shapeData.data[i * 2 + 1])
-				));
-			}
-			dynamic_cast<b2ChainShape *>(shapeData.shape.get())->CreateLoop(p.data(), shapeData.data.size()/2);
-			break;
-		}
-		default:
-			break;
-	}
-	return &shapeData;
-}
-*/
 b2Body *Physics::CreateBody(iPoint pos, BodyType type, float angle, fPoint damping, float gravityScale, bool fixedRotation, bool bullet) const
 {
 	b2BodyDef body;
@@ -564,6 +346,10 @@ std::unique_ptr<PhysBody> Physics::CreatePhysBody(b2Body *body, iPoint width_hei
 	return pBody;
 }
 
+
+//--------------- Joints
+
+//---- Standard
 b2RevoluteJoint *Physics::CreateRevoluteJoint(PhysBody *anchor, PhysBody *body, iPoint anchorOffset, iPoint bodyOffset, std::vector<RevoluteJointSingleProperty> properties)
 {
 	b2RevoluteJointDef rJoint;
@@ -615,6 +401,7 @@ b2PrismaticJoint *Physics::CreatePrismaticJoint(PhysBody *anchor, PhysBody *body
 	return (b2PrismaticJoint *)world->CreateJoint(&pJoint);
 }
 
+//---- Mouse
 b2MouseJoint *Physics::CreateMouseJoint(PhysBody *origin, PhysBody *target, b2Vec2 position, float dampingRatio, float frequecyHz, float maxForce)
 {
 	b2MouseJointDef mJointDef;
@@ -639,25 +426,6 @@ b2MouseJoint *Physics::CreateMouseJoint(b2Body *origin, b2Body *target, b2Vec2 p
 	mJointDef.maxForce = maxForce * selected->GetMass();
 
 	return ((b2MouseJoint *)world->CreateJoint(&mJointDef));
-}
-
-
-//--------------- Utils
-
-void Physics::DrawDebug(const b2Body *body, const int32 count, const b2Vec2 *vertices, Uint8 r, Uint8 g, Uint8 b, Uint8 a) const
-{
-	b2Vec2 prev = body->GetWorldPoint(vertices[0]);
-	b2Vec2 v;
-
-	for (int32 i = 1; i < count; ++i)
-	{
-		v = body->GetWorldPoint(vertices[i]);
-		app->render->DrawLine(METERS_TO_PIXELS(prev.x), METERS_TO_PIXELS(prev.y), METERS_TO_PIXELS(v.x), METERS_TO_PIXELS(v.y), r, g, b, a);
-		prev = v;
-	}
-
-	v = body->GetWorldPoint(vertices[0]);
-	app->render->DrawLine(METERS_TO_PIXELS(prev.x), METERS_TO_PIXELS(prev.y), METERS_TO_PIXELS(v.x), METERS_TO_PIXELS(v.y), r, g, b, a);
 }
 
 void Physics::DragSelectedObject()
@@ -692,13 +460,6 @@ void Physics::DragSelectedObject()
 
 }
 
-bool Physics::IsMouseOverObject(b2Fixture const *f) const
-{
-	if (f->TestPoint(IPointToWorldVec(app->input->GetMousePosition())))
-		return true;
-	return false;
-}
-
 void Physics::DestroyMouseJoint()
 {
 	world->DestroyJoint(mouseJoint);
@@ -706,11 +467,39 @@ void Physics::DestroyMouseJoint()
 	if (selected) selected = nullptr;
 }
 
+
+//--------------- Utils
+
+//---- Debug
+void Physics::DrawDebug(const b2Body *body, const int32 count, const b2Vec2 *vertices, Uint8 r, Uint8 g, Uint8 b, Uint8 a) const
+{
+	b2Vec2 prev = body->GetWorldPoint(vertices[0]);
+	b2Vec2 v;
+
+	for (int32 i = 1; i < count; ++i)
+	{
+		v = body->GetWorldPoint(vertices[i]);
+		app->render->DrawLine(METERS_TO_PIXELS(prev.x), METERS_TO_PIXELS(prev.y), METERS_TO_PIXELS(v.x), METERS_TO_PIXELS(v.y), r, g, b, a);
+		prev = v;
+	}
+
+	v = body->GetWorldPoint(vertices[0]);
+	app->render->DrawLine(METERS_TO_PIXELS(prev.x), METERS_TO_PIXELS(prev.y), METERS_TO_PIXELS(v.x), METERS_TO_PIXELS(v.y), r, g, b, a);
+}
+
+bool Physics::IsMouseOverObject(b2Fixture const *f) const
+{
+	if (f->TestPoint(IPointToWorldVec(app->input->GetMousePosition())))
+		return true;
+	return false;
+}
+
 bool Physics::IsDebugActive() const
 {
 	return debug;
 }
 
+//---- Position
 iPoint Physics::WorldVecToIPoint(const b2Vec2 &v) const
 {
 	return iPoint(METERS_TO_PIXELS(v.x), METERS_TO_PIXELS(v.y));
@@ -721,6 +510,7 @@ b2Vec2 Physics::IPointToWorldVec(const iPoint &p) const
 	return b2Vec2(PIXEL_TO_METERS(p.x), PIXEL_TO_METERS(p.y));
 }
 
+//---- World
 void Physics::ToggleStep()
 {
 	stepActive = !stepActive;
@@ -731,6 +521,7 @@ b2Vec2 Physics::GetWorldGravity() const
 	return world->GetGravity();
 }
 
+//---- Destroy
 void Physics::DestroyBody(b2Body *b)
 {
 	if (b) world->DestroyBody(b);
@@ -743,6 +534,7 @@ void Physics::DestroyPhysBody(PhysBody *b)
 
 }
 
+//---- Map manipulation
 BodyType Physics::GetEnumFromStr(const std::string &s) const
 {
 	if (!bodyTypeStrToEnum.count(s))

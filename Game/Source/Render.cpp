@@ -86,7 +86,7 @@ bool Render::PostUpdate()
 bool Render::CleanUp()
 {
 	LOG("Destroying SDL render");
-	SDL_DestroyRenderer(renderer);
+	if(renderer) SDL_DestroyRenderer(renderer);
 	return true;
 }
 

@@ -274,6 +274,10 @@ std::vector<TileColliderInfo> Map::LoadHitboxInfo(const pugi::xml_node &tileNode
 		if(shapeInfo.empty())
 		{
 			retHitBox.shape = "rectangle";
+			retHitBox.x += retHitBox.width / 2;
+			retHitBox.y += retHitBox.height / 2;
+			retHitBox.points.push_back(retHitBox.width / 2);
+			retHitBox.points.push_back(retHitBox.height / 2);
 			retVec.emplace_back(retHitBox);
 			return retVec;
 		}
@@ -289,8 +293,11 @@ std::vector<TileColliderInfo> Map::LoadHitboxInfo(const pugi::xml_node &tileNode
 			std::smatch match = *i;
 			retHitBox.points.push_back(stoi(match.str()));
 		}
-		retVec.emplace_back(retHitBox);
 
+		if(StrEquals(retHitBox.shape, "polygon") && retHitBox.points.size() > b2_maxPolygonVertices * 2)
+			retHitBox.shape = "chain";
+
+		retVec.emplace_back(retHitBox);
 	}
 		
 	return retVec;
@@ -344,7 +351,7 @@ std::unique_ptr<MapLayer> Map::LoadLayer(pugi::xml_node const &node)
 		{
 			TileSet const *tileset = GetTilesetFromTileId(gid);
 			if(auto colliderCreated = CreateCollider(gid, pos.x, pos.y, tileset); colliderCreated != nullptr)
-				collidersOnMap.emplace_back(colliderCreated);
+				collidersOnMap.emplace_back(std::move(colliderCreated));
 
 			retTileAnim.gid = gid;
 			retTileAnim.originalGid = gid;
@@ -375,43 +382,31 @@ std::unique_ptr<MapLayer> Map::LoadLayer(pugi::xml_node const &node)
 	return std::move(layer);
 }
 
-inline std::shared_ptr<PhysBody> Map::CreateCollider(int gid, int i, int j, TileSet const *tileset) const
+inline std::unique_ptr<PhysBody> Map::CreateCollider(int gid, int i, int j, TileSet const *tileset) const
 {
 	if(auto colliderInfo = tileset->tileInfo.find(gid-1); colliderInfo != tileset->tileInfo.end())
 	{
 		if(colliderInfo->second->collider.empty()) return nullptr;
 		
-		if(colliderInfo->second->collider[0].shape.empty() && colliderInfo->second->collider[0].points.size() <= 0)
-			return nullptr;
 		TileColliderInfo collider = colliderInfo->second->collider[0];
+
+		if(collider.shape.empty() || collider.points.empty())
+			return nullptr;
+
+		auto retCollider = std::make_unique<PhysBody>();
+
+		ShapeData shape(collider.shape, collider.points);
+
 		iPoint colliderPos = MapToWorld(i, j);
-		std::shared_ptr<PhysBody> retCollider;
-		if(collider.shape == "rectangle")
-		{
-			colliderPos.x += collider.width/2 + collider.x;
-			colliderPos.y += collider.height/2 + collider.y;
-			ShapeData box("rectangle", std::vector<int>{collider.width, collider.height});
-			retCollider = app->physics->CreateQuickPlatform(
-				box,
-				{colliderPos.x, colliderPos.y},
-				{collider.width, collider.height}
-			);
-		}
-		else if(collider.shape == "polygon")
-		{
-			colliderPos.x += collider.x;
-			colliderPos.y += collider.y;
-			retCollider = app->physics->CreateChain(
-														colliderPos.x,
-														colliderPos.y,
-														collider.points.data(),
-														collider.points.size(),
-														BodyType::STATIC,
-														0.0f,
-														collider.cat
-			);
-		}
-		retCollider->ctype = (ColliderLayers)collider.cat;
+		colliderPos.x += collider.x;
+		colliderPos.y += collider.y;
+
+		retCollider = app->physics->CreateQuickPlatform(
+			shape,
+			{colliderPos.x, colliderPos.y},
+			{collider.width, collider.height}
+		);
+
 		return retCollider;
 	}
 	return nullptr;

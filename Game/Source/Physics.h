@@ -51,7 +51,7 @@ struct ShapeData
 	}
 	explicit ShapeData(b2Shape const *newShape, std::vector<int> const &newData = std::vector<int>()) : data(newData)
 	{
-		if (newShape == nullptr) LOG("Error in creating Shape (ShapeData). Shape constructor is nullptr");
+		if (!newShape) LOG("Error in creating Shape (ShapeData). Shape constructor is nullptr");
 		else
 		{
 			switch (newShape->GetType())
@@ -74,6 +74,7 @@ struct ShapeData
 		}
 	}
 	~ShapeData() = default;
+
 	b2Shape *CreateShape()
 	{
 		switch (shape.get()->GetType())
@@ -97,14 +98,14 @@ struct ShapeData
 				if (data.size() == 2)
 				{
 					dynamic_cast<b2PolygonShape *>(shape.get())->SetAsBox(
-						PIXEL_TO_METERS(data[0]) * 0.5f,
-						PIXEL_TO_METERS(data[1]) * 0.5f
+						PIXEL_TO_METERS(data[0]),
+						PIXEL_TO_METERS(data[1])
 					);
 					break;
 				}
 				else //if it's not a rectangle, it's a plain polygon
 				{
-					auto p = std::vector<b2Vec2>(data.size() / 2);
+					auto p = std::vector<b2Vec2>();
 					for (uint i = 0; i < data.size() / 2; ++i)
 					{
 						p.push_back(b2Vec2(
@@ -112,13 +113,13 @@ struct ShapeData
 							PIXEL_TO_METERS(data[i * 2 + 1])
 						));
 					}
-					dynamic_cast<b2PolygonShape *>(shape.get())->Set(p.data(), data.size() / 2);
+					dynamic_cast<b2PolygonShape *>(shape.get())->Set(p.data(), p.size());
 				}
 				break;
 			}
 			case b2Shape::Type::e_chain:
 			{
-				auto p = std::vector<b2Vec2>(data.size() / 2);
+				auto p = std::vector<b2Vec2>();
 				for (uint i = 0; i < data.size() / 2; ++i)
 				{
 					p.push_back(b2Vec2(
@@ -126,7 +127,7 @@ struct ShapeData
 						PIXEL_TO_METERS(data[i * 2 + 1])
 					));
 				}
-				dynamic_cast<b2ChainShape *>(shape.get())->CreateLoop(p.data(), data.size() / 2);
+				dynamic_cast<b2ChainShape *>(shape.get())->CreateLoop(p.data(), p.size());
 				break;
 			}
 			default:
@@ -237,21 +238,11 @@ public:
 	// Create basic physics objects
 	std::unique_ptr<PhysBody> CreateRectangle(int x, int y, int width, int height, BodyType type, float32 gravityScale = 1.0f, float rest = 0.0f, uint16 cat = (uint16)ColliderLayers::PLATFORMS, uint16 mask = (uint16)ColliderLayers::PLAYER);
 	std::unique_ptr<PhysBody> CreateCircle(int x, int y, int radius, BodyType type, float rest = 0.0f, uint16 cat = (uint16)ColliderLayers::PLATFORMS, uint16 mask = (uint16)ColliderLayers::PLAYER);
-	std::unique_ptr<PhysBody> CreatePolygon(int x, int y, const int *const points, int size, BodyType type, float rest = 0.0f, uint16 cat = (uint16)ColliderLayers::PLATFORMS, uint16 mask = (uint16)ColliderLayers::PLAYER, int angle = 0);
-	std::unique_ptr<PhysBody> CreateChain(int x, int y, const int *const points, int size, BodyType type, float rest = 0.0f, uint16 cat = (uint16)ColliderLayers::PLATFORMS, uint16 mask = (uint16)ColliderLayers::PLAYER, int angle = 0);
-	PhysBody *CreateRectangleSensor(int x, int y, int width, int height, BodyType type, uint16 cat = (uint16)ColliderLayers::TRIGGERS, uint16 mask = (uint16)ColliderLayers::PLAYER);
-	
-	
-	//ShapeData *CreateShape(ShapeData &shapeData);
 
 	std::unique_ptr<PhysBody> CreateQuickPlatform(
 		ShapeData &shapeData,
 		iPoint pos,
-		iPoint width_height = iPoint(0, 0),
-		BodyType bodyType = BodyType::STATIC,
-		uint16 cat = (uint16)ColliderLayers::PLATFORMS,
-		uint16 mask = (uint16)ColliderLayers::PLAYER,
-		bool sensor = false
+		iPoint width_height = iPoint(0, 0)
 	);
 
 	b2Body *CreateBody(

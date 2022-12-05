@@ -233,9 +233,9 @@ void Entity::CreatePhysBody(Uint16 collisionCategory, Uint16 collisionMask)
 	{
 		pBody = app->physics->CreateRectangle(
 			position.x,
-			position.y + height/2,
-			width,
-			height,
+			position.y,
+			width / 2,
+			height / 2,
 			bodyType,
 			gravity,
 			restitution,

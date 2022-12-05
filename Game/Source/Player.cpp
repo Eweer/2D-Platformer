@@ -128,9 +128,9 @@ bool Player::Update()
 	}
 	
 	//Update player position in pixels
-	position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x) - pBody->width/2;
-	position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y) - pBody->height/2;
-	app->render->DrawCharacterTexture(texture->UpdateAndGetFrame(), iPoint(position.x - 20, position.y - pBody->height - 7), (bool) dir, texture->GetFlipPivot());
+	position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x) - (int)(pBody->width * 1.5f);
+	position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y) - (int)(pBody->height * 3.5f);
+	app->render->DrawCharacterTexture(texture->UpdateAndGetFrame(), iPoint(position.x, position.y), (bool) dir, texture->GetFlipPivot());
 	
 	if(moveCamera && app->render->camera.x <= 0 && position.x >= startingPosition.x)
 	{

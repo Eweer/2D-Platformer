@@ -191,7 +191,7 @@ private:
 	std::unique_ptr<TileInfo> LoadTileInfo(const pugi::xml_node &tileInfoNode) const;
 	std::shared_ptr<TileAnimationInfo> LoadAnimationInfo(const pugi::xml_node &tileInfoNode, XML_Properties_Map_t const &properties) const;
 	std::vector<TileColliderInfo> LoadHitboxInfo(const pugi::xml_node &hitbox, XML_Properties_Map_t const &properties = XML_Properties_Map_t()) const;
-	std::shared_ptr<PhysBody> CreateCollider (int gid, int i, int j, TileSet const *tileset) const;
+	std::unique_ptr<PhysBody> CreateCollider (int gid, int i, int j, TileSet const *tileset) const;
 	
 	bool LoadAllLayers(pugi::xml_node const &mapNode);
 	std::unique_ptr<MapLayer> LoadLayer(pugi::xml_node const &node);
@@ -205,7 +205,7 @@ private:
 	std::string mapFileName;
 	std::string mapFolder;
 	bool mapLoaded = false;
-	std::vector<std::shared_ptr<PhysBody>> collidersOnMap;
+	std::vector<std::unique_ptr<PhysBody>> collidersOnMap;
 };
 
 #endif // __MAP_H__
