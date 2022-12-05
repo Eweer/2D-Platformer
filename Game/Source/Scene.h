@@ -7,13 +7,6 @@
 
 struct SDL_Texture;
 
-struct SDL_Deleter
-{
-	void operator()(SDL_Window *p) const { SDL_DestroyWindow(p); }
-	void operator()(SDL_Renderer *p) const { SDL_DestroyRenderer(p); }
-	void operator()(SDL_Texture *p) const { SDL_DestroyTexture(p); }
-};
-
 class Scene : public Module
 {
 public:
@@ -21,29 +14,26 @@ public:
 	Scene();
 
 	// Destructor
-	virtual ~Scene();
+	~Scene() final;
 
 	// Called before render is available
-	bool Awake(pugi::xml_node& config);
+	bool Awake(pugi::xml_node& config) final;
 
 	// Called before the first frame
-	bool Start();
+	bool Start() final;
 
 	// Called before all Updates
-	bool PreUpdate();
+	bool PreUpdate() final;
 
 	// Called each loop iteration
-	bool Update(float dt);
+	bool Update(float dt) final;
 
 	// Called before all Updates
-	bool PostUpdate();
+	bool PostUpdate() final;
 
 	// Called before quitting
-	bool CleanUp();
-
-public:
-
-	//L02: DONE 3: Declare a Player attribute 
+	bool CleanUp() final;
+	
 	Player* player;
 
 private:

@@ -39,7 +39,6 @@
 	}						\
 }
 
-
 #define IN_RANGE(value, min, max) ((value >= min && value <= max) ? 1 : 0)
 #define TO_BOOL(a)  ((a != 0) ? true : false )
 

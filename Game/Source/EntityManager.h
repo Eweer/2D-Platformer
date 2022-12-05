@@ -4,7 +4,6 @@
 #include "Module.h"
 #include "Entity.h"
 #include "Map.h"
-#include "List.h"
 
 #include <deque>
 #include <utility>		//std::pair
@@ -29,7 +28,7 @@ public:
 	EntityManager();
 
 	// Destructor
-	virtual ~EntityManager();
+	~EntityManager() final;
 
 	// Called before render is available
 	bool Awake(pugi::xml_node&) final;

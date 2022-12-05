@@ -2,7 +2,6 @@
 #define __MAP_H__
 
 #include "Module.h"
-#include "List.h"
 #include "Point.h"
 #include "Defs.h"
 #include "Log.h"
@@ -156,7 +155,7 @@ public:
 	Map();
 
 	// Destructor
-	virtual ~Map();
+	~Map() final;
 
 	// Called before render is available
 	bool Awake(pugi::xml_node &conf) final;

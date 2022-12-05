@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="Source\Log.cpp">
-      <Filter>Utils</Filter>
-    </ClCompile>
     <ClCompile Include="Source\External\PugiXml\src\pugixml.cpp">
       <Filter>External\PugiXml</Filter>
     </ClCompile>
@@ -52,18 +49,12 @@
     <ClCompile Include="Source\Entity.cpp">
       <Filter>Source\Entities</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Log.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Defs.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\DynArray.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\List.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Log.h">
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="Source\Point.h">
@@ -74,9 +65,6 @@
     </ClInclude>
     <ClInclude Include="Source\External\PugiXml\src\pugixml.hpp">
       <Filter>External\PugiXml</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Queue.h">
-      <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="Source\App.h">
       <Filter>Headers</Filter>
@@ -131,6 +119,9 @@
     </ClInclude>
     <ClInclude Include="Source\BitMaskColliderLayers.h">
       <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Log.h">
+      <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

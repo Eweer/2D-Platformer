@@ -2,10 +2,9 @@
 #define __APP_H__
 
 #include "Module.h"
+#include "Defs.h"
 
 #include <list>
-#include "List.h"
-
 #include <memory>
 
 #include "PugiXml/src/pugixml.hpp"
@@ -22,7 +21,6 @@ class Audio;
 class Scene;
 class EntityManager;
 class Map;
-//L07 DONE 2: Add Physics module
 class Physics;
 
 class App
@@ -55,14 +53,24 @@ public:
 	const char* GetArgv(int index) const;
 	std::string GetTitle() const;
 	std::string GetOrganization() const;
-
-	// L03: DONE 1: Create methods to control that the real Load and Save happens at the end of the frame
+	
 	void LoadGameRequest();
-	void SaveGameRequest() ;
+	void SaveGameRequest();
 	bool LoadFromFile();
 	bool SaveToFile();
 	
 	uint GetLevelNumber() const;
+
+	// Modules
+	std::unique_ptr<Window> win;
+	std::unique_ptr<Input> input;
+	std::unique_ptr<Render> render;
+	std::unique_ptr<Textures> tex;
+	std::unique_ptr<Audio> audio;
+	std::unique_ptr<Scene> scene;
+	std::unique_ptr<EntityManager> entityManager;
+	std::unique_ptr<Map> map;
+	std::unique_ptr<Physics> physics;
 
 private:
 
@@ -83,21 +91,6 @@ private:
 
 	// Call modules after each loop iteration
 	bool PostUpdate();
-
-public:
-
-	// Modules
-	std::unique_ptr<Window> win;
-	std::unique_ptr<Input> input;
-	std::unique_ptr<Render> render;
-	std::unique_ptr<Textures> tex;
-	std::unique_ptr<Audio> audio;
-	std::unique_ptr<Scene> scene;
-	std::unique_ptr<EntityManager> entityManager;
-	std::unique_ptr<Map> map;
-	std::unique_ptr<Physics> physics;
-
-private:
 
 	int argc;
 	char** args;
