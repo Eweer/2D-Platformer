@@ -13,12 +13,6 @@
 #include <algorithm>
 #include <string>
 
-//  NULL just in case ----------------------
-
-#ifndef NULL
-#define NULL 0
-#endif
-
 // Deletes a buffer
 #define RELEASE( x )		\
 {							\
