@@ -2,6 +2,7 @@
 #define __WINDOW_H__
 
 #include "Module.h"
+#include "Defs.h"
 
 struct SDL_Window;
 struct SDL_Surface;
@@ -13,32 +14,35 @@ public:
 	Window();
 
 	// Destructor
-	virtual ~Window();
+	~Window() final;
 
 	// Called before render is available
-	bool Awake(pugi::xml_node&);
+	bool Awake(pugi::xml_node&) final;
 
 	// Called before quitting
-	bool CleanUp();
+	bool CleanUp() final;
 
-	// Changae title
-	void SetTitle(const char* title);
+	// Change title
+	void SetTitle(std::string const &title);
+
+	SDL_Window *GetWindow() const;
+
+	SDL_Surface *GetSurface() const;
 
 	// Retrive window size
-	void GetWindowSize(uint& width, uint& height) const;
+	void GetWindowSize(uint &w, uint &h) const;
 
 	// Retrieve window scale
 	uint GetScale() const;
 
-public:
+private:
 	// The window we'll be rendering to
-	SDL_Window* window;
+	SDL_Window* window = nullptr;
 
 	// The surface contained by the window
-	SDL_Surface* screenSurface;
+	SDL_Surface* screenSurface = nullptr;
 
-private:
-	SString title;
+	std::string title = "";
 	uint width;
 	uint height;
 	uint scale;

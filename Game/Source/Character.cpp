@@ -10,7 +10,6 @@
 #include "Physics.h"
 #include "Animation.h"
 
-
 constexpr uint Character_SIZE = 30;
 
 Character::Character() : Entity(ColliderLayers::UNKNOWN) {}
@@ -55,7 +54,6 @@ bool Character::Update()
 
 bool Character::CleanUp()
 {
-	//if(renderMode == RenderModes::IMAGE) app->tex->UnLoad(texture.image);
 	texture->CleanUp();
 	return true;
 }
@@ -65,7 +63,8 @@ void Character::OnCollision(PhysBody *physA, PhysBody *physB)
 	if(timeUntilReset >= 0) return;
 	switch(physB->ctype)
 	{
-		case ColliderLayers::ITEMS:
+		using enum ColliderLayers;
+		case ITEMS:
 			if(score < 99999)
 			{
 				score += (float)(100 * scoreMultiplier);
@@ -73,10 +72,10 @@ void Character::OnCollision(PhysBody *physA, PhysBody *physB)
 			}
 			LOG("Collision ITEMS");
 			break;
-		case ColliderLayers::UNKNOWN:
+		case UNKNOWN:
 			LOG("Collision UNKNOWN");
 			break;
-		case ColliderLayers::PLATFORMS:
+		case PLATFORMS:
 			LOG("Collision BOARD");
 			break;
 		default:
@@ -117,6 +116,57 @@ void Character::SetStartingPosition()
 	CreatePhysBody();
 }
 
+void Character::CreatePhysBody(Uint16 collisionCategory, Uint16 collisionMask)
+{
+	pugi::xml_node physicsNode = parameters.child("physics");
+
+	if(physicsNode.empty()) [[unlikely]]
+	{
+		LOG("Entity %s has no physics node", name.c_str());
+		return;
+	}
+
+	int height = physicsNode.attribute("height").as_int();
+	int width = physicsNode.attribute("width").as_int();
+	auto bodyType = (BodyType)GetParameterBodyType();
+	float restitution = physicsNode.attribute("restitution") ? physicsNode.attribute("restitution").as_float() : 1.0f;
+	float32 gravity = physicsNode.attribute("gravityscale") ? physicsNode.attribute("gravityscale").as_float() : 1.0f;
+
+	if(physicsNode.attribute("radius"))
+	{
+		int radius = physicsNode.attribute("radius").as_int()/2;
+		pBody = app->physics->CreateCircle(
+			position.x + radius/2,
+			position.y + radius/2,
+			radius,
+			bodyType,
+			restitution,
+			collisionCategory,
+			collisionMask
+		);
+	}
+	else if(physicsNode.attribute("width") && physicsNode.attribute("height"))
+	{
+		pBody = app->physics->CreateRectangle(
+			position.x,
+			position.y,
+			width / 2,
+			height / 2,
+			bodyType,
+			gravity,
+			restitution,
+			collisionCategory,
+			collisionMask
+		);
+	}
+	else [[unlikely]]
+	{
+		LOG("ERROR: Unknown shape of entity %s", name.c_str());
+		return;
+	}
+	pBody->listener = this;
+	pBody->ctype = (ColliderLayers)collisionCategory;
+}
 void Character::AddTexturesAndAnimationFrames()
 {
 	texture = std::make_unique<Animation>();
@@ -208,19 +258,20 @@ void Character::AddTexturesAndAnimationFrames()
 	free(folderList);
 }
 
-//	Let's just say that today is november 24th. Tomorrow is my birthday. It's 4.13 AM. I can't even think.
-//	BUT I'm just gonna leave this here and hope that I can fix it later.
-//	I'm so sorry about this. But hey, at least it works.
-//	If you have any issue don't hesitate to contact me. I'll be happy to help you.
-//	r(R"((([a-zA-Z]+(?:_??(?:(?!(?:_image|_static|(?:_*?anim\d+)|\d+)(?:\.png|\.jpg)))[a-zA-Z]*))_?(?:(image|static|(?:anim\d+)|\d+))(\d+)*(?:\.png|\.jpg)))"); 
-
-// haHA it didn't work. Improved version. Only took 8 minutes to fix it. I'm so proud of myself.
-// Overall I've been working on this regex for 3 hours and a half. I'm surprised it took so little.
-// https://regex101.com/r/8CRsUh/1
-// https://regex101.com/r/viuXac/2
-// final ? https://regex101.com/r/pdLoYK/1
-// https://regex101.com/r/VDIgWc/1
-//static const std::regex r(R"((([a-zA-Z]+(?:_??(?:(?!(?:_image|_static|(?:_*?anim\d+)|\d+)(?:\.png|\.jpg)))[a-zA-Z]*))_?(?:(image|static|(?:anim(?:\d+)*?)|\d+))(\d+)*(?:\.png|\.jpg))
-//))"); //std::smatch m;
-		//and im not even gonna use it.........................
-
+/*
+ *	Let's just say that today is november 24th. Tomorrow is my birthday. It's 4.13 AM. I can't even think.
+ *	BUT I'm just gonna leave this here and hope that I can fix it later.
+ *	I'm so sorry about this. But hey, at least it works.
+ *	If you have any issue don't hesitate to contact me. I'll be happy to help you.
+ *	r(R"((([a-zA-Z]+(?:_??(?:(?!(?:_image|_static|(?:_*?anim\d+)|\d+)(?:\.png|\.jpg)))[a-zA-Z]*))_?(?:(image|static|(?:anim\d+)|\d+))(\d+)*(?:\.png|\.jpg)))")
+ *
+ *  haHA it didn't work. Improved version. Only took 8 minutes to fix it. I'm so proud of myself.
+ *  Overall I've been working on this regex for 3 hours and a half. I'm surprised it took so little.
+ *  https://regex101.com/r/8CRsUh/1
+ *  https://regex101.com/r/viuXac/2
+ *  final ? https://regex101.com/r/pdLoYK/1
+ *  https://regex101.com/r/VDIgWc/1
+ *  static const std::regex r(R"((([a-zA-Z]+(?:_??(?:(?!(?:_image|_static|(?:_*?anim\d+)|\d+)(?:\.png|\.jpg)))[a-zA-Z]*))_?
+ *	 						  (?:(image|static|(?:anim(?:\d+)*?)|\d+))(\d+)*(?:\.png|\.jpg))))")  
+ *  and im not even gonna use it.........................
+*/

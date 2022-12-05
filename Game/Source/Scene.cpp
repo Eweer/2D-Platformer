@@ -26,13 +26,6 @@ bool Scene::Awake(pugi::xml_node& config)
 	LOG("Loading Scene");
 	bool ret = true;
 
-	// Iterate all objects in the scene
-	/*for(pugi::xml_node itemNode = config.child("item"); itemNode; itemNode = itemNode.next_sibling("item"))
-	{
-	//	auto* item = (Item*)app->entityManager->CreateEntity(ColliderLayers::ITEMS);
-		//item->parameters = itemNode;
-	}*/
-
 	// Instantiate the player using the entity manager
 	if (config.child("player")) {
 		app->entityManager->CreateEntity("player", config.child("player"));
@@ -48,15 +41,14 @@ bool Scene::Start()
 	app->map->Load();
 
 	// Set the window title with map/tileset info
-	SString title("Map:%dx%d Tiles:%dx%d Tilesets:%d",
-		app->map->GetWidth(),
-		app->map->GetHeight(),
-		app->map->GetTileWidth(),
-		app->map->GetTileHeight(),
-		app->map->GetTileSetSize()
-	);
+	std::string title = "Map:%dx%d Tiles:%dx%d Tilesets:%d"
+						+ app->map->GetWidth()
+						+ app->map->GetHeight()
+						+ app->map->GetTileWidth()
+						+ app->map->GetTileHeight()
+						+ app->map->GetTileSetSize();
 
-	app->win->SetTitle(title.GetString());
+	app->win->SetTitle(title.c_str());
 
 	return true;
 }

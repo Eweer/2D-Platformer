@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <string>
+#include <array>
 
 Render::Render() : Module()
 {
@@ -19,8 +20,7 @@ Render::Render() : Module()
 }
 
 // Destructor
-Render::~Render()
-{}
+Render::~Render() = default;
 
 // Called before render is available
 bool Render::Awake(pugi::xml_node& config)
@@ -36,7 +36,7 @@ bool Render::Awake(pugi::xml_node& config)
 		LOG("Using vsync");
 	}
 
-	renderer = SDL_CreateRenderer(app->win->window, -1, flags);
+	renderer = SDL_CreateRenderer(app->win->GetWindow(), -1, flags);
 
 	if(renderer == nullptr)
 	{
@@ -45,8 +45,8 @@ bool Render::Awake(pugi::xml_node& config)
 	}
 	else
 	{
-		camera.w = app->win->screenSurface->w;
-		camera.h = app->win->screenSurface->h;
+		camera.w = app->win->GetSurface()->w;
+		camera.h = app->win->GetSurface()->h;
 		camera.x = 0;
 		camera.y = 0;
 	}
@@ -148,8 +148,8 @@ bool Render::DrawTexture(SDL_Texture* texture, int x, int y, const SDL_Rect* sec
 	uint scale = app->win->GetScale();
 
 	SDL_Rect rect;
-	rect.x = (int)(camera.x * speed) + x * scale;
-	rect.y = (int)(camera.y * speed) + y * scale;
+	rect.x = (int)((float)camera.x * speed) + x * scale;
+	rect.y = (int)((float)camera.y * speed) + y * scale;
 
 	if(section != nullptr)
 	{
@@ -198,7 +198,7 @@ bool Render::DrawRectangle(const SDL_Rect& rect, Uint8 r, Uint8 g, Uint8 b, Uint
 		rec.h *= scale;
 	}
 
-	int result = (filled) ? SDL_RenderFillRect(renderer, &rec) : SDL_RenderDrawRect(renderer, &rec);
+	int result = filled ? SDL_RenderFillRect(renderer, &rec) : SDL_RenderDrawRect(renderer, &rec);
 
 	if(result != 0)
 	{
@@ -233,26 +233,26 @@ bool Render::DrawLine(int x1, int y1, int x2, int y2, Uint8 r, Uint8 g, Uint8 b,
 	return ret;
 }
 
-bool Render::DrawCircle(int x, int y, int radius, Uint8 r, Uint8 g, Uint8 b, Uint8 a, bool use_camera) const
+bool Render::DrawCircle(int x, int y, int radius, Uint8 r, Uint8 g, Uint8 b, Uint8 a) const
 {
 	bool ret = true;
-	uint scale = app->win->GetScale();
+	[[maybe_unused]] uint scale = app->win->GetScale();
 
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 	SDL_SetRenderDrawColor(renderer, r, g, b, a);
 
 	int result = -1;
-	SDL_Point points[360];
+	std::array<SDL_Point, 360> points{};
 
 	float factor = (float)M_PI / 180.0f;
 
 	for(uint i = 0; i < 360; ++i)
 	{
-		points[i].x = (int)(camera.x + x + radius * cos(i * factor));
-		points[i].y = (int)(camera.y + y + radius * sin(i * factor));
+		points[i].x = camera.x + x + (int)((float)radius * cos((float)i * factor));
+		points[i].y = camera.y + y + (int)((float)radius * sin((float)i * factor));
 	}
 
-	result = SDL_RenderDrawPoints(renderer, points, 360);
+	result = SDL_RenderDrawPoints(renderer, points.data(), 360);
 
 	if(result != 0)
 	{

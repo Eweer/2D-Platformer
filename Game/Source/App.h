@@ -2,12 +2,16 @@
 #define __APP_H__
 
 #include "Module.h"
+
+#include <list>
 #include "List.h"
+
+#include <memory>
 
 #include "PugiXml/src/pugixml.hpp"
 
-#define CONFIG_FILENAME		"config.xml"
-#define SAVE_STATE_FILENAME "save_game.xml"
+constexpr auto CONFIG_FILENAME = "config.xml";
+constexpr auto SAVE_STATE_FILENAME = "save_game.xml";
 
 // Modules
 class Window;
@@ -44,13 +48,13 @@ public:
 	bool CleanUp();
 
 	// Add a new module to handle
-	void AddModule(Module* module);
+	void AddModule(Module* mod);
 
 	// Exposing some properties for reading
 	int GetArgc() const;
 	const char* GetArgv(int index) const;
-	const char* GetTitle() const;
-	const char* GetOrganization() const;
+	std::string GetTitle() const;
+	std::string GetOrganization() const;
 
 	// L03: DONE 1: Create methods to control that the real Load and Save happens at the end of the frame
 	void LoadGameRequest();
@@ -83,29 +87,29 @@ private:
 public:
 
 	// Modules
-	Window* win;
-	Input* input;
-	Render* render;
-	Textures* tex;
-	Audio* audio;
-	Scene* scene;
-	EntityManager* entityManager;
-	Map* map;
-	Physics* physics;
+	std::unique_ptr<Window> win;
+	std::unique_ptr<Input> input;
+	std::unique_ptr<Render> render;
+	std::unique_ptr<Textures> tex;
+	std::unique_ptr<Audio> audio;
+	std::unique_ptr<Scene> scene;
+	std::unique_ptr<EntityManager> entityManager;
+	std::unique_ptr<Map> map;
+	std::unique_ptr<Physics> physics;
 
 private:
 
 	int argc;
 	char** args;
-	SString title;
-	SString organization;
+	std::string title;
+	std::string organization;
 
-	List<Module*> modules;
+	std::list<Module*> modules;
 	
 	pugi::xml_document configFile;
 	pugi::xml_node configNode;
 
-	uint frames;
+	uint frames = 0;
 	float dt;
 
 	bool saveGameRequested;
@@ -114,6 +118,6 @@ private:
 	uint levelNumber = 1;
 };
 
-extern App* app;
+extern std::unique_ptr<App> app;
 
 #endif	// __APP_H__

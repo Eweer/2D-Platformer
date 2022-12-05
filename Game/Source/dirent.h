@@ -18,6 +18,8 @@
 #	pragma GCC diagnostic ignored "-Wunused-function"
 #endif
 
+#pragma warning ( push, 0 )
+
 /*
  * Include windows.h without Windows Sockets 1.1 to prevent conflicts with
  * Windows Sockets 2.0.
@@ -1214,4 +1216,5 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+#pragma warning( pop )
 #endif /*DIRENT_H*/

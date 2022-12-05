@@ -20,52 +20,38 @@
 // Constructor
 App::App(int argc, char* args[]) : argc(argc), args(args)
 {
-	frames = 0;
-
-	input = new Input();
-	win = new Window();
-	render = new Render();
-	tex = new Textures();
-	audio = new Audio();
-	physics = new Physics();
-	scene = new Scene();
-	entityManager = new EntityManager();
-	map = new Map();
+	input = std::make_unique<Input>();
+	win = std::make_unique<Window>();
+	render = std::make_unique<Render>();
+	tex = std::make_unique<Textures>();
+	audio = std::make_unique<Audio>();
+	physics = std::make_unique<Physics>();
+	scene = std::make_unique<Scene>();
+	entityManager = std::make_unique<EntityManager>();
+	map = std::make_unique<Map>();
 
 	// Ordered for awake / Start / Update
 	// Reverse order of CleanUp
-	AddModule(input);
-	AddModule(win);
-	AddModule(tex);
-	AddModule(audio);
-	AddModule(physics);
-	AddModule(scene);
-	AddModule(entityManager);
-	AddModule(map);
+	AddModule(input.get());
+	AddModule(win.get());
+	AddModule(tex.get());
+	AddModule(audio.get());
+	AddModule(physics.get());
+	AddModule(scene.get());
+	AddModule(entityManager.get());
+	AddModule(map.get());
 
 	// Render last to swap buffer
-	AddModule(render);
+	AddModule(render.get());
 }
 
 // Destructor
-App::~App()
+App::~App() = default;
+
+void App::AddModule(Module* mod)
 {
-	// Release modules
-	ListItem<Module*>* item = modules.end;
-
-	while (item != NULL)
-	{
-		RELEASE(item->data);
-		item = item->prev;
-	}
-
-	modules.Clear();
-}
-
-void App::AddModule(Module* module)
-{
-	module->Init();
-	modules.Add(module);
+	mod->Init();
+	modules.push_back(mod);
 }
 
 // Called before render is available
@@ -76,16 +62,13 @@ bool App::Awake()
 
 	title = configNode.child("app").child("title").child_value(); 
 
-	ListItem<Module*>* item = modules.start;
-
-	while(item != nullptr)
+	for(auto const &item : modules)
 	{
-		if(pugi::xml_node node = configNode.child(item->data->name.c_str()); !item->data->Awake(node)) 
+		if(pugi::xml_node node = configNode.child(item->name.c_str());
+		   !item->Awake(node))
 		{
 			return false;
 		}
-		
-		item = item->next;
 	}
 
 	return true;
@@ -94,59 +77,47 @@ bool App::Awake()
 // Called before the first frame
 bool App::Start()
 {
-	bool ret = true;
-	ListItem<Module*>* item;
-	item = modules.start;
-
-	while (item != NULL && ret == true)
+	for(auto const &item : modules)
 	{
-		ret = item->data->Start();
-		item = item->next;
+		if(!item->Start()) return false;
 	}
 
-	return ret;
+	return true;
 }
 
 // Called each loop iteration
 bool App::Update()
 {
-	bool ret = true;
 	PrepareUpdate();
 
-	if (input->GetWindowEvent(WE_QUIT) == true)
-		ret = false;
-
-	if (ret == true)
-		ret = PreUpdate();
-
-	if (ret == true)
-		ret = DoUpdate();
-
-	if (ret == true)
-		ret = PostUpdate();
+	if (input->GetWindowEvent(WE_QUIT))
+		return false;
+	if(!PreUpdate())
+		return false;
+	if(!DoUpdate())
+		return false;
+	if(!PostUpdate())
+		return false;
 
 	FinishUpdate();
-	return ret;
+	return true;
 }
 
 // Load config from XML file
 bool App::LoadConfig()
 {
-	bool ret = false;
-
-	// L01: DONE 3: Load config.xml file using load_file() method from the xml_document class
-	pugi::xml_parse_result parseResult = configFile.load_file("config.xml");
-
-	// L01: DONE 3: Check result for loading errors
-	if (parseResult) {
-		ret = true;
+	if (pugi::xml_parse_result parseResult = configFile.load_file("config.xml"); 
+		parseResult) 
+	{
 		configNode = configFile.child("config");
 	}
-	else {
+	else
+	{
 		LOG("Error in App::LoadConfig(): %s", parseResult.description());
+		return false;
 	}
 
-	return ret;
+	return true;
 }
 
 // ---------------------------------------------
@@ -165,82 +136,46 @@ void App::FinishUpdate()
 // Call modules before each loop iteration
 bool App::PreUpdate()
 {
-	bool ret = true;
-	ListItem<Module*>* item;
-	item = modules.start;
-	Module* pModule = NULL;
-
-	for (item = modules.start; item != NULL && ret == true; item = item->next)
+	for(auto const &item : modules)
 	{
-		pModule = item->data;
-
-		if (pModule->active == false) {
-			continue;
-		}
-
-		ret = item->data->PreUpdate();
+		if(!item->active) continue;
+		if(!item->PreUpdate()) return false;
 	}
 
-	return ret;
+	return true;
 }
 
 // Call modules on each loop iteration
 bool App::DoUpdate()
 {
-	bool ret = true;
-	ListItem<Module*>* item;
-	item = modules.start;
-	Module* pModule = NULL;
-
-	for (item = modules.start; item != NULL && ret == true; item = item->next)
+	for(auto const &item : modules)
 	{
-		pModule = item->data;
-
-		if (pModule->active == false) {
-			continue;
-		}
-
-		ret = item->data->Update(dt);
+		if(!item->active) continue;
+		if(!item->Update(dt)) return false;
 	}
 
-	return ret;
+	return true;
 }
 
 // Call modules after each loop iteration
 bool App::PostUpdate()
 {
-	bool ret = true;
-	ListItem<Module*>* item;
-	Module* pModule = NULL;
-
-	for (item = modules.start; item != NULL && ret == true; item = item->next)
+	for(auto const &item : modules)
 	{
-		pModule = item->data;
-
-		if (pModule->active == false) {
-			continue;
-		}
-
-		ret = item->data->PostUpdate();
+		if(!item->active) continue;
+		if(!item->PostUpdate()) return false;
 	}
 
-	return ret;
+	return true;
 }
 
 // Called before quitting
 bool App::CleanUp()
 {
-	bool ret = true;
-	ListItem<Module*>* item;
-	item = modules.end;
-
-	while (item != NULL && ret == true)
-	{
-		ret = item->data->CleanUp();
-		item = item->prev;
-	}
-
-	return ret;
+	for(auto const &item : modules)
+		if(!item->CleanUp()) return false;
+	
+	return true;
 }
 
 // ---------------------------------------
@@ -255,19 +190,19 @@ const char* App::GetArgv(int index) const
 	if (index < argc)
 		return args[index];
 	else
-		return NULL;
+		return nullptr;
 }
 
 // ---------------------------------------
-const char* App::GetTitle() const
+std::string App::GetTitle() const
 {
-	return title.GetString();
+	return title;
 }
 
 // ---------------------------------------
-const char* App::GetOrganization() const
+std::string App::GetOrganization() const
 {
-	return organization.GetString();
+	return organization;
 }
 
 // L02: DONE 1: Implement methods to request load / save and methods 
@@ -298,17 +233,15 @@ bool App::LoadFromFile()
 		return false;
 	}
 	
-	ListItem<Module*>* item = modules.start;
- 
-	while (item != nullptr)
+	for(auto const &item : modules)
 	{
-		if(const auto moduleName = item->data->name.c_str();
-		   !item->data->LoadState(gameStateFile.child("save_state").child(moduleName)))
+		if(const auto moduleName = item->name.c_str();
+		   !item->LoadState(gameStateFile.child("save_state").child(moduleName)))
 		{
 			return false;
 		}
-		item = item->next;
 	}
+
 	return !(loadGameRequested = false);
 }
 
@@ -318,21 +251,16 @@ bool App::SaveToFile()
 {
 	auto saveDoc = std::make_unique<pugi::xml_document>();
 	pugi::xml_node saveStateNode = saveDoc->append_child("save_state");
-
-	ListItem<Module*>* item = modules.start;
-
-	while (item != nullptr)
+	for(auto const &item : modules)
 	{
-		if(item->data->HasSaveData())
+		if(item->HasSaveData())
 		{
-			if(auto ret = item->data->SaveState(saveStateNode); !ret.empty())
+			if(auto ret = item->SaveState(saveStateNode); !ret.empty())
 				saveStateNode.child("save_state").append_copy(ret);
 			else
-				LOG("Error saving state of module %s", item->data->name.c_str());
+				LOG("Error saving state of module %s", item->name.c_str());
 		}
-		item = item->next;
 	}
-
 	saveGameRequested = saveDoc->save_file("save_game.xml");
 
 	return !saveGameRequested;

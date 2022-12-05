@@ -1,7 +1,6 @@
 #ifndef __MODULE_H__
 #define __MODULE_H__
 
-#include "SString.h"
 #include <string>
 
 #include "PugiXml/src/pugixml.hpp"
@@ -13,8 +12,9 @@ class Module
 {
 public:
 
-	Module() : active(false)
-	{}
+	Module() = default;
+	
+	virtual ~Module() = default;
 
 	void Init()
 	{
@@ -56,8 +56,7 @@ public:
 	{
 		return true;
 	}
-
-	// L03: DONE 2: Create new virtual methods to LoadState / SaveState
+	
 	virtual bool LoadState(pugi::xml_node const &)
 	{
 		return true;
@@ -70,7 +69,7 @@ public:
 
 	virtual void OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 	{
-	
+		// To Override
 	}
 
 	virtual bool HasSaveData() const
@@ -79,7 +78,7 @@ public:
 	}
 
 	std::string name;
-	bool active;
+	bool active = false;
 };
 
 #endif // __MODULE_H__

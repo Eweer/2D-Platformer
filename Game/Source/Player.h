@@ -30,9 +30,9 @@ public:
 	void OnCollision(PhysBody* physA, PhysBody* physB) final;
 
 private:
-	entityJump jump;
-	uint cameraXCorrection;
-	uint cameraYCorrection;
+	CharacterJump jump;
+	uint cameraXCorrection = 0;
+	uint cameraYCorrection  = 0;
 
 
 

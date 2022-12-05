@@ -61,7 +61,7 @@ bool Player::Update()
 			if((uint)score > scoreList.first)
 			{
 				scoreList.first = (uint)score;
-				//app->SaveToConfig("scene", "Character", "highscore", std::to_string(scoreList.first));
+				//app->SaveToConfig("scene", "Character", "highscore", std::to_string(scoreList.first))
 			}
 			scoreList.second = (uint)score;
 			ResetScore();
@@ -128,8 +128,8 @@ bool Player::Update()
 	}
 	
 	//Update player position in pixels
-	position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x) - (int)(pBody->width * 1.5f);
-	position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y) - (int)(pBody->height * 3.5f);
+	position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x) - (int)((float)pBody->width * 1.5f);
+	position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y) - (int)((float)pBody->height * 3.5f);
 	app->render->DrawCharacterTexture(texture->UpdateAndGetFrame(), iPoint(position.x, position.y), (bool) dir, texture->GetFlipPivot());
 	
 	if(moveCamera && app->render->camera.x <= 0 && position.x >= startingPosition.x)
@@ -170,6 +170,22 @@ void Player::OnCollision(PhysBody* physA, PhysBody* physB) {
 				jump = {false, 0, jump.maxJumps, 0, jump.jumpImpulse};
 			}
 			break;
+		case PLAYER:
+		{
+			break;
+		}
+		case ENEMIES:
+		{
+			break;
+		}
+		case TRIGGERS:
+		{
+			break;
+		}
+		case CHECKPOINTS:
+		{
+			break;
+		}
 		case UNKNOWN:
 			LOG("Collision UNKNOWN");
 			break;

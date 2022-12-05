@@ -1,13 +1,13 @@
 #pragma once
 #include "Entity.h"
 
-struct entityJump
+struct CharacterJump
 {
-	bool bJumping;
-	int currentJumps;
-	int maxJumps;
-	int timeSinceLastJump;
-	float jumpImpulse;
+	bool bJumping = false;
+	int currentJumps = 0;
+	int maxJumps = 0;
+	int timeSinceLastJump = 0;
+	float jumpImpulse = 0.0f;
 };
 
 class Character : public Entity
@@ -42,11 +42,13 @@ public:
 
 	std::pair<uint, uint> GetScoreList() const;
 	
+	void CreatePhysBody(Uint16 collisionCategory = 0, Uint16 collisionMask = 0) override;
+	
 	void SetStartingPosition();
 
 	void AddTexturesAndAnimationFrames() override;
 	
-	virtual void jumpOnNextUpdate(bool bStartJumpOnUpdate) {};
+	virtual void jumpOnNextUpdate(bool bStartJumpOnUpdate) { /*Method toOverride*/ };
 
 	float score = 0;
 	uint scoreMultiplier = 1;

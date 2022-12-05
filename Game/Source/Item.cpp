@@ -11,7 +11,7 @@
 #include "Map.h"
 #include "Entity.h"
 
-#include <cctype> //tolower;
+#include <cctype> //tolower
 
 Item::Item() : Entity(ColliderLayers::ITEMS)
 {
@@ -22,7 +22,7 @@ Item::Item(TileInfo const *tileInfo, iPoint pos, int width, int height) : Entity
 {
 	name = "item";
 	type2 = (*(std::get_if<std::string>(&tileInfo->properties.find("Type")->second)));
-	type2[0] = std::tolower(type2[0]);
+	type2[0] = (char)std::tolower(type2[0]);
 	imageVariation = *(std::get_if<int>(&tileInfo->properties.find("ImageVariation")->second));
 	startingPosition = pos;
 	position = startingPosition;
@@ -54,18 +54,13 @@ bool Item::Awake()
 
 bool Item::Start() 
 {
-	using enum ColliderLayers;
-	uint16 maskFlag = 0x0001;
-	maskFlag = (uint16)(PLAYER);
-	CreatePhysBody((uint16)ITEMS, maskFlag);
-	
 	return true;
 }
 
 bool Item::Update()
 {  
-	//position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x) - 16;
-	//position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y) - 16;
+	//position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x) - 16
+	//position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y) - 16
 
 	app->render->DrawTexture(anim->GetCurrentFrame(), position.x, position.y - height);
 
@@ -79,5 +74,5 @@ bool Item::CleanUp()
 
 void Item::AddTexturesAndAnimationFrames()
 {
-
+	// TODO
 }

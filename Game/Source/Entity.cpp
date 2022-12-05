@@ -16,6 +16,9 @@
 #include <memory>
 #include <variant>
 
+#pragma warning(push)
+#pragma warning(disable : 123)
+
 Entity::Entity(ColliderLayers type) : type(type) {}
 
 Entity::Entity(pugi::xml_node const &itemNode) : parameters(itemNode)
@@ -35,7 +38,7 @@ Entity::Entity(pugi::xml_node const &itemNode) : parameters(itemNode)
 
 	if(!entityTypeStrToEnum.contains(m[0]))
 	{
-		LOG("%s string does not have a mapped enum", m[0]);
+		LOG("%s does not have a mapped enum", itemNode.name());
 		return;
 	}
 
@@ -200,73 +203,25 @@ void Entity::AddTexturesAndAnimationFrames()
 	free(nameList);
 }
 
-void Entity::CreatePhysBody(Uint16 collisionCategory, Uint16 collisionMask)
-{
-	pugi::xml_node physicsNode = parameters.child("physics");
-	
-	if(physicsNode.empty()) [[unlikely]]
-	{
-		LOG("Entity %s has no physics node", name.c_str());
-		return;
-	}
-	
-	int height = physicsNode.attribute("height").as_int();
-	int width = physicsNode.attribute("width").as_int();
-	auto bodyType = (BodyType)GetParameterBodyType();
-	float restitution = physicsNode.attribute("restitution") ? physicsNode.attribute("restitution").as_float() : 1.0f;
-	float32 gravity = physicsNode.attribute("gravityscale") ? physicsNode.attribute("gravityscale").as_float() : 1.0f;
-
-	if(physicsNode.attribute("radius"))
-	{
-		int radius = physicsNode.attribute("radius").as_int()/2;
-		pBody = app->physics->CreateCircle(
-			position.x + radius/2,
-			position.y + radius/2,
-			radius,
-			bodyType,
-			restitution,
-			collisionCategory,
-			collisionMask
-		);
-	}
-	else if(physicsNode.attribute("width") && physicsNode.attribute("height"))
-	{
-		pBody = app->physics->CreateRectangle(
-			position.x,
-			position.y,
-			width / 2,
-			height / 2,
-			bodyType,
-			gravity,
-			restitution,
-			collisionCategory,
-			collisionMask
-		);
-	}
-	else [[unlikely]]
-	{
-		LOG("ERROR: Unknown shape of entity %s", name.c_str());
-		return;
-	}
-	pBody->listener = this;
-	pBody->ctype = (ColliderLayers)collisionCategory;
-}
-
 uint Entity::GetParameterBodyType() const
 {
+	using enum BodyType;
 	switch(str2int(parameters.child("physics").attribute("bodytype").as_string()))
 	{
 		case str2int("static"):
-			return (uint)BodyType::STATIC;
+			return (uint)STATIC;
 			break;
 		case str2int("dynamic"):
-			return (uint)BodyType::DYNAMIC;
+			return (uint)DYNAMIC;
 			break;
 		case str2int("kinematic"):
-			return (uint)BodyType::KINEMATIC;
+			return (uint)KINEMATIC;
 			break;
 		default:
 			LOG("ERROR: Invalid body type");
 	}
-	return (uint)BodyType::UNKNOWN;
+	return (uint)UNKNOWN;
 }
+
+
+#pragma warning( pop )

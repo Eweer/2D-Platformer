@@ -19,6 +19,8 @@
 #ifndef BOX2D_H
 #define BOX2D_H
 
+#pragma warning( push, 0 )
+
 /**
 \mainpage Box2D API Documentation
 
@@ -64,5 +66,7 @@ For discussion please visit http://box2d.org/forum
 #include "Dynamics/Joints/b2RopeJoint.h"
 #include "Dynamics/Joints/b2WeldJoint.h"
 #include "Dynamics/Joints/b2WheelJoint.h"
+
+#pragma warning( pop )
 
 #endif

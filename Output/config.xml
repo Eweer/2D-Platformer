@@ -24,7 +24,7 @@
 	<!-- Animstyle: ONCE = 0 | LOOP_FROM_START = 1 | FORWARD_BACKWARD = 2 | LOOP_FORWARD_BACKWARD = 3 | NEVER = 4 -->
 	<scene assetpath="Assets/" texturepath="Assets/Textures/" audiopath="Assets/Audio/" fxfolder="Fx/">
 		<player x="120" y="420" renderable="true" maxjumps = "2" jumpimpulse = "5" currentcharacter="Mage">
-			<physics bodytype="dynamic" width="46d" height="50" gravityscale="1" restitution="0" shape="rectangle"/>
+			<physics bodytype="dynamic" width="46" height="50" gravityscale="1" restitution="0" shape="rectangle"/>
 			<animationdata  width="128" height="128" pivotx="42" pivoty="85" animstyle="1" animspeed="1" animloop="true" name="player" animpath="Assets/Animations/Player/"/>
 			<animation name="idle" style="4" speed="0.1" frames="3"/>
 			<animation name="walk" style="4" speed="0.2" frames="4"/>

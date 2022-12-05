@@ -30,7 +30,7 @@ bool Physics::Start()
 	LOG("Creating Physics 2D environment");
 
 	// Create a new World
-	world = new b2World(b2Vec2(GRAVITY_X, -GRAVITY_Y));
+	world = std::make_unique<b2World>(b2Vec2(GRAVITY_X, -GRAVITY_Y));
 
 	// Set this module as a listener for contacts
 	world->SetContactListener(this);
@@ -174,10 +174,9 @@ bool Physics::CleanUp()
 {
 	LOG("Destroying physics world");
 
-	// Delete the whole physics world!
-	RELEASE(world)
-
-		return true;
+	world.reset();
+	
+	return true;
 }
 
 
@@ -229,16 +228,17 @@ std::unique_ptr<PhysBody> Physics::CreateCircle(int x, int y, int radius, BodyTy
 	b2BodyDef body;
 	switch (type)
 	{
-		case BodyType::DYNAMIC:
+		using enum BodyType;
+		case DYNAMIC:
 			body.type = b2_dynamicBody;
 			break;
-		case BodyType::STATIC:
+		case STATIC:
 			body.type = b2_staticBody;
 			break;
-		case BodyType::KINEMATIC:
+		case KINEMATIC:
 			body.type = b2_kinematicBody;
 			break;
-		case BodyType::UNKNOWN:
+		case UNKNOWN:
 			LOG("CreateRectangle Received UNKNOWN BodyType");
 			return nullptr;
 	}
@@ -334,6 +334,7 @@ std::unique_ptr<PhysBody> Physics::CreatePhysBody(b2Body *body, iPoint width_hei
 //---- Mouse
 b2MouseJoint *Physics::CreateMouseJoint(PhysBody *origin, PhysBody *target, b2Vec2 position, float dampingRatio, float frequecyHz, float maxForce)
 {
+	// TODO: Make so it works if camera moves
 	b2MouseJointDef mJointDef;
 	mJointDef.bodyA = origin->body;
 	mJointDef.bodyB = target->body;
@@ -452,16 +453,9 @@ b2Vec2 Physics::GetWorldGravity() const
 }
 
 //---- Destroy
-void Physics::DestroyBody(b2Body *b)
+void Physics::DestroyBody(b2Body *b) const
 {
 	if (b) world->DestroyBody(b);
-}
-
-void Physics::DestroyPhysBody(PhysBody *b)
-{
-	DestroyBody(b->body);
-	if (b) delete b;
-
 }
 
 //--------------- PhysBody

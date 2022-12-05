@@ -224,8 +224,7 @@ public:
 
 	b2Vec2 GetWorldGravity() const;
 
-	void DestroyBody(b2Body *b = nullptr);
-	void DestroyPhysBody(PhysBody *b = nullptr);
+	void DestroyBody(b2Body *b = nullptr) const;
 
 	// Get Info
 	bool IsDebugActive() const;
@@ -246,7 +245,7 @@ private:
 	bool stepActive = true;
 
 	// Box2D World
-	b2World *world = nullptr;
+	std::unique_ptr<b2World>world = nullptr;
 	b2Body *ground = nullptr;
 
 	// Mouse Joint

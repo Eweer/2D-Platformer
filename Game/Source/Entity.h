@@ -70,11 +70,11 @@ public:
 
 	virtual void AddTexturesAndAnimationFrames();
 
-	void CreatePhysBody(Uint16 collisionCategory = 0, Uint16 collisionMask = 0);
+	virtual void CreatePhysBody(Uint16 collisionCategory = 0, Uint16 collisionMask = 0) {};
 
 	uint GetParameterBodyType() const;
 
-	virtual void OnCollision(PhysBody *physA, PhysBody *physB) {};
+	virtual void OnCollision(PhysBody *physA, PhysBody *physB) { /* Method to Override */ };
 
 	bool active = true;
 
