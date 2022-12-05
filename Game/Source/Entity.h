@@ -86,7 +86,7 @@ public:
 	std::unique_ptr<Animation> texture;
 	int imageVariation = 0;
 	RenderModes renderMode = RenderModes::UNKNOWN;
-	std::shared_ptr<PhysBody> pBody;
+	std::unique_ptr<PhysBody> pBody;
 
 	pugi::xml_node parameters;
 	std::string texturePath;
