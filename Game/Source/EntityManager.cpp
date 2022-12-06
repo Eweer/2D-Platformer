@@ -6,17 +6,21 @@
 #include "Scene.h"
 #include "BitMaskColliderLayers.h"
 #include "Animation.h"
+#include "Physics.h"
 
 #include "Defs.h"
 #include "Log.h"
 #include "dirent.h"
 
 #include <algorithm>
+#include <ranges>
 #include <vector>
 #include <regex>
 #include <variant>
-#include <string>		//std::string, std::stoi
-#include <cctype>		//std::tolower
+#include <string>		// std::string, std::stoi
+#include <cctype>		// std::tolower
+
+#include <Box2D/Box2D/Box2D.h>
 
 EntityManager::EntityManager() : Module()
 {
@@ -275,6 +279,7 @@ bool EntityManager::Update(float dt)
 			for(auto const &[key, anim] : entityInfo.animation)
 			{
 				anim->UpdateAndGetFrame();
+				CreateAllColliders();
 			}
 		}
 		for(auto const &entity : entityInfo.entities)
@@ -295,8 +300,52 @@ void EntityManager::CreateAllColliders()
 		for(auto const &entity : entityInfo.entities)
 		{
 			if(!IsEntityActive(entity.get())) continue;
-			
-			
+			if(StrEquals(entity->name, "item"))
+			{
+				auto item = dynamic_cast<Item *>(entity.get());
+
+				// Create PhysBody
+				std::unique_ptr<PhysBody>physBodyPtr(
+					app->physics->CreatePhysBody(
+						app->physics->CreateBody(item->position),
+						iPoint(item->width, item->height),
+						ColliderLayers::ITEMS
+					)
+				);
+				item->pBody = std::move(physBodyPtr);
+
+				// Fill fixtureDef (all colliders of item) of PhysBody)
+				for(auto const &collider : item->info->collider)
+				{
+					ShapeData shape(collider.shape, collider.points);
+					std::unique_ptr<b2FixtureDef> fixtureDef(
+						app->physics->CreateFixtureDef(
+							shape,
+							collider.cat,
+							(uint16)ColliderLayers::ITEMS,
+							true
+						)
+					);
+					item->pBody->fixtures.push_back(std::move(fixtureDef));
+				}
+
+				// If the body has colliders
+				if(!item->pBody->fixtures.empty())
+				{
+					try
+					{
+						std::ranges::reverse(item->pBody->fixtures);
+						auto physBody = item->pBody.get();
+						const b2FixtureDef *fixtureDef = physBody->fixtures.front().get();
+						auto itemBody = physBody->body;
+						itemBody->CreateFixture(fixtureDef);
+					}
+					catch(...)
+					{
+						std::cout << "asd" << std::endl;
+					}
+				}
+			}
 		}
 	}
 }

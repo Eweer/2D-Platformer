@@ -85,6 +85,8 @@ bool Player::Update()
 
 	b2Vec2 vel = pBody->body->GetLinearVelocity();
 	b2Vec2 impulse = b2Vec2_zero;
+	float maxVel = 5.0f;
+	bool moveCamera = false;
 
 	if(app->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN && !jump.bJumping && jump.currentJumps <= jump.maxJumps)
 	{
@@ -98,12 +100,10 @@ bool Player::Update()
 		pBody->body->ApplyLinearImpulse(b2Vec2(0, impulse.y), pBody->body->GetWorldCenter(), true);
 	}
 
-	float maxVel = 5.0f;
-	bool moveCamera = false;
-
 	if(app->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
 	{
-		impulse.x = b2Max(vel.x - 0.25f, maxVel * -1);
+		if(vel.y != 0) impulse.x = b2Max(vel.x - 0.15f, maxVel * -1);
+		else impulse.x = b2Max(vel.x - 0.25f, maxVel * -1);
 		moveCamera = true;
 		if(texture->GetCurrentAnimName() != "walk")
 			texture->SetCurrentAnimation("walk");
@@ -111,7 +111,8 @@ bool Player::Update()
 	}
 	if(app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
 	{
-		impulse.x = b2Min(vel.x + 0.25f, maxVel);
+		if(vel.y != 0) impulse.x = b2Min(vel.x + 0.15f, maxVel);
+		else impulse.x = b2Min(vel.x + 0.25f, maxVel);
 		moveCamera = true;
 		if(texture->GetCurrentAnimName() != "walk")
 			texture->SetCurrentAnimation("walk");
@@ -136,12 +137,12 @@ bool Player::Update()
 	{
 		if(abs(app->render->camera.x) + cameraXCorrection <= app->map->GetWidth() * app->map->GetTileWidth())
 		{
-			app->render->camera.x -= (int)(vel.x * 0.90);
+			app->render->camera.x -= (int)(vel.x * 0.98);
 			if(app->render->camera.x > 0) app->render->camera.x = 0;
 		}
 		else if(vel.x < 0)
 		{
-			app->render->camera.x -= (int)(vel.x * 0.90);
+			app->render->camera.x -= (int)(vel.x * 0.98);
 		}
 	}
 	return true;
