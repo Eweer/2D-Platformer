@@ -92,14 +92,17 @@ public:
 		else LOG("Error in creating Shape (ShapeData). No shape with name %s exists", name);
 	}
 
-	b2Shape *CreateShape()
+	b2Shape *CreateShape(b2Vec2 fixPos = b2Vec2(0,0))
 	{
 		switch (shape.get()->GetType())
 		{
 			case b2Shape::Type::e_circle:
 			{
 				if (!data.empty())
+				{
 					dynamic_cast<b2CircleShape *>(shape.get())->m_radius = PIXEL_TO_METERS(data[0].x);
+					dynamic_cast<b2CircleShape *>(shape.get())->m_p = fixPos;
+				}
 				else
 					LOG("Radius for creating circle shape not found.");
 				break;
@@ -223,7 +226,8 @@ public:
 		bool isSensor = false,
 		float density = 1.0f,
 		float friction = 1.0f,
-		float restitution = 0.0f
+		float restitution = 0.0f,
+		b2Vec2 fixPos = b2Vec2(0, 0)
 	) const;
 
 	std::unique_ptr<PhysBody> CreatePhysBody(

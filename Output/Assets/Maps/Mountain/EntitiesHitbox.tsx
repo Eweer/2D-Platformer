@@ -37,7 +37,7 @@
   </properties>
   <image width="128" height="128" source="../../Animations/Player/Mage/Walk/walk2.png"/>
   <objectgroup draworder="index" id="3">
-   <object id="2" name="CharacterOutline" class="Sensor" x="20" y="54" width="43" height="58">
+   <object id="2" name="Sensor" class="Dynamic" x="20" y="54" width="43" height="58">
     <polygon points="5,13 14,3 32,4 43,15 42,33 37,40 38,50 34,53 12,53 9,50"/>
    </object>
    <object id="4" name="Ground" class="Dynamic" x="40" y="103" width="7" height="7">

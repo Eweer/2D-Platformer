@@ -10,6 +10,8 @@
 #include "Physics.h"
 #include "Animation.h"
 
+#include <bit>		//std::bit_cast
+
 constexpr uint Character_SIZE = 30;
 
 Character::Character() : Entity(ColliderLayers::UNKNOWN) {}
@@ -109,8 +111,6 @@ void Character::CreatePhysBody()
 	
 	float32 gravity = currentNode.attribute("gravityscale") ? currentNode.attribute("gravityscale").as_float() : 1.0f;
 	float32 restitution = currentNode.attribute("restitution") ? currentNode.attribute("restitution").as_float() : 1.0f;
-	float32 density = currentNode.attribute("density") ? currentNode.attribute("density").as_float() : 1.0f;
-	float32 friction = currentNode.attribute("friction") ? currentNode.attribute("friction").as_float() : 1.0f;
 		
 	// <properties/> (or <animation> if properties doesn't exist
 	if(currentNode = currentNode.parent().child("animationdata").first_child();
@@ -137,9 +137,10 @@ void Character::CreatePhysBody()
 	// <collidergroup>
 	for(auto const &colliderGroupNode : currentNode.children("collidergroup"))
 	{
-		auto bodyType = GetParameterBodyType(colliderGroupNode.attribute("class").as_string());
-
-		iPoint width_height(colliderGroupNode.attribute("width").as_int(), colliderGroupNode.attribute("height").as_int());
+		iPoint width_height(
+			colliderGroupNode.attribute("width").as_int(),
+			colliderGroupNode.attribute("height").as_int()
+		);
 
 		if(!pBody)
 		{
@@ -147,6 +148,8 @@ void Character::CreatePhysBody()
 				colliderGroupNode.first_child().attribute("x").as_int(),
 				colliderGroupNode.first_child().attribute("y").as_int()
 			};
+			
+			auto bodyType = GetParameterBodyType(colliderGroupNode.attribute("class").as_string());
 			
 			auto bodyPtr = app->physics->CreateBody(
 				position + colliderOffset,
@@ -183,7 +186,9 @@ void Character::CreatePhysBody()
 			std::string shapeType = elem.name();
 			std::vector<b2Vec2> tempData;
 			ShapeData shape;
-
+			float32 density = currentNode.attribute("density") ? currentNode.attribute("density").as_float() : 0.0f;
+			bool bSensor = currentNode.attribute("sensor").as_bool();
+				
 			if(StrEquals(shapeType, "chain") || StrEquals(shapeType, "polygon"))
 			{
 				const std::string xyStr = elem.attribute("points").as_string();
@@ -215,7 +220,7 @@ void Character::CreatePhysBody()
 			{
 				tempData.push_back(
 					{
-						PIXEL_TO_METERS(elem.attribute("radius").as_int()),
+						colliderGroupNode.attribute("radius").as_float(),
 						0
 					}
 				);
@@ -223,16 +228,34 @@ void Character::CreatePhysBody()
 
 			if(!tempData.empty())
 			{
+				b2Vec2 fixPos(0, 0);
 				shape.Create(shapeType, tempData);
+				if(shape.shape.get()->GetType() == b2Shape::e_circle)
+				{
+					iPoint tempPos = {
+						elem.attribute("x").as_int() - colliderOffset.x,
+						elem.attribute("y").as_int() - colliderOffset.y
+					};	
+					
+					fixPos = {
+						PIXEL_TO_METERS(tempPos.x),
+						PIXEL_TO_METERS(tempPos.y)
+					};
+				}
+
+				float32 friction = elem.attribute("friction") ? elem.attribute("friction").as_float() : 1.0f;
+				
 				auto fixtureDef = app->physics->CreateFixtureDef(
-						shape,
-						static_cast<uint16>(type),
-						maskFlag,
-						currentNode.attribute("sensor").as_bool(),
-						density,
-						friction,
-						restitution
+					shape,
+					static_cast<uint16>(type),
+					maskFlag,
+					bSensor,
+					density,
+					friction,
+					restitution,
+					fixPos
 				);
+
 				pBody->body->CreateFixture(fixtureDef.get());
 			}
 		}

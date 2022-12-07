@@ -107,7 +107,7 @@ bool Physics::PostUpdate()
 				case b2Shape::Type::e_circle:
 				{
 					auto const circleShape = (b2CircleShape *)f->GetShape();
-					b2Vec2 pos = f->GetBody()->GetPosition();
+					b2Vec2 pos = f->GetBody()->GetPosition() + circleShape->m_p;
 					app->render->DrawCircle(METERS_TO_PIXELS(pos.x), METERS_TO_PIXELS(pos.y), METERS_TO_PIXELS(circleShape->m_radius), 255, 255, 255);
 					break;
 				}
@@ -311,10 +311,10 @@ b2Body *Physics::CreateBody(iPoint pos, BodyType type, float angle, fPoint dampi
 	return world->CreateBody(&body);
 }
 
-std::unique_ptr<b2FixtureDef> Physics::CreateFixtureDef(ShapeData &shapeData, uint16 cat, uint16 mask, bool isSensor, float density, float friction, float restitution) const
+std::unique_ptr<b2FixtureDef> Physics::CreateFixtureDef(ShapeData &shapeData, uint16 cat, uint16 mask, bool isSensor, float density, float friction, float restitution, b2Vec2 fixPos) const
 {
 	auto fixture = std::make_unique<b2FixtureDef>();
-	fixture->shape = shapeData.CreateShape();
+	fixture->shape = shapeData.CreateShape(fixPos);
 	fixture->density = density;
 	fixture->friction = friction;
 	fixture->restitution = restitution;

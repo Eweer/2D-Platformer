@@ -22,29 +22,30 @@
 	</audio>
 
 	<scene assetpath="Assets/" texturepath="Assets/Animations/" audiopath="Assets/Audio/" fxfolder="Fx/" musicfolder="Music/">
-		<player name="Player" class="Mage" x="44" y="477" renderable="true" maxjumps = "2" jumpimpulse = "5">
-			<physics bodytype="dynamic" gravityscale="1" restitution="0" density="1" friction="1" colliderlayers="2"/>				
+		<player name="Player" class="Mage" x="44" y="427" renderable="true" maxjumps = "2" jumpimpulse = "5">
+			<physics bodytype="dynamic" gravityscale="1" restitution="0" friction="1" colliderlayers="2"/>				
 			<animationdata>
 				<properties width="128" height="128" pivotx="42" pivoty="85" animstyle="4" animloop="true"/>
 				<animation name="idle" style="4" speed="0.1"/>
 				<animation name="walk" style="1" speed="0.2">
-					<collidergroup name="CharacterOutline" class="Dynamic" sensor="true" width="43" height="58">
-						<chain x="20" y="54" points="5,13 14,3 32,4 43,15 42,33 37,40 38,50 34,53 12,53 9,50"/>
+					<collidergroup name="CharacterSensor" class="Dynamic" density="1" sensor="true" width="43" height="58">
+						<chain x="20" y="54" friction="0" points="5,13 14,3 32,4 43,15 42,33 37,40 38,50 34,53 12,53 9,50"/>
 					</collidergroup>	
 					<collidergroup name="Terrain" class="Dynamic" sensor="false" radius="7">
-						<circle name="Ground" x="40" y="103"/>
-						<circle name="BottomRight" x="51" y="96"/>
-						<circle name="Right" x="56" y="75"/>
-						<circle name="TopRight" x="52" y="62"/>
-						<circle name="Top" x="39" y="57"/>
-						<circle name="TopLeft" x="25" y="65"/>
-						<circle name="BottomLeft" x="28" y="91"/>
+						<circle name="Ground" friction="1" x="40" y="103"/>
+						<circle name="BottomRight" friction="0" x="51" y="96"/>
+						<circle name="Right" friction="0" x="56" y="75"/>
+						<circle name="TopRight" friction="0" x="52" y="62"/>
+						<circle name="Top" friction="0" x="39" y="57"/>
+						<circle name="TopLeft" friction="0" x="25" y="65"/>
+						<circle name="BottomLeft" friction="0" x="28" y="91"/>
 					</collidergroup>
 				</animation>
 			</animationdata>
 		</player>
 	</scene>
-<!--
+<!---		fixPos	{x=0.799999952 y=2.05999994 }	b2Vec2
+
 <tile id="2" class="Mage">
 	<properties>
 	<property name="Parameters" type="class" propertytype="Animation">
