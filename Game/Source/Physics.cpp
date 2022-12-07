@@ -10,6 +10,7 @@
 
 #include "math.h"
 
+#include <iostream>
 #include <variant>
 #include <memory>
 
@@ -47,15 +48,14 @@ bool Physics::PreUpdate()
 	float newGrav = b2_maxFloat;
 	for (uint keyIterator = SDL_SCANCODE_1; keyIterator <= SDL_SCANCODE_0; keyIterator++)
 	{
-		if (app->input->GetKey(keyIterator) == KEY_DOWN) {
-			if (keyIterator == SDL_SCANCODE_0)
-			{
-				newGrav = 0;
-				break;
-			}
+		if (app->input->GetKey(keyIterator) == KEY_DOWN) 
+		{
 			newGrav = (float)((int)keyIterator - (int)SDL_SCANCODE_1 + 1);
+			
 			if (app->input->GetKey(SDL_SCANCODE_LCTRL) == KEY_REPEAT) newGrav *= -1;
 			if (app->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT) newGrav *= 2;
+			
+			if (keyIterator == SDL_SCANCODE_0) newGrav = 0;
 		}
 	}
 
@@ -74,22 +74,6 @@ bool Physics::PreUpdate()
 		world->Step(1.0f / 60.0f, 6, 2);
 
 	if (app->input->GetKey(SDL_SCANCODE_N) == KEY_DOWN) ToggleStep();
-
-	// Because Box2D does not automatically broadcast collisions/contacts with sensors, 
-	// we have to manually search for collisions and "call" the equivalent to the ModulePhysics::BeginContact() ourselves...
-	for (b2Contact *c = world->GetContactList(); c; c = c->GetNext())
-	{
-		// For each contact detected by Box2D, see if the first one colliding is a sensor
-		if (c->IsTouching() && c->GetFixtureA()->IsSensor())
-		{
-			// If so, we call the OnCollision listener function (only of the sensor), passing as inputs our custom PhysBody classes
-			auto *pb1 = (PhysBody *)c->GetFixtureA()->GetBody()->GetUserData();
-			auto *pb2 = (PhysBody *)c->GetFixtureB()->GetBody()->GetUserData();
-
-			if (pb1 && pb2 && pb1->listener)
-				pb1->listener->OnCollision(pb1, pb2);
-		}
-	}
 
 	return true;
 }
@@ -184,15 +168,36 @@ bool Physics::CleanUp()
 
 void Physics::BeginContact(b2Contact *contact)
 {
-	// Call the OnCollision listener function to bodies A and B, passing as inputs our custom PhysBody classes
-	auto *pBodyA = (PhysBody *)contact->GetFixtureA()->GetBody()->GetUserData();
-	auto *pBodyB = (PhysBody *)contact->GetFixtureB()->GetBody()->GetUserData();
+	/*
+	if(contact->IsTouching()
+	   && !(contact->GetFixtureA()->IsSensor() || contact->GetFixtureB()->IsSensor()))
+	{
+		 Call the OnCollision listener function to bodies A and B, passing as inputs 
+		 our custom PhysBody classes
+		auto pBodyA = static_cast<PhysBody *>(contact->GetFixtureA()->GetBody()->GetUserData());
+		auto pBodyB = static_cast<PhysBody *>(contact->GetFixtureB()->GetBody()->GetUserData());
 
-	if (pBodyA && pBodyA->listener)
+		if(pBodyA && pBodyA->listener) pBodyA->listener->OnCollision(pBodyA, pBodyB);
+		if(pBodyB && pBodyB->listener)
+		{
+			pBodyB->listener->OnCollision(pBodyB, pBodyA);
+			pBodyB->listener->SendContact(contact);
+		}
+	}*/
+	// our custom PhysBody classes
+	auto pBodyA = static_cast<PhysBody *>(contact->GetFixtureA()->GetBody()->GetUserData());
+	auto pBodyB = static_cast<PhysBody *>(contact->GetFixtureB()->GetBody()->GetUserData());
+
+	if(pBodyA && pBodyA->listener)
+	{
 		pBodyA->listener->OnCollision(pBodyA, pBodyB);
-
-	if (pBodyB && pBodyB->listener)
+		if(pBodyB->ctype != ColliderLayers::PLATFORMS) pBodyA->listener->SendContact(contact);
+	}
+	if(pBodyB && pBodyB->listener)
+	{
 		pBodyB->listener->OnCollision(pBodyB, pBodyA);
+		if(pBodyA->ctype != ColliderLayers::PLATFORMS) pBodyB->listener->SendContact(contact);
+	}
 }
 
 

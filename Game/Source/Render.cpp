@@ -104,7 +104,7 @@ void Render::ResetViewPort()
 	SDL_RenderSetViewport(renderer, &viewport);
 }
 
-bool Render::DrawCharacterTexture(SDL_Texture *texture, const iPoint pos, const bool flip, SDL_Point pivot, const iPoint offset, const double angle)
+bool Render::DrawCharacterTexture(SDL_Texture *texture, iPoint const &pos, const bool flip, SDL_Point pivot, const iPoint offset, const double angle)
 {
 	SDL_Rect rect{0};
 
@@ -128,8 +128,8 @@ bool Render::DrawCharacterTexture(SDL_Texture *texture, const iPoint pos, const 
 
 	if(pivot.x != INT_MAX && pivot.y != INT_MAX)
 	{
-		SDL_Point sdlpivot{pivot.x, pivot.y};
-		p = &sdlpivot;
+		SDL_Point sdlPivot{pivot.x, pivot.y};
+		p = &sdlPivot;
 	}
 		
 	if(SDL_RenderCopyEx(renderer, texture, nullptr, &rect, angle, p, (SDL_RendererFlip)flip) == -1)
@@ -146,9 +146,12 @@ bool Render::DrawTexture(SDL_Texture* texture, int x, int y, const SDL_Rect* sec
 {
 	uint scale = app->win->GetScale();
 
-	SDL_Rect rect;
-	rect.x = (int)((float)camera.x * speed) + x * scale;
-	rect.y = (int)((float)camera.y * speed) + y * scale;
+	SDL_Rect rect = {
+		.x = static_cast<int>((static_cast<float>(camera.x) * speed)) + x * static_cast<int>(scale),
+		.y = static_cast<int>((static_cast<float>(camera.y) * speed)) + y * static_cast<int>(scale),
+		.w = 0,
+		.h = 0
+	};
 
 	if(section != nullptr)
 	{

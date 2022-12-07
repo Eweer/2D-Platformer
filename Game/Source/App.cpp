@@ -205,8 +205,6 @@ std::string App::GetOrganization() const
 	return organization;
 }
 
-// L02: DONE 1: Implement methods to request load / save and methods 
-// for the real execution of load / save (to be implemented in TODO 5 and 7)
 void App::LoadGameRequest()
 {
 	// NOTE: We should check if SAVE_STATE_FILENAME actually exist
@@ -220,9 +218,6 @@ void App::SaveGameRequest()
 	saveGameRequested = true;
 }
 
-
-// L02: DONE 5: Implement the method LoadFromFile() to actually load a xml file
-// then call all the modules to load themselves
 bool App::LoadFromFile()
 {
 	pugi::xml_document gameStateFile;
@@ -245,7 +240,6 @@ bool App::LoadFromFile()
 	return !(loadGameRequested = false);
 }
 
-// L02: DONE 7: Implement the xml save method SaveToFile() for current state
 // check https://pugixml.org/docs/quickstart.html#modify
 bool App::SaveToFile() 
 {

@@ -37,7 +37,7 @@ bool Character::Start()
 
 bool Character::Update()
 {
-	
+	/*
 	//Update Character position in pixels
 	position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x) - Character_SIZE/2;
 	position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y) - Character_SIZE/2;
@@ -47,7 +47,7 @@ bool Character::Update()
 	for(int i = 0; i < hp; i++)
 	{
 		app->render->DrawTexture(texture->UpdateAndGetFrame(), 710, 930 - i*(Character_SIZE + 10));
-	}
+	}*/
 
 	return true;
 }
@@ -58,30 +58,7 @@ bool Character::CleanUp()
 	return true;
 }
 
-void Character::OnCollision(PhysBody *physA, PhysBody *physB)
-{
-	if(timeUntilReset >= 0) return;
-	switch(physB->ctype)
-	{
-		using enum ColliderLayers;
-		case ITEMS:
-			if(score < 99999)
-			{
-				score += (float)(100 * scoreMultiplier);
-				if(score > 99999) score = 99999;
-			}
-			LOG("Collision ITEMS");
-			break;
-		case UNKNOWN:
-			LOG("Collision UNKNOWN");
-			break;
-		case PLATFORMS:
-			LOG("Collision BOARD");
-			break;
-		default:
-			LOG("HOW DID YOU GET HERE?!?!?!?");
-	}
-}
+
 
 void Character::ResetScore()
 {
@@ -110,68 +87,161 @@ std::pair<uint, uint> Character::GetScoreList() const
 
 void Character::SetStartingPosition()
 {
+	/*
 	if(pBody->body) app->physics->DestroyBody(pBody->body);
 	position.x = parameters.attribute("x").as_int();
 	position.y = parameters.attribute("y").as_int();
-	CreatePhysBody();
+	CreatePhysBody();*/
 }
 
-void Character::CreatePhysBody(Uint16 collisionCategory, Uint16 collisionMask)
-{
-	pugi::xml_node physicsNode = parameters.child("physics");
-
-	if(physicsNode.empty()) [[unlikely]]
+void Character::CreatePhysBody() 
+{ 
+	// <physics>
+	auto currentNode = parameters.child("physics");
+	
+	if(currentNode.empty()) [[unlikely]]
 	{
 		LOG("Entity %s has no physics node", name.c_str());
 		return;
 	}
-
-	int height = physicsNode.attribute("height").as_int();
-	int width = physicsNode.attribute("width").as_int();
-	auto bodyType = (BodyType)GetParameterBodyType();
-	float restitution = physicsNode.attribute("restitution") ? physicsNode.attribute("restitution").as_float() : 1.0f;
-	float32 gravity = physicsNode.attribute("gravityscale") ? physicsNode.attribute("gravityscale").as_float() : 1.0f;
-
-	if(physicsNode.attribute("radius"))
+	
+	type = (ColliderLayers)currentNode.attribute("colliderlayers").as_int();
+	
+	float32 gravity = currentNode.attribute("gravityscale") ? currentNode.attribute("gravityscale").as_float() : 1.0f;
+	float32 restitution = currentNode.attribute("restitution") ? currentNode.attribute("restitution").as_float() : 1.0f;
+	float32 density = currentNode.attribute("density") ? currentNode.attribute("density").as_float() : 1.0f;
+	float32 friction = currentNode.attribute("friction") ? currentNode.attribute("friction").as_float() : 1.0f;
+		
+	// <properties/> (or <animation> if properties doesn't exist
+	if(currentNode = currentNode.parent().child("animationdata").first_child();
+	   currentNode.empty())
 	{
-		int radius = physicsNode.attribute("radius").as_int()/2;
-		pBody = app->physics->CreateCircle(
-			position.x + radius/2,
-			position.y + radius/2,
-			radius,
-			bodyType,
-			restitution,
-			collisionCategory,
-			collisionMask
-		);
-	}
-	else if(physicsNode.attribute("width") && physicsNode.attribute("height"))
-	{
-		pBody = app->physics->CreateRectangle(
-			position.x,
-			position.y,
-			width / 2,
-			height / 2,
-			bodyType,
-			gravity,
-			restitution,
-			collisionCategory,
-			collisionMask
-		);
-	}
-	else [[unlikely]]
-	{
-		LOG("ERROR: Unknown shape of entity %s", name.c_str());
+		LOG("No animationdata on %s", name);
 		return;
 	}
-	pBody->listener = this;
-	pBody->ctype = (ColliderLayers)collisionCategory;
+
+	while(currentNode) 
+	{
+		if(!currentNode.child("collidergroup").empty()) 
+			break;
+		currentNode = currentNode.next_sibling();
+	}
+	
+	// <animation> that has the collider child or <null handle> if no node exists
+	if(!currentNode)
+	{
+		LOG("Entity %s has no collider node", name.c_str());
+		return;
+	}
+	
+	// <collidergroup>
+	for(auto const &colliderGroupNode : currentNode.children("collidergroup"))
+	{
+		auto bodyType = GetParameterBodyType(colliderGroupNode.attribute("class").as_string());
+
+		iPoint width_height(colliderGroupNode.attribute("width").as_int(), colliderGroupNode.attribute("height").as_int());
+
+		if(!pBody)
+		{
+			colliderOffset = {
+				colliderGroupNode.first_child().attribute("x").as_int(),
+				colliderGroupNode.first_child().attribute("y").as_int()
+			};
+			
+			auto bodyPtr = app->physics->CreateBody(
+				position + colliderOffset,
+				bodyType,
+				0.0f,
+				{0.00f,0.01f},
+				gravity
+			);
+
+			auto pBodyPtr = app->physics->CreatePhysBody(
+				bodyPtr,
+				width_height,
+				type
+			);
+
+			pBody = std::move(pBodyPtr);
+			pBody->listener = this;
+		}
+		
+		uint16 maskFlag = 0x0001;
+		if(StrEquals(name, "player"))
+		{
+			using enum ColliderLayers;
+			if(StrEquals(colliderGroupNode.attribute("name").as_string(), "CharacterSensor"))
+				maskFlag = (uint16)(ENEMIES | TRIGGERS | CHECKPOINTS);
+			else if(StrEquals(colliderGroupNode.attribute("name").as_string(), "Terrain"))
+				maskFlag = (uint16)(PLATFORMS | ITEMS);
+		}
+		
+		for(auto const &elem : colliderGroupNode.children())
+		{
+			// iterate over digits in node and add them to a b2Vec2 as x, y.
+			// Will be used on shape creation
+			std::string shapeType = elem.name();
+			std::vector<b2Vec2> tempData;
+			ShapeData shape;
+
+			if(StrEquals(shapeType, "chain") || StrEquals(shapeType, "polygon"))
+			{
+				const std::string xyStr = elem.attribute("points").as_string();
+				static const std::regex r(R"((-?\d{1,3})(?:\.\d+)*,(-?\d{1,3})(?:\.\d+)*)");
+				auto xyStrBegin = std::sregex_iterator(xyStr.begin(), xyStr.end(), r);
+				auto xyStrEnd = std::sregex_iterator();
+
+				for(std::sregex_iterator i = xyStrBegin; i != xyStrEnd; ++i)
+				{
+					std::smatch match = *i;
+					tempData.push_back(
+						{
+							PIXEL_TO_METERS(stoi(match[1].str())),
+							PIXEL_TO_METERS(stoi(match[2].str()))
+						}
+					);
+				}
+			}
+			else if(StrEquals(shapeType, "rectangle"))
+			{
+				tempData.push_back(
+					{
+						PIXEL_TO_METERS(width_height.x),
+						PIXEL_TO_METERS(width_height.y)
+					}
+				);
+			}
+			else if(StrEquals(shapeType, "circle"))
+			{
+				tempData.push_back(
+					{
+						PIXEL_TO_METERS(elem.attribute("radius").as_int()),
+						0
+					}
+				);
+			}
+
+			if(!tempData.empty())
+			{
+				shape.Create(shapeType, tempData);
+				auto fixtureDef = app->physics->CreateFixtureDef(
+						shape,
+						static_cast<uint16>(type),
+						maskFlag,
+						currentNode.attribute("sensor").as_bool(),
+						density,
+						friction,
+						restitution
+				);
+				pBody->body->CreateFixture(fixtureDef.get());
+			}
+		}
+	}
 }
+
 void Character::AddTexturesAndAnimationFrames()
 {
 	texture = std::make_unique<Animation>();
-
-	pugi::xml_node animDataNode = parameters.child("animationdata");
 
 	if(!parameters.attribute("renderable").as_bool())
 	{
@@ -179,24 +249,28 @@ void Character::AddTexturesAndAnimationFrames()
 		return;
 	}
 	
-	std::string entityFolder;
-	if(animDataNode.attribute("animpath"))
-	{
-		entityFolder = animDataNode.attribute("animpath").as_string();
-	}
-	else if(animDataNode.attribute("name"))
-	{
-		entityFolder = animDataNode.attribute("name").as_string();
-	}
-	else
-	{
-		entityFolder = texLevelPath + name + "/";
-		LOG("No animation folder specified for %s, defaulting to %s", name, entityFolder);
-	}
+	std::string entityFolder = "";
 
-	if(currentCharacter != "") entityFolder += currentCharacter +"/";
+	if(!parameters.attribute("class").empty())
+		entityFolder = std::string(parameters.attribute("class").as_string()) + "/";
+
+	if(!parameters.attribute("name").empty())
+		entityFolder = std::string(parameters.attribute("name").as_string()) + "/" + entityFolder;
 	
-	texture->setPivot(animDataNode.attribute("pivotx").as_int(), animDataNode.attribute("pivoty").as_int());
+	if(!parameters.parent().attribute("texturepath").empty())
+		entityFolder = std::string(parameters.parent().attribute("texturepath").as_string()) + entityFolder;
+
+	
+	LOG("No animation folder specified for %s", entityFolder);
+
+	auto animDataNode = parameters.child("animationdata");
+	
+	textureOffset = {
+		.x = animDataNode.child("properties").attribute("pivotx").as_int(),
+		.y = animDataNode.child("properties").attribute("pivoty").as_int()
+	};
+
+	texture->setPivot(textureOffset);
 	
 	struct dirent **folderList;
 	const char *dirPath = entityFolder.c_str();
@@ -239,14 +313,18 @@ void Character::AddTexturesAndAnimationFrames()
 			//if we have multiple frames we set renderMode to animation
 			if(renderMode == RenderModes::UNKNOWN) [[unlikely]]
 				renderMode = RenderModes::ANIMATION;
-
-			if(parameters.child("animation").attribute("speed"))
-				texture->SetSpeed(parameters.child("animation").attribute("speed").as_float());
+			auto action = std::string(folderList[nCharacterFolder]->d_name);
+			action[0] = std::tolower(action[0], std::locale());
+			
+			auto animationParameters = animDataNode.find_child_by_attribute("name", action.c_str());
+			
+			if(!animationParameters.empty() && animationParameters.attribute("speed"))
+				texture->SetSpeed(animationParameters.attribute("speed").as_float());
 			else
 				texture->SetSpeed(0.2f);
-
-			if(parameters.child("animation").attribute("style"))
-				texture->SetAnimStyle(static_cast<AnimIteration>(parameters.child("animation").attribute("animstyle").as_int()));
+				
+			if(!animationParameters.empty() && animationParameters.attribute("style"))
+				texture->SetAnimStyle(static_cast<AnimIteration>(animationParameters.attribute("animstyle").as_int()));
 			else
 				texture->SetAnimStyle(AnimIteration::LOOP_FROM_START);
 

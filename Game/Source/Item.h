@@ -5,6 +5,7 @@
 #include "Point.h"
 #include "Map.h"
 #include "SDL/include/SDL.h"
+#include "Box2D/Box2D/Box2D.h"
 
 struct SDL_Texture;
 
@@ -32,13 +33,19 @@ public:
 
 	bool SetStartingParameters() override;
 
+	void CreatePhysBody() final;
+
+	void SendContact(b2Contact *c) final;
+
+
 	bool isPicked = false;
 
 	TileInfo const *info = nullptr;
+	std::unordered_map<std::string, std::vector<std::pair<ShapeData, iPoint>>, StringHash, std::equal_to<>> colliderMap;
 	int width = 0;
 	int height = 0;
 	const Animation *anim;
-	std::string type2 = "Unknown";
+	std::string itemClass = "Unknown";
 };
 
 #endif // __ITEM_H__

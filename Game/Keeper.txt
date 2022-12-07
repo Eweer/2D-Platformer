@@ -105,3 +105,30 @@ struct SDL_Deleter
 	void operator()(SDL_Texture *p) const { SDL_DestroyTexture(p); }
 };
 */
+
+		switch(other.shape.get()->GetType())
+		{
+			case b2Shape::Type::e_circle:
+			{
+				shape = dynamic_cast<b2CircleShape *>(other.shape.get()) = std::move(other.shape);
+				break;
+			}
+			case b2Shape::Type::e_edge:
+			{
+				shape = dynamic_cast<b2EdgeShape *>(other.shape.get()) = std::move(other.shape);
+				break;
+			}
+			case b2Shape::Type::e_polygon:
+			{
+				shape = dynamic_cast<b2PolygonShape *>(other.shape.get()) = std::move(other.shape);
+				break;
+			}
+			case b2Shape::Type::e_chain:
+			{
+				shape = dynamic_cast<b2ChainShape *>(other.shape.get()) = std::move(other.shape);
+				break;
+			}
+			default:
+				LOG("Error in copying Shape (ShapeData).");
+				break;
+		}

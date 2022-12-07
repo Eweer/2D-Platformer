@@ -8,6 +8,7 @@
 #include "Log.h"
 #include "Defs.h"
 #include "BitMaskColliderLayers.h"
+#include <Box2D/Box2D/Box2D.h>
 
 #include <string>
 #include <regex>
@@ -16,6 +17,13 @@
 #include <variant>
 
 class PhysBody;
+enum class BodyType;
+
+struct EntityAnimation
+{
+	std::unique_ptr<Animation> animation;
+	std::vector<b2Fixture> fixtures;
+};
 
 enum class SensorFunction
 {
@@ -69,11 +77,12 @@ public:
 	virtual void SetPathsToLevel();
 
 	virtual void AddTexturesAndAnimationFrames();
-
-	virtual void CreatePhysBody(Uint16 collisionCategory = 0, Uint16 collisionMask = 0) {};
-
-	uint GetParameterBodyType() const;
-
+	
+	BodyType GetParameterBodyType(std::string const &str) const;
+	
+	virtual void CreatePhysBody() { /* Method to Override */ };
+	
+	virtual void SendContact(b2Contact *c) { /* Method to Override */ };
 	virtual void OnCollision(PhysBody *physA, PhysBody *physB) { /* Method to Override */ };
 
 	bool active = true;
@@ -83,8 +92,9 @@ public:
 
 	iPoint position;
 	iPoint startingPosition;
+	iPoint colliderOffset;
 	std::unique_ptr<Animation> texture;
-	int imageVariation = 0;
+	int imageVariation = -1;
 	RenderModes renderMode = RenderModes::UNKNOWN;
 	std::unique_ptr<PhysBody> pBody;
 

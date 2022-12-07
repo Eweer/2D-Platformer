@@ -1,8 +1,8 @@
 #pragma once
 #include "Module.h"
-#include "Entity.h"
 #include "Defs.h"
 #include "BitMaskColliderLayers.h"
+#include "Entity.h"
 
 #include <unordered_map>
 #include <variant>
@@ -36,20 +36,16 @@ constexpr auto RADTODEG = 57.295779513082320876f;
 // if type = "edge" -> data[0] = point1, data[1] = point2
 // if type = "rectangle" -> data[0] = width, data[1] = height
 // if type = "polygon" || "chain" -> data = points
-struct ShapeData
+class ShapeData
 {
+public:
 	std::unique_ptr<b2Shape> shape;
 	std::vector<b2Vec2> data;
 
-	ShapeData() = delete;
-	explicit ShapeData(std::string const &name, std::vector<b2Vec2> const &newData = std::vector<b2Vec2>()) : data(newData)
+	ShapeData() = default;
+	explicit ShapeData(std::string const &type, std::vector<b2Vec2> const &newData = std::vector<b2Vec2>()) : data(newData)
 	{
-		if (StrEquals(name, "circle"))			shape = std::make_unique<b2CircleShape>();
-		else if (StrEquals(name, "edge"))		shape = std::make_unique<b2EdgeShape>();
-		else if (StrEquals(name, "rectangle"))	shape = std::make_unique<b2PolygonShape>();
-		else if (StrEquals(name, "polygon"))	shape = std::make_unique<b2PolygonShape>();
-		else if (StrEquals(name, "chain"))		shape = std::make_unique<b2ChainShape>();
-		else LOG("Error in creating Shape (ShapeData). No shape with name %s exists", name);
+		this->Create(type, newData);
 	}
 	explicit ShapeData(b2Shape const *newShape, std::vector<b2Vec2> const &newData = std::vector<b2Vec2>()) : data(newData)
 	{
@@ -75,7 +71,26 @@ struct ShapeData
 			}
 		}
 	}
+	explicit ShapeData(ShapeData &&other) noexcept : shape(std::move(other.shape)), data(std::move(other.data))
+	{};
 	~ShapeData() = default;
+	
+	void Create(std::string const &type, std::vector<b2Vec2> const &newData = std::vector<b2Vec2>()) 
+	{
+		data = newData;
+		
+		std::string name = type;
+		name[0] = std::tolower(type[0], std::locale());
+
+		if(StrEquals(name, "polygon") && data.size() > b2_maxPolygonVertices) name = "chain";
+
+		if (StrEquals(name, "circle"))			shape = std::make_unique<b2CircleShape>();
+		else if (StrEquals(name, "edge"))		shape = std::make_unique<b2EdgeShape>();
+		else if (StrEquals(name, "rectangle"))	shape = std::make_unique<b2PolygonShape>();
+		else if (StrEquals(name, "polygon"))	shape = std::make_unique<b2PolygonShape>();
+		else if (StrEquals(name, "chain"))		shape = std::make_unique<b2ChainShape>();
+		else LOG("Error in creating Shape (ShapeData). No shape with name %s exists", name);
+	}
 
 	b2Shape *CreateShape()
 	{
@@ -163,6 +178,7 @@ public:
 	Entity *listener = nullptr;
 	ColliderLayers ctype = ColliderLayers::UNKNOWN;
 	std::vector<std::unique_ptr<b2FixtureDef>> fixtures;
+	std::vector<iPoint> offsets;
 };
 
 // Module --------------------------------------
@@ -258,5 +274,4 @@ private:
 	// Mouse Joint
 	b2Body *selected = nullptr;
 	b2MouseJoint *mouseJoint = nullptr;
-	
 };
