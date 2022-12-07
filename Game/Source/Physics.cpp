@@ -106,7 +106,7 @@ bool Physics::PostUpdate()
 				// Draw circles ------------------------------------------------
 				case b2Shape::Type::e_circle:
 				{
-					auto const circleShape = (b2CircleShape *)f->GetShape();
+					auto const *circleShape = dynamic_cast<b2CircleShape *>(f->GetShape());
 					b2Vec2 pos = f->GetBody()->GetPosition() + circleShape->m_p;
 					app->render->DrawCircle(METERS_TO_PIXELS(pos.x), METERS_TO_PIXELS(pos.y), METERS_TO_PIXELS(circleShape->m_radius), 255, 255, 255);
 					break;
@@ -114,26 +114,26 @@ bool Physics::PostUpdate()
 				// Draw polygons ------------------------------------------------
 				case b2Shape::Type::e_polygon:
 				{
-					auto const *itemToDraw = (b2PolygonShape *)f->GetShape();
+					auto const *itemToDraw = dynamic_cast<b2PolygonShape *>(f->GetShape());
 					DrawDebug(b, itemToDraw->m_count, itemToDraw->m_vertices, 255, 255, 0);
 					break;
 				}
 				// Draw chains contour -------------------------------------------
 				case b2Shape::Type::e_chain:
 				{
-					auto const *itemToDraw = (b2ChainShape *)f->GetShape();
+					auto const *itemToDraw = dynamic_cast<b2ChainShape *>(f->GetShape());
 					DrawDebug(b, itemToDraw->m_count, itemToDraw->m_vertices, 100, 255, 100);
 					break;
 				}
 				// Draw a single segment(edge) ----------------------------------
 				case b2Shape::Type::e_edge:
 				{
-					auto const *edgeShape = (b2EdgeShape *)f->GetShape();
+					auto const *edgeShape = dynamic_cast<b2EdgeShape *>(f->GetShape());
 					b2Vec2 v1;
 					b2Vec2 v2;
 
 					v1 = b->GetWorldPoint(edgeShape->m_vertex0);
-					v1 = b->GetWorldPoint(edgeShape->m_vertex1);
+					v2 = b->GetWorldPoint(edgeShape->m_vertex1);
 					app->render->DrawLine(METERS_TO_PIXELS(v1.x), METERS_TO_PIXELS(v1.y), METERS_TO_PIXELS(v2.x), METERS_TO_PIXELS(v2.y), 100, 100, 255);
 					break;
 				}
