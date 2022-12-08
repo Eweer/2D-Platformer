@@ -108,21 +108,21 @@ bool Physics::PostUpdate()
 				{
 					auto const *circleShape = dynamic_cast<b2CircleShape *>(f->GetShape());
 					b2Vec2 pos = f->GetBody()->GetPosition() + circleShape->m_p;
-					app->render->DrawCircle(METERS_TO_PIXELS(pos.x), METERS_TO_PIXELS(pos.y), METERS_TO_PIXELS(circleShape->m_radius), 255, 255, 255);
+					app->render->DrawCircle(METERS_TO_PIXELS(pos), METERS_TO_PIXELS(circleShape->m_radius), SDL_Color(255,255,255,255));
 					break;
 				}
 				// Draw polygons ------------------------------------------------
 				case b2Shape::Type::e_polygon:
 				{
 					auto const *itemToDraw = dynamic_cast<b2PolygonShape *>(f->GetShape());
-					DrawDebug(b, itemToDraw->m_count, itemToDraw->m_vertices, 255, 255, 0);
+					DrawDebug(b, itemToDraw->m_count, itemToDraw->m_vertices, SDL_Color(255, 255, 0, 255));
 					break;
 				}
 				// Draw chains contour -------------------------------------------
 				case b2Shape::Type::e_chain:
 				{
 					auto const *itemToDraw = dynamic_cast<b2ChainShape *>(f->GetShape());
-					DrawDebug(b, itemToDraw->m_count, itemToDraw->m_vertices, 100, 255, 100);
+					DrawDebug(b, itemToDraw->m_count, itemToDraw->m_vertices, SDL_Color(100, 255, 100, 255));
 					break;
 				}
 				// Draw a single segment(edge) ----------------------------------
@@ -132,7 +132,7 @@ bool Physics::PostUpdate()
 					b2Vec2 v1 = b->GetWorldPoint(edgeShape->m_vertex0);
 					b2Vec2 v2 = b->GetWorldPoint(edgeShape->m_vertex1);
 
-					app->render->DrawLine(METERS_TO_PIXELS(v1.x), METERS_TO_PIXELS(v1.y), METERS_TO_PIXELS(v2.x), METERS_TO_PIXELS(v2.y), 100, 100, 255);
+					app->render->DrawLine(METERS_TO_PIXELS(v1), METERS_TO_PIXELS(v2), SDL_Color(100, 100, 255, 255));
 					break;
 				}
 				case b2Shape::Type::e_typeCount:
@@ -363,22 +363,21 @@ b2MouseJoint *Physics::CreateMouseJoint(b2Body *origin, b2Body *target, b2Vec2 p
 
 void Physics::DragSelectedObject()
 {
-	int mouseX;
-	int mouseY;
-	app->input->GetMousePosition(mouseX, mouseY);
-	b2Vec2 target(PIXEL_TO_METERS(mouseX), PIXEL_TO_METERS(mouseY));
-
 	switch (app->input->GetMouseButtonDown(SDL_BUTTON_LEFT))
 	{
 		case KeyState::KEY_DOWN:
 		{
-			mouseJoint = CreateMouseJoint(ground, selected, target);
+			mouseJoint = CreateMouseJoint(ground, selected, PIXEL_TO_METERS(app->input->GetMousePosition()));
 			break;
 		}
 		case KeyState::KEY_REPEAT:
 		{
-			mouseJoint->SetTarget(target);
-			app->render->DrawLine(mouseX, mouseY, METERS_TO_PIXELS(selected->GetPosition().x), METERS_TO_PIXELS(selected->GetPosition().y), 0, 255, 255, 255);
+			mouseJoint->SetTarget(PIXEL_TO_METERS(app->input->GetMousePosition()));
+			app->render->DrawLine(
+				app->input->GetMousePosition(),
+				METERS_TO_PIXELS(selected->GetPosition()),
+				SDL_Color(0, 255, 255, 255)
+			);
 			break;
 		}
 		case KeyState::KEY_UP:
@@ -404,7 +403,7 @@ void Physics::DestroyMouseJoint()
 //--------------- Utils
 
 //---- Debug
-void Physics::DrawDebug(const b2Body *body, const int32 count, const b2Vec2 *vertices, Uint8 r, Uint8 g, Uint8 b, Uint8 a) const
+void Physics::DrawDebug(const b2Body *body, const int32 count, const b2Vec2 *vertices, SDL_Color color) const
 {
 	b2Vec2 prev = body->GetWorldPoint(vertices[0]);
 	b2Vec2 v;
@@ -412,12 +411,12 @@ void Physics::DrawDebug(const b2Body *body, const int32 count, const b2Vec2 *ver
 	for (int32 i = 1; i < count; ++i)
 	{
 		v = body->GetWorldPoint(vertices[i]);
-		app->render->DrawLine(METERS_TO_PIXELS(prev.x), METERS_TO_PIXELS(prev.y), METERS_TO_PIXELS(v.x), METERS_TO_PIXELS(v.y), r, g, b, a);
+		app->render->DrawLine(METERS_TO_PIXELS(prev), METERS_TO_PIXELS(v), color);
 		prev = v;
 	}
 
 	v = body->GetWorldPoint(vertices[0]);
-	app->render->DrawLine(METERS_TO_PIXELS(prev.x), METERS_TO_PIXELS(prev.y), METERS_TO_PIXELS(v.x), METERS_TO_PIXELS(v.y), r, g, b, a);
+	app->render->DrawLine(METERS_TO_PIXELS(prev), METERS_TO_PIXELS(v), color);
 }
 
 bool Physics::IsMouseOverObject(b2Fixture const *f) const

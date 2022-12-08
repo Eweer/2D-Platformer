@@ -92,16 +92,19 @@ bool App::Update()
 {
 	PrepareUpdate();
 
-	if (input->GetWindowEvent(WE_QUIT))
-		return false;
-	if(!PreUpdate())
-		return false;
-	if(!DoUpdate())
-		return false;
-	if(!PostUpdate())
-		return false;
+	if (input->GetWindowEvent(WE_QUIT)) return false;
+
+	if(!PreUpdate()) return false;
+	if(!DoUpdate()) return false;
+	if(!PostUpdate()) return false;
 
 	FinishUpdate();
+
+	if (input->GetKey(SDL_SCANCODE_P) == KEY_DOWN)
+	{
+		return PauseGame();
+	}
+
 	return true;
 }
 
@@ -130,7 +133,6 @@ void App::PrepareUpdate()
 // ---------------------------------------------
 void App::FinishUpdate()
 {
-	// L03: DONE 1: This is a good place to call Load / Save methods
 	if (loadGameRequested) LoadFromFile();
 	if (saveGameRequested) SaveToFile();
 }
@@ -209,14 +211,12 @@ std::string App::GetOrganization() const
 
 void App::LoadGameRequest()
 {
-	// NOTE: We should check if SAVE_STATE_FILENAME actually exist
 	loadGameRequested = true;
 }
 
 // ---------------------------------------
 void App::SaveGameRequest() 
 {
-	// NOTE: We should check if SAVE_STATE_FILENAME actually exist and... should we overwriten
 	saveGameRequested = true;
 }
 
@@ -260,6 +260,67 @@ bool App::SaveToFile()
 	saveGameRequested = saveDoc->save_file("save_game.xml");
 
 	return !saveGameRequested;
+}
+
+bool App::SaveAttributeToConfig(std::string const &moduleName, std::string const &node, std::string const &attribute, std::string const &value)
+{
+	auto m = moduleName.c_str();
+	auto n = node.c_str();
+	auto a = attribute.c_str();
+	auto v = value.c_str();
+
+	if (moduleName.empty() || node.empty() || attribute.empty())
+	{
+		LOG("Can't save to config. String is empty");
+		return false;
+	}
+
+	if (configNode.child(m).empty())
+	{
+		// If module doesn't exist
+		configNode.append_child(m).append_child(n).append_attribute(a).set_value(v);
+	}
+	else if (configNode.child(m).child(n).empty())
+	{
+		// If node doesn't exist
+		configNode.child(m).append_child(n).append_attribute(a).set_value(v);
+	}
+	else if (configNode.child(m).child(n).attribute(a).empty())
+	{
+		// If attribute doesn't exist
+		configNode.child(m).child(n).append_attribute(a).set_value(v);
+	}
+	else
+	{
+		// If everything exists
+		configNode.child(m).child(n).attribute(a).set_value(v);
+	}
+
+	if (!configFile.save_file("config.xml"))
+	{
+		LOG("Can't save config.");
+		return false;
+	}
+
+	return false;
+}
+
+bool App::PauseGame() const
+{
+	physics->ToggleStep();
+	while (input->GetKey(SDL_SCANCODE_P) == KEY_DOWN || input->GetKey(SDL_SCANCODE_P) == KEY_REPEAT)
+	{
+		input->PreUpdate();
+		if (app->input->GetKey(SDL_SCANCODE_ESCAPE) == KEY_DOWN) return false;
+	}
+	while (input->GetKey(SDL_SCANCODE_P) == KEY_IDLE || input->GetKey(SDL_SCANCODE_P) == KEY_UP)
+	{
+		input->PreUpdate();
+		if (app->input->GetKey(SDL_SCANCODE_ESCAPE) == KEY_DOWN) return false;
+	}
+	physics->ToggleStep();
+
+	return true;
 }
 
 uint App::GetLevelNumber() const

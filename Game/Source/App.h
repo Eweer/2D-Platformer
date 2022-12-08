@@ -52,15 +52,26 @@ public:
 	// Exposing some properties for reading
 	int GetArgc() const;
 	const char* GetArgv(int index) const;
+
+	// Getters
 	std::string GetTitle() const;
 	std::string GetOrganization() const;
+	uint GetLevelNumber() const;
 	
+	// Saving / Loading
 	void LoadGameRequest();
 	void SaveGameRequest();
 	bool LoadFromFile();
 	bool SaveToFile();
+	bool SaveAttributeToConfig(
+		std::string const &moduleName, 
+		std::string const &node, 
+		std::string const &attribute, 
+		std::string const &value
+	);
 	
-	uint GetLevelNumber() const;
+	// Utils
+	bool PauseGame() const;
 
 	// Modules
 	std::unique_ptr<Window> win;

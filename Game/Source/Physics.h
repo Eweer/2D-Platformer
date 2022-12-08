@@ -33,6 +33,23 @@ constexpr int METERS_TO_PIXELS(T m)
 	return static_cast<int>(std::floor(PIXELS_PER_METER * m));
 }
 
+template<typename T>
+concept PointToInt = requires (T t) 
+{ 
+	{ t.x } -> std::convertible_to<int>;
+	{ t.y } -> std::convertible_to<int>;
+};
+
+template<PointToInt T = b2Vec2>
+constexpr iPoint METERS_TO_PIXELS(T p)
+{
+	iPoint r = {
+		static_cast<int>(std::floor(PIXELS_PER_METER * p.x)),
+		static_cast<int>(std::floor(PIXELS_PER_METER * p.y))
+	};
+	return r;
+}
+
 // Box2D -> Screen
 constexpr auto METER_PER_PIXEL = 1.0f/PIXELS_PER_METER;
 
@@ -41,6 +58,24 @@ constexpr float PIXEL_TO_METERS(T p)
 {
 	return static_cast<float>(p) * METER_PER_PIXEL;
 }
+
+template<typename T>
+concept PointToFloat = requires (T t)
+{
+	{ t.x } -> std::convertible_to<float>;
+	{ t.y } -> std::convertible_to<float>;
+};
+
+template<PointToFloat T = iPoint>
+constexpr b2Vec2 PIXEL_TO_METERS(T p)
+{
+	b2Vec2 r = {
+		static_cast<float>(p.x) * METER_PER_PIXEL,
+		static_cast<float>(p.y) * METER_PER_PIXEL
+	};
+	return r;
+}
+
 
 // Angles
 constexpr auto DEGTORAD = 0.0174532925199432957f;
@@ -292,7 +327,12 @@ public:
 private:
 
 	//---- Debug
-	void DrawDebug(const b2Body *body, const int32 count, const b2Vec2 *vertices, Uint8 r, Uint8 g, Uint8 b, Uint8 a = (Uint8)255U) const;
+	void DrawDebug(
+		const b2Body *body,
+		const int32 count,
+		const b2Vec2 *vertices,
+		SDL_Color color
+	) const;
 
 	//---- Joints
 	void DragSelectedObject();

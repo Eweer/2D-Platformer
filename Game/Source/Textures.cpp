@@ -70,11 +70,7 @@ SDL_Texture* Textures::Load(const char* path)
 // Translate a surface into a texture
 SDL_Texture* Textures::LoadSurface(SDL_Surface* surface)
 {
-
-	if(std::unique_ptr<SDL_Texture, std::function<void(SDL_Texture *)>>texturePtr(
-			SDL_CreateTextureFromSurface(app->render->renderer, surface),
-			[](SDL_Texture *tex) { if(tex) SDL_DestroyTexture(tex); }
-		);
+	if(auto texturePtr = app->render->LoadTexture(surface);
 		texturePtr != nullptr)
 	{
 		textures.emplace_back(std::move(texturePtr));

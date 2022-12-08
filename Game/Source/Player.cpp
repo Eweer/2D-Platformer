@@ -145,27 +145,18 @@ bool Player::Update()
 		texture->GetFlipPivot()
 	);
 
-	//Update player position in pixels
-	//position.x += METERS_TO_PIXELS(pBody->body->GetTransform().p.x) - colliderOffset.x;
-	//position.y += METERS_TO_PIXELS(pBody->body->GetTransform().p.y) - colliderOffset.y;
-	/*app->render->DrawCharacterTexture(
-		texture->UpdateAndGetFrame(),
-		position,
-		(bool)dir,
-		textureOffset,
-		colliderOffset
-	);*/
+	SDL_Rect camera = app->render->GetCamera();
 	
-	if(moveCamera && app->render->camera.x <= 0 && position.x >= startingPosition.x)
+	if(moveCamera && camera.x <= 0 && position.x >= startingPosition.x)
 	{
-		if(abs(app->render->camera.x) + cameraXCorrection <= app->map->GetWidth() * app->map->GetTileWidth())
+		if(abs(camera.x) + cameraXCorrection <= app->map->GetWidth() * app->map->GetTileWidth())
 		{
-			app->render->camera.x -= (int)(vel.x * 0.98);
-			if(app->render->camera.x > 0) app->render->camera.x = 0;
+			camera.x -= (int)(vel.x * 0.98);
+			if(camera.x > 0) camera.x = 0;
 		}
 		else if(vel.x < 0)
 		{
-			app->render->camera.x -= (int)(vel.x * 0.98);
+			camera.x -= (int)(vel.x * 0.98);
 		}
 	}
 	return true;
