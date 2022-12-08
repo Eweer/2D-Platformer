@@ -33,12 +33,6 @@ public:
 
 	// Called before quitting
 	bool CleanUp() final;
-	
-	Player* player;
-
-private:
-	SDL_Texture* img;
-
 };
 
 #endif // __SCENE_H__

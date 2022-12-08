@@ -8,6 +8,7 @@
 #include "EntityManager.h"
 #include "Map.h"
 #include "Physics.h"
+#include "Fonts.h"
 
 #include "Defs.h"
 #include "Log.h"
@@ -29,6 +30,7 @@ App::App(int argc, char* args[]) : argc(argc), args(args)
 	scene = std::make_unique<Scene>();
 	entityManager = std::make_unique<EntityManager>();
 	map = std::make_unique<Map>();
+	fonts = std::make_unique<Fonts>();
 
 	// Ordered for awake / Start / Update
 	// Reverse order of CleanUp
@@ -40,6 +42,7 @@ App::App(int argc, char* args[]) : argc(argc), args(args)
 	AddModule(scene.get());
 	AddModule(entityManager.get());
 	AddModule(map.get());
+	AddModule(fonts.get());
 
 	// Render last to swap buffer
 	AddModule(render.get());
@@ -57,7 +60,6 @@ void App::AddModule(Module* mod)
 // Called before render is available
 bool App::Awake()
 {
-	// L01: DONE 3: Load config from XML
 	if(!LoadConfig()) return false;
 
 	title = configNode.child("app").child("title").child_value(); 

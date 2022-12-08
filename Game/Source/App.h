@@ -22,6 +22,7 @@ class Scene;
 class EntityManager;
 class Map;
 class Physics;
+class Fonts;
 
 class App
 {
@@ -71,6 +72,7 @@ public:
 	std::unique_ptr<EntityManager> entityManager;
 	std::unique_ptr<Map> map;
 	std::unique_ptr<Physics> physics;
+	std::unique_ptr<Fonts> fonts;
 
 private:
 

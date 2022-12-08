@@ -13,8 +13,8 @@
 #include <algorithm>
 #include <string>
 
-template<typename T>
-constexpr auto in_range(T value, T  min, T  max) 
+template<typename T1, typename T2, typename T3>
+constexpr auto in_range(T1 value, T2  min, T3  max) 
 { 
 	return ((value >= min && value <= max) ? true : false);
 }

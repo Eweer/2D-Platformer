@@ -72,7 +72,9 @@
 	</animation>
 </tile>
 -->
-		
+	<fonts>
+		<property path="Assets/Textures/Fonts/"/>
+	</fonts>
 
 	<map>
 		<mapfolder path="Assets/Maps/Mountain/"/>

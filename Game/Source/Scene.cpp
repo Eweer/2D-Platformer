@@ -8,6 +8,7 @@
 #include "EntityManager.h"
 #include "Map.h"
 #include "BitMaskColliderLayers.h"
+#include "Fonts.h"
 
 #include "Defs.h"
 #include "Log.h"
@@ -53,6 +54,7 @@ bool Scene::Start()
 		std::to_string(app->map->GetTileSetSize())
 	); 
 
+	app->fonts->Load("CleanCraters");
 	app->win->SetTitle(title.c_str());
 
 	return true;
