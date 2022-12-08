@@ -20,7 +20,7 @@ public:
 	~Render() final;
 
 	// Called before render is available
-	bool Awake(pugi::xml_node&) final;
+	bool Awake(pugi::xml_node &) final;
 
 	// Called before the first frame
 	bool Start() final;
@@ -33,22 +33,22 @@ public:
 	// Called before quitting
 	bool CleanUp() final;
 
-	void SetViewPort(const SDL_Rect& rect) const;
+	void SetViewPort(const SDL_Rect &rect) const;
 	void ResetViewPort() const;
 
 	// Drawing
 	bool DrawTexture(
-		SDL_Texture* texture,
+		SDL_Texture *texture,
 		int x,
 		int y,
-		const SDL_Rect* section = nullptr,
+		const SDL_Rect *section = nullptr,
 		float speed = 1.0f,
 		double angle = 0,
 		int pivotX = INT_MAX,
 		int pivotY = INT_MAX,
 		SDL_RendererFlip flip = SDL_FLIP_NONE
 	) const;
-	
+
 	bool DrawCharacterTexture(
 		SDL_Texture *texture,
 		iPoint const &pos,
@@ -59,33 +59,27 @@ public:
 	) const;
 
 	bool DrawRectangle(
-		const SDL_Rect& rect,
+		const SDL_Rect &rect,
 		SDL_Color color,
 		bool filled = true,
-		bool useCamera = true, 
+		bool useCamera = true,
 		SDL_BlendMode blendMode = SDL_BlendMode::SDL_BLENDMODE_BLEND
 	) const;
-	
+
 	bool DrawLine(
-		int x1,
-		int y1,
-		int x2,
-		int y2,
-		Uint8 r,
-		Uint8 g,
-		Uint8 b,
-		Uint8 a = 255,
-		bool useCamera = true
+		iPoint v1,
+		iPoint v2,
+		SDL_Color color,
+		bool use_camera = true,
+		SDL_BlendMode blendMode = SDL_BlendMode::SDL_BLENDMODE_BLEND
 	) const;
-	
+
 	bool DrawCircle(
-		int x1,
-		int y1,
-		int redius,
-		Uint8 r,
-		Uint8 g,
-		Uint8 b,
-		Uint8 a = 255
+		iPoint center,
+		int radius,
+		SDL_Color color,
+		bool use_camera = true,
+		SDL_BlendMode blendMode = SDL_BlendMode::SDL_BLENDMODE_BLEND
 	) const;
 
 	// Set background color
@@ -96,12 +90,15 @@ public:
 
 	bool HasSaveData() const final;
 
+	
+
 	std::unique_ptr<SDL_Renderer, std::function<void(SDL_Renderer *)>> renderer;
 	SDL_Rect camera;
 	SDL_Rect viewport;
 	SDL_Color background;
 	
 private:
+	
 	// Max fps we want to achieve
 	uint32 fpsTarget = 60;
 	
@@ -117,6 +114,7 @@ private:
 	// Last tick in which we updated the current fps
 	uint32 fpsTimer = 0;
 
+	// -------- Vsync
 	bool vSyncActive = true;
 	bool vSyncOnRestart = true;
 };

@@ -7,9 +7,10 @@
 #include "Defs.h"
 #include "Log.h"
 
-#include <iostream>
 #include <string>
 #include <array>
+#include <algorithm>
+#include <numbers>		// std::numbers::pi
 
 constexpr auto ticks_for_next_frame = (1000 / 60);
 constexpr auto fps_UI_seconds_interval = 1.0f;
@@ -250,11 +251,10 @@ bool Render::DrawRectangle(const SDL_Rect& rect, SDL_Color color, bool filled, b
 		rec.w *= scale;
 		rec.h *= scale;
 	}
-
 	
+	auto result = filled ? SDL_RenderFillRect(renderer.get(), &rec) : SDL_RenderDrawRect(renderer.get(), &rec);
 
-	if(int result = filled ? SDL_RenderFillRect(renderer.get(), &rec) : SDL_RenderDrawRect(renderer.get(), &rec); 
-	   result)
+	if(result)  
 	{
 		LOG("Cannot draw quad to screen. SDL_RenderFillRect error: %s", SDL_GetError());
 		return false;
@@ -263,58 +263,58 @@ bool Render::DrawRectangle(const SDL_Rect& rect, SDL_Color color, bool filled, b
 	return true;
 }
 
-bool Render::DrawLine(int x1, int y1, int x2, int y2, Uint8 r, Uint8 g, Uint8 b, Uint8 a, bool use_camera) const
+bool Render::DrawLine(iPoint v1, iPoint v2, SDL_Color color, bool use_camera, SDL_BlendMode blendMode) const
 {
-	bool ret = true;
+
+	SDL_SetRenderDrawBlendMode(renderer.get(), blendMode);
+	SDL_SetRenderDrawColor(renderer.get(), color.r, color.g, color.b, color.a);
+	
 	uint scale = app->win->GetScale();
+	
+	iPoint cameraPos = use_camera ? iPoint{camera.x, camera.y} : iPoint{0, 0};
+	
+	iPoint v1Final = v1 * scale + cameraPos;
+	iPoint v2Final = v2 * scale + cameraPos;
 
-	SDL_SetRenderDrawBlendMode(renderer.get(), SDL_BLENDMODE_BLEND);
-	SDL_SetRenderDrawColor(renderer.get(), r, g, b, a);
-
-	int result = -1;
-
-	if(use_camera)
-		result = SDL_RenderDrawLine(renderer.get(), camera.x + x1 * scale, camera.y + y1 * scale, camera.x + x2 * scale, camera.y + y2 * scale);
-	else
-		result = SDL_RenderDrawLine(renderer.get(), x1 * scale, y1 * scale, x2 * scale, y2 * scale);
-
-	if(result != 0)
+	if(SDL_RenderDrawLine(renderer.get(), v1Final.x, v1Final.y, v2Final.x, v2Final.y))
 	{
 		LOG("Cannot draw quad to screen. SDL_RenderFillRect error: %s", SDL_GetError());
-		ret = false;
+		return false;
 	}
 
-	return ret;
+	return true;
 }
 
-bool Render::DrawCircle(int x, int y, int radius, Uint8 r, Uint8 g, Uint8 b, Uint8 a) const
+bool Render::DrawCircle(iPoint center, int radius, SDL_Color color, bool use_camera, SDL_BlendMode blendMode) const
 {
-	bool ret = true;
 	[[maybe_unused]] uint scale = app->win->GetScale();
 
-	SDL_SetRenderDrawBlendMode(renderer.get(), SDL_BLENDMODE_BLEND);
-	SDL_SetRenderDrawColor(renderer.get(), r, g, b, a);
+	SDL_SetRenderDrawBlendMode(renderer.get(), blendMode);
+	SDL_SetRenderDrawColor(renderer.get(), color.r, color.g, color.b, color.a);
 
-	int result = -1;
 	std::array<SDL_Point, 360> points{};
+	
+	auto factor = std::numbers::pi_v<float> / 180.0f;
+	auto r = static_cast<float>(radius);
+	SDL_Point cam = use_camera ? SDL_Point(camera.x, camera.y) : SDL_Point(0,0);
 
-	float factor = (float)M_PI / 180.0f;
-
-	for(uint i = 0; i < 360; ++i)
+	for(int i = 0; auto &elem : points)
 	{
-		points[i].x = camera.x + x + (int)((float)radius * cos((float)i * factor));
-		points[i].y = camera.y + y + (int)((float)radius * sin((float)i * factor));
+		auto offset = static_cast<float>(i) * factor;
+		elem = {
+			.x = center.x + cam.x + static_cast<int>(r * cos(offset)),
+			.y = center.y + cam.y + static_cast<int>(r * sin(offset))
+		};
+		i++;
 	}
-
-	result = SDL_RenderDrawPoints(renderer.get(), points.data(), 360);
-
-	if(result != 0)
+	
+	if(SDL_RenderDrawPoints(renderer.get(), points.data(), 360))
 	{
 		LOG("Cannot draw quad to screen. SDL_RenderFillRect error: %s", SDL_GetError());
-		ret = false;
+		return false;
 	}
 
-	return ret;
+	return true;
 }
 
 bool Render::LoadState(pugi::xml_node const &data)
@@ -338,7 +338,6 @@ pugi::xml_node Render::SaveState(pugi::xml_node const &data) const
 	
 	cam.append_child("graphics").append_attribute("vsync").set_value(vSyncOnRestart ? "true" : "false");
 	cam.child("graphics").append_attribute("targetfps").set_value(std::to_string(fpsTarget).c_str());
-	
 
 	return cam;
 }

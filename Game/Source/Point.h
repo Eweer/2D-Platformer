@@ -42,6 +42,16 @@ public:
 		return r;
 	}
 
+	Point operator *(uint i)
+	{
+		Point r;
+
+		r.x = x * i;
+		r.y = y * i;
+
+		return r;
+	}
+
 	const Point& operator -=(const Point &v)
 	{
 		x -= v.x;
