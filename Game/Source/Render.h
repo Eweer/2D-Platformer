@@ -33,9 +33,6 @@ public:
 	// Called before quitting
 	bool CleanUp() final;
 
-	void SetViewPort(const SDL_Rect &rect) const;
-	void ResetViewPort() const;
-
 	// Drawing
 	bool DrawTexture(
 		SDL_Texture *texture,
@@ -90,15 +87,25 @@ public:
 
 	bool HasSaveData() const final;
 
-	
+	std::unique_ptr<SDL_Texture, std::function<void(SDL_Texture *)>> LoadTexture(SDL_Surface *surface);
+
+	SDL_Rect GetCamera() const;
+
+private:
+
+	void SetViewPort(const SDL_Rect &rect) const;
+	void ResetViewPort() const;
 
 	std::unique_ptr<SDL_Renderer, std::function<void(SDL_Renderer *)>> renderer;
 	SDL_Rect camera;
 	SDL_Rect viewport;
 	SDL_Color background;
-	
-private:
-	
+
+	// -------- Vsync
+	bool vSyncActive = true;
+	bool vSyncOnRestart = true;
+
+	// -------- No Vsync
 	// Max fps we want to achieve
 	uint32 fpsTarget = 60;
 	
@@ -113,10 +120,6 @@ private:
 	uint32 fps = 0;
 	// Last tick in which we updated the current fps
 	uint32 fpsTimer = 0;
-
-	// -------- Vsync
-	bool vSyncActive = true;
-	bool vSyncOnRestart = true;
 };
 
 #endif // __RENDER_H__

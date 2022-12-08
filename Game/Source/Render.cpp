@@ -17,7 +17,7 @@ constexpr auto fps_UI_seconds_interval = 1.0f;
 
 Render::Render() : Module()
 {
-	name = "renderer";
+	name = "render";
 	background.r = 0;
 	background.g = 0;
 	background.b = 0;
@@ -97,7 +97,21 @@ bool Render::Update(float dt)
 	if(app->input->GetKey(SDL_SCANCODE_V) == KEY_DOWN)
 	{
 		vSyncOnRestart = !vSyncOnRestart;
+		app->SaveAttributeToConfig(name, "vsync", "value", vSyncOnRestart ? "true" : "false");
 	}
+
+	if(app->input->GetKey(SDL_SCANCODE_UP) == KEY_REPEAT)
+		camera.y += 1;
+
+	if(app->input->GetKey(SDL_SCANCODE_DOWN) == KEY_REPEAT)
+		camera.y -= 1;
+
+	if(app->input->GetKey(SDL_SCANCODE_LEFT) == KEY_REPEAT)
+		camera.x += 1;
+
+	if(app->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_REPEAT)
+		camera.x -= 1;
+
 	return true;
 }
 
@@ -345,4 +359,18 @@ pugi::xml_node Render::SaveState(pugi::xml_node const &data) const
 bool Render::HasSaveData() const
 {
 	return true;
+}
+
+std::unique_ptr<SDL_Texture, std::function<void(SDL_Texture *)>> Render::LoadTexture(SDL_Surface *surface)
+{
+	std::unique_ptr<SDL_Texture, std::function<void(SDL_Texture *)>>texturePtr(
+			SDL_CreateTextureFromSurface(renderer.get(), surface),
+			[](SDL_Texture *tex) { if(tex) SDL_DestroyTexture(tex); }
+	);
+	return texturePtr;
+}
+
+SDL_Rect Render::GetCamera() const
+{
+	return camera;
 }

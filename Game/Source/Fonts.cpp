@@ -139,10 +139,12 @@ void Fonts::Draw(std::string_view text, iPoint position, int fontId, bool isFixe
 	// 0 = no new line, 1 = new line on space, 2 = new line now
 	int newLine = 0;
 	
+	SDL_Rect camera = app->render->GetCamera();
+
 	// Fix X position if it's a static text on window
 	if(isFixed)
 	{
-		position.x += app->render->camera.x * -1;
+		position.x += camera.x * -1;
 	}
 	
 	for(int i = 0; auto const &elem : text)
@@ -185,7 +187,11 @@ void Fonts::Draw(std::string_view text, iPoint position, int fontId, bool isFixe
 			
 			xAdvance += it->second.xAdvance + 2;
 
-			if(!newLine) newLine = CheckIfNewLine(position.x, xAdvance, maxX, i);
+			if(maxX.first == SCREEN_FIT && xAdvance + position.x > camera.w - camera.x) [[unlikely]]
+				newLine = 2;
+
+			if(!newLine) [[unlikely]]
+				newLine = CheckIfNewLine(position.x, xAdvance, maxX, i);
 		}
 		else LOG("Character %s could not be found in %s", elem, font.name.c_str());
 	}
@@ -197,11 +203,7 @@ int Fonts::CheckIfNewLine(int x, int xAdvance, std::pair<FontDrawNewLine, int> m
 	auto const &[mode, max] = maxX;
 	using enum FontDrawNewLine;
 	
-	if(mode == SCREEN_FIT && xAdvance + x > app->render->camera.w - app->render->camera.x) 
-		return 2;
-	
-	if(mode == NONE || max == 0) 
-		return 0;
+	if(mode == NONE || max == 0) return 0;
 	
 	if(mode == NUMBER_OF_CHARS) {
 		if(max < i)
@@ -212,11 +214,9 @@ int Fonts::CheckIfNewLine(int x, int xAdvance, std::pair<FontDrawNewLine, int> m
 		i++;
 	}
 	
-	if(mode == POSITION_X_ON_MAP && max < xAdvance + x)
-		return 1;
+	if(mode == POSITION_X_ON_MAP && max < xAdvance + x) return 1;
 	
-	if(mode == POSITION_X_ON_SCREEN && max < xAdvance)
-		return 1;
+	if(mode == POSITION_X_ON_SCREEN && max < xAdvance) return 1;
 	
 	return 0;
 }
