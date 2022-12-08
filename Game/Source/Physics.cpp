@@ -18,6 +18,7 @@
 
 Physics::Physics() : Module()
 {
+	name = "physics";
 }
 
 // Destructor
@@ -242,14 +243,14 @@ void Physics::PreSolve(b2Contact *contact, const b2Manifold *oldManifold)
 	/* Play sound when colliding
 	std::array<b2PointState, 2>state1{}
 	std::array<b2PointState, 2>state2{}
-	b2GetPointStates(state1.data(), state2.data(), oldManifold, contact->GetManifold());
-	if(state2[0] == b2_addState)
+	b2GetPointStates(state1.data(), state2.data(), oldManifold, contact->GetManifold())
+	i(state2[0] == b2_addState)
 	{
 		b2Vec2 point = worldManifold.points[0]
 		b2Vec2 vA = pBodyA->body->GetLinearVelocityFromWorldPoint(point)
 		b2Vec2 vB = pBodyB->body->GetLinearVelocityFromWorldPoint(point)
 		float32 approachVelocity = b2Dot(vB-vA, worldManifold.normal)
-		if(approachVelocity > 1.0f)
+		i(approachVelocity > 1.0f)
 		{
 			PlayCollisionSound()
 		}
