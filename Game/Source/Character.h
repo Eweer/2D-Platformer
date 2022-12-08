@@ -29,9 +29,7 @@ public:
 	bool Update() override;
 
 	bool CleanUp() override;
-
-	void OnCollision(PhysBody *physA, PhysBody *physB) override;
-
+	
 	void ResetScore();
 
 	uint GetScore() const;
@@ -41,14 +39,14 @@ public:
 	int GetTimeUntilReset() const;
 
 	std::pair<uint, uint> GetScoreList() const;
-	
-	void CreatePhysBody(Uint16 collisionCategory = 0, Uint16 collisionMask = 0) override;
-	
+
+	void CreatePhysBody() override;
+
 	void SetStartingPosition();
 
 	void AddTexturesAndAnimationFrames() override;
 	
-	virtual void jumpOnNextUpdate(bool bStartJumpOnUpdate) { /*Method toOverride*/ };
+	virtual void jumpOnNextUpdate(bool bStartJumpOnUpdate) { /*Method to Override*/ };
 
 	float score = 0;
 	uint scoreMultiplier = 1;
@@ -63,4 +61,5 @@ public:
 	int dir = 1;
 
 	std::string currentCharacter = "";
+	SDL_Point textureOffset;
 };

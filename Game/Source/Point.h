@@ -10,29 +10,15 @@ class Point
 {
 public:
 
-	TYPE x, y;
+	TYPE x = 0;
+	TYPE y = 0;
 
-	Point()
-	{}
-
-	Point(const Point<TYPE>& v)
+	Point& Create(const TYPE& a, const TYPE& b)
 	{
-		this->x = v.x;
-		this->y = v.y;
-	}
+		this->x = a;
+		this->y = b;
 
-	Point(const TYPE& x, const TYPE& y)
-	{
-		this->x = x;
-		this->y = y;
-	}
-
-	Point& Create(const TYPE& x, const TYPE& y)
-	{
-		this->x = x;
-		this->y = y;
-
-		return(*this);
+		return *this;
 	}
 
 	// Math ------------------------------------------------
@@ -43,7 +29,7 @@ public:
 		r.x = x - v.x;
 		r.y = y - v.y;
 
-		return(r);
+		return r;
 	}
 
 	Point operator + (const Point &v) const
@@ -53,7 +39,7 @@ public:
 		r.x = x + v.x;
 		r.y = y + v.y;
 
-		return(r);
+		return r;
 	}
 
 	const Point& operator -=(const Point &v)
@@ -61,7 +47,7 @@ public:
 		x -= v.x;
 		y -= v.y;
 
-		return(*this);
+		return *this;
 	}
 
 	const Point& operator +=(const Point &v)
@@ -69,18 +55,10 @@ public:
 		x += v.x;
 		y += v.y;
 
-		return(*this);
+		return *this;
 	}
 
-	bool operator ==(const Point& v) const
-	{
-		return (x == v.x && y == v.y);
-	}
-
-	bool operator !=(const Point& v) const
-	{
-		return (x != v.x || y != v.y);
-	}
+	auto operator <=>(const Point &v) const = default;
 
 	// Utils ------------------------------------------------
 	bool IsZero() const
@@ -125,7 +103,7 @@ public:
 	}
 };
 
-typedef Point<int> iPoint;
-typedef Point<float> fPoint;
+using iPoint = Point<int>;
+using fPoint = Point<float>;
 
 #endif // __POINT_H__

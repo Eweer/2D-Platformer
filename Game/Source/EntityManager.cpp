@@ -6,17 +6,19 @@
 #include "Scene.h"
 #include "BitMaskColliderLayers.h"
 #include "Animation.h"
+#include "Physics.h"
 
 #include "Defs.h"
 #include "Log.h"
 #include "dirent.h"
 
 #include <algorithm>
+#include <ranges>
 #include <vector>
 #include <regex>
 #include <variant>
-#include <string>		//std::string, std::stoi
-#include <cctype>		//std::tolower
+#include <string>		// std::string, std::stoi
+#include <locale>		// std::tolower
 
 EntityManager::EntityManager() : Module()
 {
@@ -144,8 +146,8 @@ bool EntityManager::LoadAllTextures()
 
 bool EntityManager::LoadEntities(TileInfo const *tileInfo, iPoint pos, int width, int height)
 {
-	std::string aux = *(std::get_if<std::string>(&tileInfo->properties.find("Type")->second));
-	aux[0] = (char)std::tolower(aux[0]);
+	std::string aux = *(std::get_if<std::string>(&tileInfo->properties.find("EntityClass")->second));
+	aux[0] = std::tolower(aux[0], std::locale());
 	
 	allEntities[aux].entities.push_back(std::make_unique<Item>(tileInfo, pos, width, height));
 
@@ -154,8 +156,10 @@ bool EntityManager::LoadEntities(TileInfo const *tileInfo, iPoint pos, int width
 
 void EntityManager::LoadItemAnimations()
 {
+	// We loop through all the files in the directory looking for an entity 
+	// that matches the name of the file.
+	// 
 	// https://regex101.com/r/96aJfl/3
-	// Looks for a file named:
 	// itemAnimMatch[0] = file name
 	// itemAnimMatch[1] = (ItemType) -> Coin, Gem, Potion... Any word
 	// itemAnimMatch[2] = (From 0 to 3 digis) -> Image Variation
@@ -166,6 +170,7 @@ void EntityManager::LoadItemAnimations()
 
 	static const std::regex r2(R"(([A-aZ-z]+)(\d{1,3})_([A-aZ-z]+)(\d{0,3})\.(?:png|jpg))");
 
+	// TODO: Refractor this to use <filesystem> instead of dirent
 	struct dirent **folderList;
 	std::string entityFolder = "Assets/Animations/Items/";
 	const char *dirPath = entityFolder.c_str();
@@ -176,75 +181,87 @@ void EntityManager::LoadItemAnimations()
 
 	while (nItemFolder--)
 	{
-		std::smatch itemAnimMatch;
+		std::smatch m;
 
-		// Check if file matches the regex
+		// Match the regex with the file name and check if it does. If it doesn't we go to the next file.
 		if (std::string animFileName(folderList[nItemFolder]->d_name); 
-			!std::regex_match(animFileName, itemAnimMatch, r2))
+			!std::regex_match(animFileName, m, r2))
 		{
 			free(folderList[nItemFolder]);
 			continue;
 		}
 		
-		std::string entityType = itemAnimMatch[1];
-		entityType[0] = (char)std::tolower(entityType[0]);
+		// Match 1 is the class (Coin, Gem, Orc, ...) of the entity.
+		std::string entityClass = m[1];
+		entityClass[0] = (char)std::tolower(entityClass[0]);
 
-		// Check if we have an entiy with itemAnimMatch[1] type
-		if(auto entityTypeInfo = allEntities.find(entityType); 
+		// Check if we have an entiy with m[1] class
+		if(auto entityTypeInfo = allEntities.find(entityClass); 
 		   entityTypeInfo == allEntities.end())
 			continue;
 
-		// Check if we have an entity with itemAnimMatch[2] animation number
 		Item const *entity = nullptr;
 		int variation = 0;
 
-		for(auto const &elem : allEntities[entityType].entities)
+		// For all entities of that class...
+		for(auto const &elem : allEntities[entityClass].entities)
 		{
+			// Check if we have one with m[2] animation number
+			// If we do, we have to load the animation
 			if(variation = elem.get()->imageVariation; 
-			   variation == std::stoi(itemAnimMatch.str(2)))
+			   variation == std::stoi(m.str(2)))
 			{
 				entity = dynamic_cast<Item*>(elem.get());
 				break;
 			}
 		}
+		// Check if we matched an entity or not in the loop.
 		if(!DoesEntityExist(entity)) continue;
 
-
 		// Check if we already have the animation on the Animation map
-		// If we don't, we create a new one
-		if(auto anim = allEntities[entityType].animation.find(std::stoi(itemAnimMatch.str(2)));
-		   anim == allEntities[entityType].animation.end())
-			allEntities[entityType].animation[variation] = std::make_unique<Animation>();
+		if(auto anim = allEntities[entityClass].animation.find(std::stoi(m.str(2)));
+		   anim == allEntities[entityClass].animation.end())
+		{
+			// If we don't, we create a new one
+			allEntities[entityClass].animation[variation] = std::make_unique<Animation>();
+		}
 
-		// Add the frame to animation map
-		std::string match0 = entityFolder + std::string(itemAnimMatch[0]);
+		// Create the path of the file
+		// fileName = "Assets/Output/Item/" + "coin0_rotating000.png"
+		std::string fileName = entityFolder + std::string(m[0]);
 
-		auto animationName = std::string(itemAnimMatch[3]);
-		if(auto const frameCount = allEntities[entityType].animation[variation]->AddFrame(match0.c_str(), animationName);
-		   frameCount != 1) [[likely]]
-				continue;
+		auto animationName = std::string(m[3]);
+		[[likely]] if(auto const frameCount = allEntities[entityClass].animation[variation]->AddFrame(fileName.c_str(), animationName); 
+		   frameCount != 1) 
+		{	
+			//If we have more than one frame we don't need to set up properties
+			continue;
+		}
 
-		// if it's the first frame of m[1]
-	/*	if(auto speed = entity->info->properties.find("AnimationSpeed");
+		// TODO: Load properties from XML
+		/*
+		if(auto speed = entity->info->properties.find("AnimationSpeed")
 		   speed != entity->info->properties.end() && std::get<float>(speed->second) > 0)
-			allEntities[entityType].animation[variation]->SetSpeed(std::get<float>(speed->second));
-		else*/
-			allEntities[entityType].animation[variation]->SetSpeed(0.1f);
-
-/*		if(auto speed = entity->info->properties.find("AnimationStyle");
+			allEntities[entityClass].animation[variation]->SetSpeed(std::get<float>(speed->second))
+		else
+	
+		if(auto speed = entity->info->properties.find("AnimationStyle")
 		   speed != entity->info->properties.end() && std::get<int>(speed->second) > 0)
-			allEntities[entityType].animation[variation]->SetAnimStyle(static_cast<AnimIteration>(std::get<int>(speed->second)));
-		else*/
-			allEntities[entityType].animation[variation]->SetAnimStyle(AnimIteration::LOOP_FROM_START);
+			allEntities[entityClass].animation[variation]->SetAnimStyle(static_cast<AnimIteration>(std::get<int>(speed->second)))
+		else
+		*/
 
-		for(auto const &elem : allEntities[entityType].entities)
+		allEntities[entityClass].animation[variation]->SetSpeed(0.1f);
+		allEntities[entityClass].animation[variation]->SetAnimStyle(AnimIteration::LOOP_FROM_START);
+
+		for(auto const &elem : allEntities[entityClass].entities)
 		{
 			auto *itemEntity = dynamic_cast<Item *>(elem.get());
 			if(!itemEntity || itemEntity->anim) continue;
 			if(variation = itemEntity->imageVariation;
-			   variation == std::stoi(itemAnimMatch.str(2)))
+			   variation == std::stoi(m.str(2)))
 			{
-				itemEntity->anim = allEntities[entityType].animation[variation].get();
+				itemEntity->anim = allEntities[entityClass].animation[variation].get();
 			}
 		}
 
@@ -294,9 +311,8 @@ void EntityManager::CreateAllColliders()
 
 		for(auto const &entity : entityInfo.entities)
 		{
-			if(!IsEntityActive(entity.get())) continue;
-			
-			
+			if(!IsEntityActive(entity.get()) || StrEquals(entity->name, "item")) 
+				continue;
 		}
 	}
 }

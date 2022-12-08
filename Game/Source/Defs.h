@@ -13,8 +13,17 @@
 #include <algorithm>
 #include <string>
 
-#define IN_RANGE(value, min, max) ((value >= min && value <= max) ? 1 : 0)
-#define TO_BOOL(a)  ((a != 0) ? true : false )
+template<typename T>
+constexpr auto in_range(T value, T  min, T  max) 
+{ 
+	return ((value >= min && value <= max) ? true : false);
+}
+
+template<typename T> requires std::is_convertible_v<T, int> || std::is_convertible_v<T, unsigned int>
+constexpr auto to_bool(T a) 
+{ 
+	return ((a != 0) ? true : false );
+}
 
 using uint = unsigned int;
 using uchar = unsigned char;
@@ -98,8 +107,17 @@ struct StringHash
 };
 
 // Performance macros
-#define PERF_START(timer) timer.Start()
-#define PERF_PEEK(timer) LOG("%s took %f ms", __FUNCTION__, timer.ReadMs())
+template<typename T>
+constexpr auto PERF_START(T timer)
+{ 
+	return timer.Start();
+}
+
+template<typename T>
+constexpr auto PERF_PEEK(T timer) 
+{ 
+	return LOG("%s took %f ms", __FUNCTION__, timer.ReadMs()); 
+}
 
 // Usage: range<min, man>::contains(var)
 template <int min, int max> class range

@@ -353,14 +353,18 @@ std::unique_ptr<MapLayer> Map::LoadLayer(pugi::xml_node const &node)
 	layer->height = node.attribute("height").as_int();
 
 	//Iterate over all the tiles and get gid values
-	for(iPoint pos = {0,0} ; auto const &elem : node.child("data").children("tile"))
+	for(iPoint pos = {0,0}; 
+		auto const &elem : node.child("data").children("tile"))
 	{	
 		TileImage retTileAnim;
 		if(int gid = elem.attribute("gid").as_int(); gid > 0)
 		{
 			TileSet const *tileset = GetTilesetFromTileId(gid);
-			if(auto colliderCreated = CreateCollider(gid, pos.x, pos.y, tileset); colliderCreated != nullptr)
+			if(auto colliderCreated = CreateCollider(gid, pos.x, pos.y, tileset);
+			   colliderCreated != nullptr)
+			{
 				collidersOnMap.emplace_back(std::move(colliderCreated));
+			}
 
 			retTileAnim.gid = gid;
 			retTileAnim.originalGid = gid;

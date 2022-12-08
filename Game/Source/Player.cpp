@@ -10,22 +10,32 @@
 #include "Physics.h"
 #include "BitMaskColliderLayers.h"
 #include "Map.h"
+#include <iostream>
 
 Player::Player() : Character(ColliderLayers::PLAYER)
 {
 	name = "player";
 }
 
-Player::Player(pugi::xml_node const &itemNode = pugi::xml_node()) : Character(itemNode) {}
+Player::Player(pugi::xml_node const &itemNode = pugi::xml_node()) : Character(itemNode)
+{ 
+	name = "player";
+}
 
 Player::~Player() = default;
 
 bool Player::Awake() 
 {
-	currentCharacter = parameters.attribute("currentcharacter").as_string();
+	currentCharacter = parameters.attribute("class").as_string();
 	scoreList.first = parameters.attribute("highscore").as_uint();
 	scoreList.second = 0;
-	jump = {false, 0, parameters.attribute("maxjumps").as_int(), 0, parameters.attribute("jumpimpulse").as_float()};
+	jump = { 
+		.bJumping = false, 
+		.currentJumps = 0, 
+		.maxJumps = parameters.attribute("maxjumps").as_int(), 
+		.timeSinceLastJump = 0, 
+		.jumpImpulse = parameters.attribute("jumpimpulse").as_float()
+	};
 	
 	SetStartingParameters();
 
@@ -34,10 +44,8 @@ bool Player::Awake()
 
 bool Player::Start() 
 {
-	using enum ColliderLayers;
-	uint16 maskFlag = 0x0001;
-	maskFlag = (uint16)(PLATFORMS | ENEMIES | ITEMS | TRIGGERS | CHECKPOINTS);
-	CreatePhysBody((uint16)PLAYER, maskFlag);
+
+	CreatePhysBody();
 	texture->SetCurrentAnimation("idle");
 	if(!texture->Start("idle"))
 	{
@@ -85,6 +93,8 @@ bool Player::Update()
 
 	b2Vec2 vel = pBody->body->GetLinearVelocity();
 	b2Vec2 impulse = b2Vec2_zero;
+	float maxVel = 5.0f;
+	bool moveCamera = false;
 
 	if(app->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN && !jump.bJumping && jump.currentJumps <= jump.maxJumps)
 	{
@@ -98,12 +108,10 @@ bool Player::Update()
 		pBody->body->ApplyLinearImpulse(b2Vec2(0, impulse.y), pBody->body->GetWorldCenter(), true);
 	}
 
-	float maxVel = 5.0f;
-	bool moveCamera = false;
-
 	if(app->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
 	{
-		impulse.x = b2Max(vel.x - 0.25f, maxVel * -1);
+		if(vel.y != 0) impulse.x = b2Max(vel.x - 0.15f, maxVel * -1);
+		else impulse.x = b2Max(vel.x - 0.25f, maxVel * -1);
 		moveCamera = true;
 		if(texture->GetCurrentAnimName() != "walk")
 			texture->SetCurrentAnimation("walk");
@@ -111,7 +119,8 @@ bool Player::Update()
 	}
 	if(app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
 	{
-		impulse.x = b2Min(vel.x + 0.25f, maxVel);
+		if(vel.y != 0) impulse.x = b2Min(vel.x + 0.15f, maxVel);
+		else impulse.x = b2Min(vel.x + 0.25f, maxVel);
 		moveCamera = true;
 		if(texture->GetCurrentAnimName() != "walk")
 			texture->SetCurrentAnimation("walk");
@@ -127,21 +136,36 @@ bool Player::Update()
 		 texture->SetCurrentAnimation("idle");
 	}
 	
+	position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x);
+	position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y);
+	app->render->DrawCharacterTexture(
+		texture->UpdateAndGetFrame(),
+		iPoint(position.x - colliderOffset.x, position.y - colliderOffset.y),
+		(bool)dir,
+		texture->GetFlipPivot()
+	);
+
 	//Update player position in pixels
-	position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x) - (int)((float)pBody->width * 1.5f);
-	position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y) - (int)((float)pBody->height * 3.5f);
-	app->render->DrawCharacterTexture(texture->UpdateAndGetFrame(), iPoint(position.x, position.y), (bool) dir, texture->GetFlipPivot());
+	//position.x += METERS_TO_PIXELS(pBody->body->GetTransform().p.x) - colliderOffset.x;
+	//position.y += METERS_TO_PIXELS(pBody->body->GetTransform().p.y) - colliderOffset.y;
+	/*app->render->DrawCharacterTexture(
+		texture->UpdateAndGetFrame(),
+		position,
+		(bool)dir,
+		textureOffset,
+		colliderOffset
+	);*/
 	
 	if(moveCamera && app->render->camera.x <= 0 && position.x >= startingPosition.x)
 	{
 		if(abs(app->render->camera.x) + cameraXCorrection <= app->map->GetWidth() * app->map->GetTileWidth())
 		{
-			app->render->camera.x -= (int)(vel.x * 0.90);
+			app->render->camera.x -= (int)(vel.x * 0.98);
 			if(app->render->camera.x > 0) app->render->camera.x = 0;
 		}
 		else if(vel.x < 0)
 		{
-			app->render->camera.x -= (int)(vel.x * 0.90);
+			app->render->camera.x -= (int)(vel.x * 0.98);
 		}
 	}
 	return true;
@@ -152,11 +176,26 @@ bool Player::CleanUp()
 	return true;
 }
 
-// L07 DONE 6: Define OnCollision function for the player. Check the virtual function on Entity class
-void Player::OnCollision(PhysBody* physA, PhysBody* physB) {
+void Player::SendContact(b2Contact *c)
+{
+	auto const *pBodyA = (PhysBody *)c->GetFixtureA()->GetBody()->GetUserData();
+	auto const *pBodyB = (PhysBody *)c->GetFixtureB()->GetBody()->GetUserData();
+	std::cout << "Fixture A: " << pBodyA << std::endl;
+	std::cout << "Fixture B: " << pBodyB << std::endl;
+	std::cout << "[" 
+		<< std::to_string(c->GetManifold()->points[0].localPoint.x) << ", " 
+		<< std::to_string(c->GetManifold()->points[0].localPoint.y) << "]" << std::endl;
+	std::cout << "[" 
+		<< std::to_string(c->GetManifold()->localPoint.x) << ", " 
+		<< std::to_string(c->GetManifold()->localPoint.y) << "]" << std::endl;
+	std::cout << "[" 
+		<< std::to_string(c->GetManifold()->localNormal.x) << ", " 
+		<< std::to_string(c->GetManifold()->localNormal.y) << "]" << std::endl;
 
-	// L07 DONE 7: Detect the type of collision
+}
 
+void Player::OnCollisionStart(PhysBody* physA, PhysBody* physB) 
+{
 	switch (physB->ctype)
 	{
 		using enum ColliderLayers;

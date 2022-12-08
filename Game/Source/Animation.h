@@ -13,7 +13,7 @@
 #include <memory>
 #include <unordered_map>
 #include <string>
-#include <cctype>
+#include <locale>
 
 struct SDL_Texture;
 
@@ -112,6 +112,8 @@ public:
 
 	SDL_Texture *GetCurrentFrame() const
 	{
+		if(frames.empty() || frames.at(currentAnimName).empty()) return nullptr;
+
 		if((int)currentFrame >= frames.at(currentAnimName).size())
 			return frames.at(currentAnimName).at(frames.at(currentAnimName).size() - 1);
 		else
@@ -135,7 +137,7 @@ public:
 	int AddFrame(const char *pathToPNG, const std::string &animName)
 	{
 		std::string name = animName;
-		name[0] = (char)std::tolower(animName[0]);
+		name[0] = std::tolower(animName[0], std::locale());
 		frames[name].emplace_back(std::move(app->tex->Load(pathToPNG)));
 		if(currentAnimName == "unknown") currentAnimName = name;
 		return GetFrameCount(name);
@@ -294,10 +296,9 @@ public:
 		Start();
 	}
 
-	void setPivot(const int &x, const int &y)
+	void setPivot(SDL_Point const &p)
 	{
-		animPivot.x = x;
-		animPivot.y = y;
+		animPivot = {.x = p.x, .y = p.y};
 	}
 
 private:
@@ -310,7 +311,7 @@ private:
 	AnimIteration baseStyle = AnimIteration::NEVER;
 	bool bActive = false;
 	bool bFinished = false;
-	SDL_Point animPivot = {0, 0};
+	SDL_Point animPivot = {.x = 0, .y = 0};
 	uint loopsToDo = 0;
 	uint width = 0;
 	uint height = 0;

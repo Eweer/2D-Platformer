@@ -124,8 +124,11 @@ void Entity::SetPathsToLevel()
 
 bool Entity::SetStartingParameters()
 {
-	startingPosition = position = {parameters.attribute("x").as_int(), parameters.attribute("y").as_int()};
-
+	startingPosition = {
+		parameters.attribute("x").as_int(),
+		parameters.attribute("y").as_int()
+	};
+	position = startingPosition;
 	SetPaths();
 
 	return true;
@@ -203,24 +206,26 @@ void Entity::AddTexturesAndAnimationFrames()
 	free(nameList);
 }
 
-uint Entity::GetParameterBodyType() const
+BodyType Entity::GetParameterBodyType(std::string const &str) const
 {
+	std::string bodyType = str;
+	bodyType[0] = std::tolower(bodyType[0], std::locale());
 	using enum BodyType;
-	switch(str2int(parameters.child("physics").attribute("bodytype").as_string()))
+	switch(str2int(bodyType.c_str()))
 	{
 		case str2int("static"):
-			return (uint)STATIC;
+			return STATIC;
 			break;
 		case str2int("dynamic"):
-			return (uint)DYNAMIC;
+			return DYNAMIC;
 			break;
 		case str2int("kinematic"):
-			return (uint)KINEMATIC;
+			return KINEMATIC;
 			break;
 		default:
 			LOG("ERROR: Invalid body type");
 	}
-	return (uint)UNKNOWN;
+	return UNKNOWN;
 }
 
 

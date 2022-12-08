@@ -21,22 +21,58 @@
 		<fx volume="128"/>
 	</audio>
 
-	<!-- Animstyle: ONCE = 0 | LOOP_FROM_START = 1 | FORWARD_BACKWARD = 2 | LOOP_FORWARD_BACKWARD = 3 | NEVER = 4 -->
-	<scene assetpath="Assets/" texturepath="Assets/Textures/" audiopath="Assets/Audio/" fxfolder="Fx/">
-		<player x="120" y="420" renderable="true" maxjumps = "2" jumpimpulse = "5" currentcharacter="Mage">
-			<physics bodytype="dynamic" width="46" height="50" gravityscale="1" restitution="0" shape="rectangle"/>
-			<animationdata  width="128" height="128" pivotx="42" pivoty="85" animstyle="1" animspeed="1" animloop="true" name="player" animpath="Assets/Animations/Player/"/>
-			<animation name="idle" style="4" speed="0.1" frames="3"/>
-			<animation name="walk" style="4" speed="0.2" frames="4"/>
+	<scene assetpath="Assets/" texturepath="Assets/Animations/" audiopath="Assets/Audio/" fxfolder="Fx/" musicfolder="Music/">
+		<player name="Player" class="Mage" x="44" y="427" renderable="true" maxjumps = "2" jumpimpulse = "5">
+			<physics bodytype="dynamic" gravityscale="1" restitution="0" friction="1" colliderlayers="2"/>				
+			<animationdata>
+				<properties width="128" height="128" pivotx="42" pivoty="85" animstyle="4" animloop="true"/>
+				<animation name="idle" style="4" speed="0.1"/>
+				<animation name="walk" style="1" speed="0.2">
+					<collidergroup name="CharacterSensor" class="Dynamic" density="1" sensor="true" width="43" height="58">
+						<chain x="20" y="54" friction="0" points="5,13 14,3 32,4 43,15 42,33 37,40 38,50 34,53 12,53 9,50"/>
+					</collidergroup>	
+					<collidergroup name="Terrain" class="Dynamic" sensor="false" radius="7">
+						<circle name="Ground" friction="1" x="40" y="103"/>
+						<circle name="BottomRight" friction="0" x="51" y="96"/>
+						<circle name="Right" friction="0" x="56" y="75"/>
+						<circle name="TopRight" friction="0" x="52" y="62"/>
+						<circle name="Top" friction="0" x="39" y="57"/>
+						<circle name="TopLeft" friction="0" x="25" y="65"/>
+						<circle name="BottomLeft" friction="0" x="28" y="91"/>
+					</collidergroup>
+				</animation>
+			</animationdata>
 		</player>
-		<!--
-		<item x="256" y="515" texturepath="Assets/Textures/goldCoin.png"/>
-		<item x="416" y="512" texturepath="Assets/Textures/goldCoin.png"/>
-		<item x="384" y="352" texturepath="Assets/Textures/goldCoin.png"/>
-		<item x="200" y="672" texturepath="Assets/Textures/goldCoin.png"/>
-		<item x="500" y="672" texturepath="Assets/Textures/goldCoin.png"/>
-		-->
 	</scene>
+<!---		fixPos	{x=0.799999952 y=2.05999994 }	b2Vec2
+
+<tile id="2" class="Mage">
+	<properties>
+	<property name="Parameters" type="class" propertytype="Animation">
+		<properties>
+		<property name="AnimIteration" propertytype="AnimIteration" value="LOOP_FROM_START"/>
+		<property name="AnimationFrame" type="int" value="1"/>
+		<property name="AnimationName" propertytype="PlayerAnimation" value="Walk"/>
+		<property name="AnimationSpeed" type="float" value="0.2"/>
+		</properties>
+	</property>
+	</properties>
+	<image width="128" height="128" source="../../Animations/Player/Mage/Walk/walk2.png"/>
+	<objectgroup draworder="index" id="3">
+	<object id="2" x="20" y="54" width="43" height="58">
+		<polygon points="5,13 14,3 32,4 43,15 42,33 37,40 37,53 33,56 11,56 8,53"/>
+	</object>
+	</objectgroup>
+	<animation>
+	<frame tileid="2" duration="170"/>
+	<frame tileid="3" duration="170"/>
+	<frame tileid="4" duration="170"/>
+	<frame tileid="5" duration="170"/>
+	<frame tileid="6" duration="170"/>
+	</animation>
+</tile>
+-->
+		
 
 	<map>
 		<mapfolder path="Assets/Maps/Mountain/"/>

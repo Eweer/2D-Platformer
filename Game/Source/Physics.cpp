@@ -18,6 +18,7 @@
 
 Physics::Physics() : Module()
 {
+	name = "physics";
 }
 
 // Destructor
@@ -47,15 +48,14 @@ bool Physics::PreUpdate()
 	float newGrav = b2_maxFloat;
 	for (uint keyIterator = SDL_SCANCODE_1; keyIterator <= SDL_SCANCODE_0; keyIterator++)
 	{
-		if (app->input->GetKey(keyIterator) == KEY_DOWN) {
-			if (keyIterator == SDL_SCANCODE_0)
-			{
-				newGrav = 0;
-				break;
-			}
+		if (app->input->GetKey(keyIterator) == KEY_DOWN) 
+		{
 			newGrav = (float)((int)keyIterator - (int)SDL_SCANCODE_1 + 1);
+			
 			if (app->input->GetKey(SDL_SCANCODE_LCTRL) == KEY_REPEAT) newGrav *= -1;
 			if (app->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT) newGrav *= 2;
+			
+			if (keyIterator == SDL_SCANCODE_0) newGrav = 0;
 		}
 	}
 
@@ -75,22 +75,6 @@ bool Physics::PreUpdate()
 
 	if (app->input->GetKey(SDL_SCANCODE_N) == KEY_DOWN) ToggleStep();
 
-	// Because Box2D does not automatically broadcast collisions/contacts with sensors, 
-	// we have to manually search for collisions and "call" the equivalent to the ModulePhysics::BeginContact() ourselves...
-	for (b2Contact *c = world->GetContactList(); c; c = c->GetNext())
-	{
-		// For each contact detected by Box2D, see if the first one colliding is a sensor
-		if (c->IsTouching() && c->GetFixtureA()->IsSensor())
-		{
-			// If so, we call the OnCollision listener function (only of the sensor), passing as inputs our custom PhysBody classes
-			auto *pb1 = (PhysBody *)c->GetFixtureA()->GetBody()->GetUserData();
-			auto *pb2 = (PhysBody *)c->GetFixtureB()->GetBody()->GetUserData();
-
-			if (pb1 && pb2 && pb1->listener)
-				pb1->listener->OnCollision(pb1, pb2);
-		}
-	}
-
 	return true;
 }
 
@@ -105,9 +89,9 @@ bool Physics::PostUpdate()
 
 	if (!debug) return true;
 
-	//  Iterate all objects in the world and draw the bodies
-	//  until there are no more bodies or 
-	//  we are dragging an object around and not debugging draw in the meantime
+	//  Iterate all objects in the world and draw the bodies until
+	//  there are no more bodies OR
+	//  we are dragging an object around AND not debugging draw in the meantime
 	for (b2Body *b = world->GetBodyList(); b && (!selected || (selected && debugWhileSelected)); b = b->GetNext())
 	{
 		for (b2Fixture *f = b->GetFixtureList(); f; f = f->GetNext())
@@ -122,34 +106,32 @@ bool Physics::PostUpdate()
 				// Draw circles ------------------------------------------------
 				case b2Shape::Type::e_circle:
 				{
-					auto const circleShape = (b2CircleShape *)f->GetShape();
-					b2Vec2 pos = f->GetBody()->GetPosition();
+					auto const *circleShape = dynamic_cast<b2CircleShape *>(f->GetShape());
+					b2Vec2 pos = f->GetBody()->GetPosition() + circleShape->m_p;
 					app->render->DrawCircle(METERS_TO_PIXELS(pos.x), METERS_TO_PIXELS(pos.y), METERS_TO_PIXELS(circleShape->m_radius), 255, 255, 255);
 					break;
 				}
 				// Draw polygons ------------------------------------------------
 				case b2Shape::Type::e_polygon:
 				{
-					auto const *itemToDraw = (b2PolygonShape *)f->GetShape();
+					auto const *itemToDraw = dynamic_cast<b2PolygonShape *>(f->GetShape());
 					DrawDebug(b, itemToDraw->m_count, itemToDraw->m_vertices, 255, 255, 0);
 					break;
 				}
 				// Draw chains contour -------------------------------------------
 				case b2Shape::Type::e_chain:
 				{
-					auto const *itemToDraw = (b2ChainShape *)f->GetShape();
+					auto const *itemToDraw = dynamic_cast<b2ChainShape *>(f->GetShape());
 					DrawDebug(b, itemToDraw->m_count, itemToDraw->m_vertices, 100, 255, 100);
 					break;
 				}
 				// Draw a single segment(edge) ----------------------------------
 				case b2Shape::Type::e_edge:
 				{
-					auto const *edgeShape = (b2EdgeShape *)f->GetShape();
-					b2Vec2 v1;
-					b2Vec2 v2;
+					auto const *edgeShape = dynamic_cast<b2EdgeShape *>(f->GetShape());
+					b2Vec2 v1 = b->GetWorldPoint(edgeShape->m_vertex0);
+					b2Vec2 v2 = b->GetWorldPoint(edgeShape->m_vertex1);
 
-					v1 = b->GetWorldPoint(edgeShape->m_vertex0);
-					v1 = b->GetWorldPoint(edgeShape->m_vertex1);
 					app->render->DrawLine(METERS_TO_PIXELS(v1.x), METERS_TO_PIXELS(v1.y), METERS_TO_PIXELS(v2.x), METERS_TO_PIXELS(v2.y), 100, 100, 255);
 					break;
 				}
@@ -180,101 +162,103 @@ bool Physics::CleanUp()
 }
 
 
-//--------------- Callback function to collisions with Box2D
+//--------------- Collisions
 
 void Physics::BeginContact(b2Contact *contact)
 {
-	// Call the OnCollision listener function to bodies A and B, passing as inputs our custom PhysBody classes
-	auto *pBodyA = (PhysBody *)contact->GetFixtureA()->GetBody()->GetUserData();
-	auto *pBodyB = (PhysBody *)contact->GetFixtureB()->GetBody()->GetUserData();
+	// our custom PhysBody classes
+	auto pBodyA = static_cast<PhysBody *>(contact->GetFixtureA()->GetBody()->GetUserData());
+	auto pBodyB = static_cast<PhysBody *>(contact->GetFixtureB()->GetBody()->GetUserData());
 
-	if (pBodyA && pBodyA->listener)
-		pBodyA->listener->OnCollision(pBodyA, pBodyB);
-
-	if (pBodyB && pBodyB->listener)
-		pBodyB->listener->OnCollision(pBodyB, pBodyA);
-}
-
-
-//--------------- Create Shapes and Joints
-
-std::unique_ptr<PhysBody> Physics::CreateQuickPlatform(ShapeData &shapeData, iPoint pos, iPoint width_height)
-{
-	auto body = CreateBody(pos);
-	auto fixtureDef = CreateFixtureDef(shapeData);
-	body->CreateFixture(fixtureDef.get());
-	return CreatePhysBody(body, width_height, ColliderLayers::PLATFORMS);
-}
-
-std::unique_ptr<PhysBody> Physics::CreateRectangle(int x, int y, int width, int height, BodyType type, float32 gravityScale, float rest, uint16 cat, uint16 mask)
-{
-	auto body = CreateBody(iPoint(x, y), type);
-
-	ShapeData box("rectangle", std::vector<b2Vec2>{ { (float)width, (float)height }});
-
-	// Create FIXTURE
-	auto fixture = CreateFixtureDef(box, cat, mask);
-
-	// Add fixture to the BODY
-	body->CreateFixture(fixture.get());
-
-	// Return our PhysBody class
-	return CreatePhysBody(body, iPoint(width, height));
-}
-
-std::unique_ptr<PhysBody> Physics::CreateCircle(int x, int y, int radius, BodyType type, float rest, uint16 cat, uint16 mask)
-{
-	// Create BODY at position x,y
-	b2BodyDef body;
-	switch (type)
-	{
-		using enum BodyType;
-		case DYNAMIC:
-			body.type = b2_dynamicBody;
-			break;
-		case STATIC:
-			body.type = b2_staticBody;
-			break;
-		case KINEMATIC:
-			body.type = b2_kinematicBody;
-			break;
-		case UNKNOWN:
-			LOG("CreateRectangle Received UNKNOWN BodyType");
-			return nullptr;
+	if(pBodyA && pBodyB)
+	{	
+		if(auto [i, success] = collisionMap[pBodyA->body].insert(pBodyB->body);
+		   success)
+		{
+			collisionMap[pBodyB->body].insert(pBodyA->body);
+			if(pBodyA->listener) pBodyA->listener->OnCollisionStart(pBodyA, pBodyB);
+			if(pBodyB->listener) pBodyB->listener->OnCollisionStart(pBodyB, pBodyA);
+		}
 	}
-	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
-
-	// Add BODY to the world
-	b2Body *b = world->CreateBody(&body);
-
-	// Create SHAPE
-	b2CircleShape circle;
-	circle.m_radius = PIXEL_TO_METERS(radius);
-
-	// Create FIXTURE
-	b2FixtureDef fixture;
-	fixture.shape = &circle;
-	fixture.density = 1.0f;
-	fixture.filter.categoryBits = cat;
-	fixture.filter.maskBits = mask;
-	fixture.restitution = rest;
-
-	// Add fixture to the BODY
-	b->CreateFixture(&fixture);
-
-	// Create our custom PhysBody class
-	auto pbody = std::make_unique<PhysBody>();
-	pbody->body = b;
-	b->SetUserData(pbody.get());
-	pbody->width = radius * 2;
-	pbody->height = radius * 2;
-
-	// Return our PhysBody class
-	return pbody;
 }
 
+void Physics::EndContact(b2Contact *contact)
+{
+	// our custom PhysBody classes
+	auto pBodyA = static_cast<PhysBody *>(contact->GetFixtureA()->GetBody()->GetUserData());
+	auto pBodyB = static_cast<PhysBody *>(contact->GetFixtureB()->GetBody()->GetUserData());
 
-//--------------- Body
+	if(pBodyA && pBodyB)
+	{
+		auto itA = pBodyA->body->GetContactList();
+		auto itB = pBodyB->body->GetContactList();
+		
+		while(itA && itB)
+		{
+			// if the current iterator contact is not the contact we are ending 
+			// AND the contact is not touching
+			// AND the other body of the current iterator contact is the same
+			// as the one we are ending contact right now we don't end the collision
+			if((itA->contact->IsTouching() && itA->other->GetUserData() == pBodyB) ||
+			   (itB->contact->IsTouching() && itB->other->GetUserData() == pBodyA))
+			{
+				return;
+			}
+			itA = itA->next;
+			itB = itB->next;
+		}
+		
+		// if we got here, it means there are no more contacts in the list
+		// we erase the bodies of our custom collisionSet and collisionMap
+		// and, if there is a listener, send the OnCollisionEnd function
+		if(auto i = collisionMap.find(pBodyA->body); i != collisionMap.end())
+		{
+			i->second.erase(pBodyB->body);
+			if(collisionMap.at(pBodyA->body).empty()) collisionMap.erase(i);
+			if(pBodyA->listener) pBodyA->listener->OnCollisionEnd(pBodyA, pBodyB);
+		}
+		
+		if(auto i = collisionMap.find(pBodyB->body); i != collisionMap.end())
+		{
+			i->second.erase(pBodyA->body);
+			if(collisionMap.at(pBodyB->body).empty()) collisionMap.erase(i);
+			if(pBodyB->listener) pBodyB->listener->OnCollisionEnd(pBodyB, pBodyA);
+		}
+	}
+}
+
+void Physics::PreSolve(b2Contact *contact, const b2Manifold *oldManifold)
+{
+	b2WorldManifold worldManifold;
+	contact->GetWorldManifold(&worldManifold);
+	auto bodyA = contact->GetFixtureA()->GetBody();
+	auto bodyB = contact->GetFixtureB()->GetBody();
+
+	if(bodyA->GetFixtureList()->GetFilterData().categoryBits & (uint)ColliderLayers::PLATFORMS ||
+	   bodyB->GetFixtureList()->GetFilterData().categoryBits & (uint)ColliderLayers::PLATFORMS )
+	{
+		return;
+	}
+
+	/* Play sound when colliding
+	std::array<b2PointState, 2>state1{}
+	std::array<b2PointState, 2>state2{}
+	b2GetPointStates(state1.data(), state2.data(), oldManifold, contact->GetManifold())
+	i(state2[0] == b2_addState)
+	{
+		b2Vec2 point = worldManifold.points[0]
+		b2Vec2 vA = pBodyA->body->GetLinearVelocityFromWorldPoint(point)
+		b2Vec2 vB = pBodyB->body->GetLinearVelocityFromWorldPoint(point)
+		float32 approachVelocity = b2Dot(vB-vA, worldManifold.normal)
+		i(approachVelocity > 1.0f)
+		{
+			PlayCollisionSound()
+		}
+	}
+	*/
+}
+
+//---------------- Body Creation
 
 b2Body *Physics::CreateBody(iPoint pos, BodyType type, float angle, fPoint damping, float gravityScale, bool fixedRotation, bool bullet) const
 {
@@ -306,10 +290,10 @@ b2Body *Physics::CreateBody(iPoint pos, BodyType type, float angle, fPoint dampi
 	return world->CreateBody(&body);
 }
 
-std::unique_ptr<b2FixtureDef> Physics::CreateFixtureDef(ShapeData &shapeData, uint16 cat, uint16 mask, bool isSensor, float density, float friction, float restitution) const
+std::unique_ptr<b2FixtureDef> Physics::CreateFixtureDef(ShapeData &shapeData, uint16 cat, uint16 mask, bool isSensor, float density, float friction, float restitution, b2Vec2 fixPos) const
 {
 	auto fixture = std::make_unique<b2FixtureDef>();
-	fixture->shape = shapeData.CreateShape();
+	fixture->shape = shapeData.CreateShape(fixPos);
 	fixture->density = density;
 	fixture->friction = friction;
 	fixture->restitution = restitution;
@@ -326,6 +310,24 @@ std::unique_ptr<PhysBody> Physics::CreatePhysBody(b2Body *body, iPoint width_hei
 	body->SetUserData(pBody.get());
 
 	return pBody;
+}
+
+//--------------- Create Quick Shapes
+
+std::unique_ptr<PhysBody> Physics::CreateQuickPlatform(ShapeData &shapeData, iPoint pos, iPoint width_height)
+{
+	auto body = CreateBody(pos);
+	auto fixtureDef = CreateFixtureDef(shapeData);
+	body->CreateFixture(fixtureDef.get());
+	return CreatePhysBody(body, width_height, ColliderLayers::PLATFORMS);
+}
+
+std::unique_ptr<PhysBody> Physics::CreateQuickPhysBody(iPoint position, BodyType bodyType, ShapeData shapeData, uint16 cat, uint16 mask, iPoint width_height, bool sensor)
+{
+	auto body = CreateBody(position, bodyType);
+	auto fixtureDef = CreateFixtureDef(shapeData, cat, mask, sensor);
+	body->CreateFixture(fixtureDef.get());
+	return CreatePhysBody(body, width_height, static_cast<ColliderLayers>(cat));
 }
 
 

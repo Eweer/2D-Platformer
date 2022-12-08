@@ -27,14 +27,16 @@ public:
 
 	bool CleanUp() final;
 
-	void OnCollision(PhysBody* physA, PhysBody* physB) final;
+	void SendContact(b2Contact *c) final;
+
+	void OnCollisionStart(PhysBody* physA, PhysBody* physB) final;
 
 private:
 	CharacterJump jump;
 	uint cameraXCorrection = 0;
 	uint cameraYCorrection  = 0;
 
-
+	std::string playerCharacter;
 
 };
 

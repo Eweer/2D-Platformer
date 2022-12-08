@@ -8,11 +8,7 @@
 #include <deque>
 #include <utility>		//std::pair
 
-struct EntityAnimation
-{
-	std::unique_ptr<Animation> animation;
-	std::vector<b2Fixture> fixtures;
-};
+
 
 struct EntityInfo
 {
