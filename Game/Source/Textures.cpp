@@ -72,7 +72,7 @@ SDL_Texture* Textures::LoadSurface(SDL_Surface* surface)
 {
 
 	if(std::unique_ptr<SDL_Texture, std::function<void(SDL_Texture *)>>texturePtr(
-			SDL_CreateTextureFromSurface(app->render->renderer, surface),
+			SDL_CreateTextureFromSurface(app->render->renderer.get(), surface),
 			[](SDL_Texture *tex) { if(tex) SDL_DestroyTexture(tex); }
 		);
 		texturePtr != nullptr)

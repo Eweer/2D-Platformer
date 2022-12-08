@@ -185,12 +185,7 @@ void Fonts::Draw(std::string_view text, iPoint position, int fontId, bool isFixe
 			
 			xAdvance += it->second.xAdvance + 2;
 
-			if(!newLine)
-			{
-				newLine = CheckIfNewLine(position.x, xAdvance, maxX, i);
-				if(maxX.first == NUMBER_OF_CHARS);
-			}
-
+			if(!newLine) newLine = CheckIfNewLine(position.x, xAdvance, maxX, i);
 		}
 		else LOG("Character %s could not be found in %s", elem, font.name.c_str());
 	}

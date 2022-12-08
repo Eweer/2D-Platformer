@@ -2,6 +2,7 @@
 #include "Window.h"
 #include "Render.h"
 #include "EntityManager.h"
+#include "Input.h"
 
 #include "Defs.h"
 #include "Log.h"
@@ -9,6 +10,9 @@
 #include <iostream>
 #include <string>
 #include <array>
+
+constexpr auto ticks_for_next_frame = (1000 / 60);
+constexpr auto fps_UI_seconds_interval = 1.0f;
 
 Render::Render() : Module()
 {
@@ -29,26 +33,36 @@ bool Render::Awake(pugi::xml_node& config)
 
 	Uint32 flags = SDL_RENDERER_ACCELERATED;
 
-	if (vSyncActive = config.child("vsync").attribute("value").as_bool(true); vSyncActive)
+	if (vSyncActive = config.child("vsync").attribute("value").as_bool(); 
+		vSyncActive)
 	{
 		flags |= SDL_RENDERER_PRESENTVSYNC;
 		LOG("Using vsync");
 	}
 
-	renderer = SDL_CreateRenderer(app->win->GetWindow(), -1, flags);
+	vSyncOnRestart = vSyncActive;
 
-	if(renderer)
-	{
-		camera.w = app->win->GetSurface()->w;
-		camera.h = app->win->GetSurface()->h;
-		camera.x = 0;
-		camera.y = 0;
-	}
-	else
+	std::unique_ptr<SDL_Renderer, std::function<void(SDL_Renderer *)>>renderPtr(
+		SDL_CreateRenderer(app->win->GetWindow(), -1, flags),
+		[](SDL_Renderer *r) { if(r) SDL_DestroyRenderer(r); }
+	);
+	
+	renderer = std::move(renderPtr);
+		
+	if(!renderer)
 	{
 		LOG("Could not create the renderer! SDL_Error: %s\n", SDL_GetError());
 		return false;
 	}
+
+	camera = {
+			.x = 0,
+			.y = 0,
+			.w = app->win->GetSurface()->w,
+			.h = app->win->GetSurface()->h
+		};
+	
+	ticksForNextFrame = 1000/fpsTarget;
 
 	return true;
 }
@@ -57,27 +71,66 @@ bool Render::Awake(pugi::xml_node& config)
 bool Render::Start()
 {
 	LOG("render start");
-	// back background
-	SDL_RenderGetViewport(renderer, &viewport);
+	// Background
+	SDL_RenderGetViewport(renderer.get(), &viewport);
 	return true;
 }
 
 // Called each loop iteration
 bool Render::PreUpdate()
 {
-	SDL_RenderClear(renderer);
+	if(!vSyncActive)
+	{
+		while(SDL_GetTicks() - renderLastTime < ticksForNextFrame)
+		{
+			SDL_Delay(1);
+		}
+	}
+	
+	SDL_RenderClear(renderer.get());
 	return true;
 }
 
 bool Render::Update(float dt)
 {
+	if(app->input->GetKey(SDL_SCANCODE_V) == KEY_DOWN)
+	{
+		vSyncOnRestart = !vSyncOnRestart;
+	}
 	return true;
 }
 
 bool Render::PostUpdate()
 {
-	SDL_SetRenderDrawColor(renderer, background.r, background.g, background.g, background.a);
-	SDL_RenderPresent(renderer);
+	SDL_SetRenderDrawColor(renderer.get(),
+						   background.r,
+						   background.g,
+						   background.g,
+						   background.a
+	);
+	
+	SDL_RenderPresent(renderer.get());
+	
+	// I -> increases fps target || O ->decreases fps target
+	if(app->input->GetKey(SDL_SCANCODE_I) == KEY_DOWN && fpsTarget < 1000)
+	{
+		fpsTarget += 10;
+		ticksForNextFrame = 1000/fpsTarget;
+	}
+	if(app->input->GetKey(SDL_SCANCODE_K) == KEY_DOWN && fpsTarget > 10)
+	{
+		fpsTarget -= 10;
+		ticksForNextFrame = 1000/fpsTarget;
+	}
+	
+	if(!vSyncActive) renderLastTime = SDL_GetTicks();
+	
+	fpsTimer++;
+	if(SDL_GetTicks() - fpsTimer > static_cast<uint32>(fps_UI_seconds_interval * 1000))
+	{
+		fps = fpsTimer;
+		fpsTimer = SDL_GetTicks();
+	}
 	return true;
 }
 
@@ -85,7 +138,6 @@ bool Render::PostUpdate()
 bool Render::CleanUp()
 {
 	LOG("Destroying SDL render");
-	if(renderer) SDL_DestroyRenderer(renderer);
 	return true;
 }
 
@@ -94,17 +146,17 @@ void Render::SetBackgroundColor(SDL_Color color)
 	background = color;
 }
 
-void Render::SetViewPort(const SDL_Rect& rect)
+void Render::SetViewPort(const SDL_Rect& rect) const
 {
-	SDL_RenderSetViewport(renderer, &rect);
+	SDL_RenderSetViewport(renderer.get(), &rect);
 }
 
-void Render::ResetViewPort()
+void Render::ResetViewPort() const
 {
-	SDL_RenderSetViewport(renderer, &viewport);
+	SDL_RenderSetViewport(renderer.get(), &viewport);
 }
 
-bool Render::DrawCharacterTexture(SDL_Texture *texture, iPoint const &pos, const bool flip, SDL_Point pivot, const iPoint offset, const double angle)
+bool Render::DrawCharacterTexture(SDL_Texture *texture, iPoint const &pos, const bool flip, SDL_Point pivot, const iPoint offset, const double angle) const
 {
 	SDL_Rect rect{0};
 
@@ -132,7 +184,7 @@ bool Render::DrawCharacterTexture(SDL_Texture *texture, iPoint const &pos, const
 		p = &sdlPivot;
 	}
 		
-	if(SDL_RenderCopyEx(renderer, texture, nullptr, &rect, angle, p, (SDL_RendererFlip)flip) == -1)
+	if(SDL_RenderCopyEx(renderer.get(), texture, nullptr, &rect, angle, p, (SDL_RendererFlip)flip) == -1)
 	{
 		LOG("Cannot blit to screen. SDL_RenderCopy error: %s", SDL_GetError());
 		return false;
@@ -174,7 +226,7 @@ bool Render::DrawTexture(SDL_Texture* texture, int x, int y, const SDL_Rect* sec
 		p = &pivot;
 	}
 
-	if(SDL_RenderCopyEx(renderer, texture, section, &rect, angle, p, flip) != 0)
+	if(SDL_RenderCopyEx(renderer.get(), texture, section, &rect, angle, p, flip) != 0)
 	{
 		LOG("Cannot blit to screen. SDL_RenderCopy error: %s", SDL_GetError());
 		return false;
@@ -183,32 +235,32 @@ bool Render::DrawTexture(SDL_Texture* texture, int x, int y, const SDL_Rect* sec
 	return true;
 }
 
-bool Render::DrawRectangle(const SDL_Rect& rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a, bool filled, bool use_camera) const
+bool Render::DrawRectangle(const SDL_Rect& rect, SDL_Color color, bool filled, bool use_camera, SDL_BlendMode blendMode) const
 {
-	bool ret = true;
-	uint scale = app->win->GetScale();
-
-	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-	SDL_SetRenderDrawColor(renderer, r, g, b, a);
+	SDL_SetRenderDrawBlendMode(renderer.get(), blendMode);
+	SDL_SetRenderDrawColor(renderer.get(), color.r, color.g, color.b, color.a);
 
 	SDL_Rect rec(rect);
+	
 	if(use_camera)
-	{
+	{	
+		uint scale = app->win->GetScale();
 		rec.x = (int)(camera.x + rect.x * scale);
 		rec.y = (int)(camera.y + rect.y * scale);
 		rec.w *= scale;
 		rec.h *= scale;
 	}
 
-	int result = filled ? SDL_RenderFillRect(renderer, &rec) : SDL_RenderDrawRect(renderer, &rec);
+	
 
-	if(result != 0)
+	if(int result = filled ? SDL_RenderFillRect(renderer.get(), &rec) : SDL_RenderDrawRect(renderer.get(), &rec); 
+	   result)
 	{
 		LOG("Cannot draw quad to screen. SDL_RenderFillRect error: %s", SDL_GetError());
-		ret = false;
+		return false;
 	}
 
-	return ret;
+	return true;
 }
 
 bool Render::DrawLine(int x1, int y1, int x2, int y2, Uint8 r, Uint8 g, Uint8 b, Uint8 a, bool use_camera) const
@@ -216,15 +268,15 @@ bool Render::DrawLine(int x1, int y1, int x2, int y2, Uint8 r, Uint8 g, Uint8 b,
 	bool ret = true;
 	uint scale = app->win->GetScale();
 
-	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-	SDL_SetRenderDrawColor(renderer, r, g, b, a);
+	SDL_SetRenderDrawBlendMode(renderer.get(), SDL_BLENDMODE_BLEND);
+	SDL_SetRenderDrawColor(renderer.get(), r, g, b, a);
 
 	int result = -1;
 
 	if(use_camera)
-		result = SDL_RenderDrawLine(renderer, camera.x + x1 * scale, camera.y + y1 * scale, camera.x + x2 * scale, camera.y + y2 * scale);
+		result = SDL_RenderDrawLine(renderer.get(), camera.x + x1 * scale, camera.y + y1 * scale, camera.x + x2 * scale, camera.y + y2 * scale);
 	else
-		result = SDL_RenderDrawLine(renderer, x1 * scale, y1 * scale, x2 * scale, y2 * scale);
+		result = SDL_RenderDrawLine(renderer.get(), x1 * scale, y1 * scale, x2 * scale, y2 * scale);
 
 	if(result != 0)
 	{
@@ -240,8 +292,8 @@ bool Render::DrawCircle(int x, int y, int radius, Uint8 r, Uint8 g, Uint8 b, Uin
 	bool ret = true;
 	[[maybe_unused]] uint scale = app->win->GetScale();
 
-	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-	SDL_SetRenderDrawColor(renderer, r, g, b, a);
+	SDL_SetRenderDrawBlendMode(renderer.get(), SDL_BLENDMODE_BLEND);
+	SDL_SetRenderDrawColor(renderer.get(), r, g, b, a);
 
 	int result = -1;
 	std::array<SDL_Point, 360> points{};
@@ -254,7 +306,7 @@ bool Render::DrawCircle(int x, int y, int radius, Uint8 r, Uint8 g, Uint8 b, Uin
 		points[i].y = camera.y + y + (int)((float)radius * sin((float)i * factor));
 	}
 
-	result = SDL_RenderDrawPoints(renderer, points.data(), 360);
+	result = SDL_RenderDrawPoints(renderer.get(), points.data(), 360);
 
 	if(result != 0)
 	{
@@ -265,8 +317,6 @@ bool Render::DrawCircle(int x, int y, int radius, Uint8 r, Uint8 g, Uint8 b, Uin
 	return ret;
 }
 
-// L03: DONE 6: Implement a method to load the state
-// for now load camera's x and y
 bool Render::LoadState(pugi::xml_node const &data)
 {
 	camera.x = data.child("camera").attribute("x").as_int();
@@ -291,7 +341,6 @@ pugi::xml_node Render::SaveState(pugi::xml_node const &data) const
 	
 
 	return cam;
-
 }
 
 bool Render::HasSaveData() const

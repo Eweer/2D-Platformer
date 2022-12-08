@@ -2,8 +2,11 @@
 #define __RENDER_H__
 
 #include "Module.h"
-
+#include "Defs.h"
 #include "Point.h"
+
+#include <memory>
+#include <functional>
 
 #include "SDL/include/SDL.h"
 
@@ -14,27 +17,37 @@ public:
 	Render();
 
 	// Destructor
-	virtual ~Render();
+	~Render() final;
 
 	// Called before render is available
-	bool Awake(pugi::xml_node&);
+	bool Awake(pugi::xml_node&) final;
 
 	// Called before the first frame
-	bool Start();
+	bool Start() final;
 
 	// Called each loop iteration
-	bool PreUpdate();
-	bool Update(float dt);
-	bool PostUpdate();
+	bool PreUpdate() final;
+	bool Update(float dt) final;
+	bool PostUpdate() final;
 
 	// Called before quitting
-	bool CleanUp();
+	bool CleanUp() final;
 
-	void SetViewPort(const SDL_Rect& rect);
-	void ResetViewPort();
+	void SetViewPort(const SDL_Rect& rect) const;
+	void ResetViewPort() const;
 
 	// Drawing
-	bool DrawTexture(SDL_Texture* texture, int x, int y, const SDL_Rect* section = nullptr, float speed = 1.0f, double angle = 0, int pivotX = INT_MAX, int pivotY = INT_MAX, SDL_RendererFlip flip = SDL_FLIP_NONE) const;
+	bool DrawTexture(
+		SDL_Texture* texture,
+		int x,
+		int y,
+		const SDL_Rect* section = nullptr,
+		float speed = 1.0f,
+		double angle = 0,
+		int pivotX = INT_MAX,
+		int pivotY = INT_MAX,
+		SDL_RendererFlip flip = SDL_FLIP_NONE
+	) const;
 	
 	bool DrawCharacterTexture(
 		SDL_Texture *texture,
@@ -43,11 +56,37 @@ public:
 		SDL_Point pivot = SDL_Point(INT_MAX, INT_MAX),
 		const iPoint offset = iPoint(INT_MAX, INT_MAX),
 		const double angle = 0
-	);
+	) const;
 
-	bool DrawRectangle(const SDL_Rect& rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a = 255, bool filled = true, bool useCamera = true) const;
-	bool DrawLine(int x1, int y1, int x2, int y2, Uint8 r, Uint8 g, Uint8 b, Uint8 a = 255, bool useCamera = true) const;
-	bool DrawCircle(int x1, int y1, int redius, Uint8 r, Uint8 g, Uint8 b, Uint8 a = 255) const;
+	bool DrawRectangle(
+		const SDL_Rect& rect,
+		SDL_Color color,
+		bool filled = true,
+		bool useCamera = true, 
+		SDL_BlendMode blendMode = SDL_BlendMode::SDL_BLENDMODE_BLEND
+	) const;
+	
+	bool DrawLine(
+		int x1,
+		int y1,
+		int x2,
+		int y2,
+		Uint8 r,
+		Uint8 g,
+		Uint8 b,
+		Uint8 a = 255,
+		bool useCamera = true
+	) const;
+	
+	bool DrawCircle(
+		int x1,
+		int y1,
+		int redius,
+		Uint8 r,
+		Uint8 g,
+		Uint8 b,
+		Uint8 a = 255
+	) const;
 
 	// Set background color
 	void SetBackgroundColor(SDL_Color color);
@@ -57,12 +96,26 @@ public:
 
 	bool HasSaveData() const final;
 
-	SDL_Renderer* renderer;
+	std::unique_ptr<SDL_Renderer, std::function<void(SDL_Renderer *)>> renderer;
 	SDL_Rect camera;
 	SDL_Rect viewport;
 	SDL_Color background;
 	
-	uint fpsTarget = 60;
+private:
+	// Max fps we want to achieve
+	uint32 fpsTarget = 60;
+	
+	// -------- Required for capping FPS
+	// Delay required in ms to get the fps target
+	uint32 ticksForNextFrame = 0;
+	// Last tick in which we updated render
+	uint32 renderLastTime = 0;
+	
+	// -------- Required for showing FPS on screen
+	// Current FPS
+	uint32 fps = 0;
+	// Last tick in which we updated the current fps
+	uint32 fpsTimer = 0;
 
 	bool vSyncActive = true;
 	bool vSyncOnRestart = true;
