@@ -9,6 +9,8 @@
 #include <unordered_map>
 #include <variant>
 #include <utility>
+#include <cmath>
+#include <type_traits>
 
 #include "Box2D/Box2D/Box2D.h"
 
@@ -24,12 +26,23 @@ constexpr auto GRAVITY_Y = -8.0f;
 
 // Screen -> Box2D
 constexpr auto PIXELS_PER_METER = 50.0f;
+
+template<typename T> requires std::is_convertible_v<T, int>
+constexpr int METERS_TO_PIXELS(T m)
+{
+	return static_cast<int>(std::floor(PIXELS_PER_METER * m));
+}
+
 // Box2D -> Screen
 constexpr auto METER_PER_PIXEL = 1.0f/PIXELS_PER_METER;
 
-#define METERS_TO_PIXELS(m) (static_cast<int>(floor(PIXELS_PER_METER * m)))
-#define PIXEL_TO_METERS(p)  (static_cast<float>(METER_PER_PIXEL) * p)
+template<typename T> requires std::is_convertible_v<T, float32>
+constexpr float PIXEL_TO_METERS(T p)
+{
+	return static_cast<float>(p) * METER_PER_PIXEL;
+}
 
+// Angles
 constexpr auto DEGTORAD = 0.0174532925199432957f;
 constexpr auto RADTODEG = 57.295779513082320876f;
 

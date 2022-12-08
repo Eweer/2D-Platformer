@@ -99,7 +99,8 @@ struct StringHash
 
 // Performance macros
 #define PERF_START(timer) timer.Start()
-#define PERF_PEEK(timer) LOG("%s took %f ms", __FUNCTION__, timer.ReadMs())
+template<typename T>
+constexpr auto PERF_PEEK(T timer) { return LOG("%s took %f ms", __FUNCTION__, timer.ReadMs()); }
 
 // Usage: range<min, man>::contains(var)
 template <int min, int max> class range
