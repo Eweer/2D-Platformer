@@ -103,7 +103,7 @@ public:
 	}
 };
 
-typedef Point<int> iPoint;
-typedef Point<float> fPoint;
+using iPoint = Point<int>;
+using fPoint = Point<float>;
 
 #endif // __POINT_H__

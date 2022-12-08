@@ -10,7 +10,6 @@
 
 #include "math.h"
 
-#include <iostream>
 #include <variant>
 #include <memory>
 
@@ -89,9 +88,9 @@ bool Physics::PostUpdate()
 
 	if (!debug) return true;
 
-	//  Iterate all objects in the world and draw the bodies
-	//  until there are no more bodies or 
-	//  we are dragging an object around and not debugging draw in the meantime
+	//  Iterate all objects in the world and draw the bodies until
+	//  there are no more bodies OR
+	//  we are dragging an object around AND not debugging draw in the meantime
 	for (b2Body *b = world->GetBodyList(); b && (!selected || (selected && debugWhileSelected)); b = b->GetNext())
 	{
 		for (b2Fixture *f = b->GetFixtureList(); f; f = f->GetNext())
@@ -129,11 +128,9 @@ bool Physics::PostUpdate()
 				case b2Shape::Type::e_edge:
 				{
 					auto const *edgeShape = dynamic_cast<b2EdgeShape *>(f->GetShape());
-					b2Vec2 v1;
-					b2Vec2 v2;
+					b2Vec2 v1 = b->GetWorldPoint(edgeShape->m_vertex0);
+					b2Vec2 v2 = b->GetWorldPoint(edgeShape->m_vertex1);
 
-					v1 = b->GetWorldPoint(edgeShape->m_vertex0);
-					v2 = b->GetWorldPoint(edgeShape->m_vertex1);
 					app->render->DrawLine(METERS_TO_PIXELS(v1.x), METERS_TO_PIXELS(v1.y), METERS_TO_PIXELS(v2.x), METERS_TO_PIXELS(v2.y), 100, 100, 255);
 					break;
 				}
@@ -164,122 +161,103 @@ bool Physics::CleanUp()
 }
 
 
-//--------------- Callback function to collisions with Box2D
+//--------------- Collisions
 
 void Physics::BeginContact(b2Contact *contact)
 {
-	/*
-	if(contact->IsTouching()
-	   && !(contact->GetFixtureA()->IsSensor() || contact->GetFixtureB()->IsSensor()))
-	{
-		 Call the OnCollision listener function to bodies A and B, passing as inputs 
-		 our custom PhysBody classes
-		auto pBodyA = static_cast<PhysBody *>(contact->GetFixtureA()->GetBody()->GetUserData());
-		auto pBodyB = static_cast<PhysBody *>(contact->GetFixtureB()->GetBody()->GetUserData());
-
-		if(pBodyA && pBodyA->listener) pBodyA->listener->OnCollision(pBodyA, pBodyB);
-		if(pBodyB && pBodyB->listener)
-		{
-			pBodyB->listener->OnCollision(pBodyB, pBodyA);
-			pBodyB->listener->SendContact(contact);
-		}
-	}*/
 	// our custom PhysBody classes
 	auto pBodyA = static_cast<PhysBody *>(contact->GetFixtureA()->GetBody()->GetUserData());
 	auto pBodyB = static_cast<PhysBody *>(contact->GetFixtureB()->GetBody()->GetUserData());
 
-	if(pBodyA && pBodyA->listener)
-	{
-		pBodyA->listener->OnCollision(pBodyA, pBodyB);
-		if(pBodyB->ctype != ColliderLayers::PLATFORMS) pBodyA->listener->SendContact(contact);
+	if(pBodyA && pBodyB)
+	{	
+		if(auto [i, success] = collisionMap[pBodyA->body].insert(pBodyB->body);
+		   success)
+		{
+			collisionMap[pBodyB->body].insert(pBodyA->body);
+			if(pBodyA->listener) pBodyA->listener->OnCollisionStart(pBodyA, pBodyB);
+			if(pBodyB->listener) pBodyB->listener->OnCollisionStart(pBodyB, pBodyA);
+		}
 	}
-	if(pBodyB && pBodyB->listener)
+}
+
+void Physics::EndContact(b2Contact *contact)
+{
+	// our custom PhysBody classes
+	auto pBodyA = static_cast<PhysBody *>(contact->GetFixtureA()->GetBody()->GetUserData());
+	auto pBodyB = static_cast<PhysBody *>(contact->GetFixtureB()->GetBody()->GetUserData());
+
+	if(pBodyA && pBodyB)
 	{
-		pBodyB->listener->OnCollision(pBodyB, pBodyA);
-		if(pBodyA->ctype != ColliderLayers::PLATFORMS) pBodyB->listener->SendContact(contact);
+		auto itA = pBodyA->body->GetContactList();
+		auto itB = pBodyB->body->GetContactList();
+		
+		while(itA && itB)
+		{
+			// if the current iterator contact is not the contact we are ending 
+			// AND the contact is not touching
+			// AND the other body of the current iterator contact is the same
+			// as the one we are ending contact right now we don't end the collision
+			if((itA->contact->IsTouching() && itA->other->GetUserData() == pBodyB) ||
+			   (itB->contact->IsTouching() && itB->other->GetUserData() == pBodyA))
+			{
+				return;
+			}
+			itA = itA->next;
+			itB = itB->next;
+		}
+		
+		// if we got here, it means there are no more contacts in the list
+		// we erase the bodies of our custom collisionSet and collisionMap
+		// and, if there is a listener, send the OnCollisionEnd function
+		if(auto i = collisionMap.find(pBodyA->body); i != collisionMap.end())
+		{
+			i->second.erase(pBodyB->body);
+			if(collisionMap.at(pBodyA->body).empty()) collisionMap.erase(i);
+			if(pBodyA->listener) pBodyA->listener->OnCollisionEnd(pBodyA, pBodyB);
+		}
+		
+		if(auto i = collisionMap.find(pBodyB->body); i != collisionMap.end())
+		{
+			i->second.erase(pBodyA->body);
+			if(collisionMap.at(pBodyB->body).empty()) collisionMap.erase(i);
+			if(pBodyB->listener) pBodyB->listener->OnCollisionEnd(pBodyB, pBodyA);
+		}
 	}
 }
 
-
-//--------------- Create Shapes and Joints
-
-std::unique_ptr<PhysBody> Physics::CreateQuickPlatform(ShapeData &shapeData, iPoint pos, iPoint width_height)
+void Physics::PreSolve(b2Contact *contact, const b2Manifold *oldManifold)
 {
-	auto body = CreateBody(pos);
-	auto fixtureDef = CreateFixtureDef(shapeData);
-	body->CreateFixture(fixtureDef.get());
-	return CreatePhysBody(body, width_height, ColliderLayers::PLATFORMS);
-}
+	b2WorldManifold worldManifold;
+	contact->GetWorldManifold(&worldManifold);
+	auto bodyA = contact->GetFixtureA()->GetBody();
+	auto bodyB = contact->GetFixtureB()->GetBody();
 
-std::unique_ptr<PhysBody> Physics::CreateRectangle(int x, int y, int width, int height, BodyType type, float32 gravityScale, float rest, uint16 cat, uint16 mask)
-{
-	auto body = CreateBody(iPoint(x, y), type);
-
-	ShapeData box("rectangle", std::vector<b2Vec2>{ { (float)width, (float)height }});
-
-	// Create FIXTURE
-	auto fixture = CreateFixtureDef(box, cat, mask);
-
-	// Add fixture to the BODY
-	body->CreateFixture(fixture.get());
-
-	// Return our PhysBody class
-	return CreatePhysBody(body, iPoint(width, height));
-}
-
-std::unique_ptr<PhysBody> Physics::CreateCircle(int x, int y, int radius, BodyType type, float rest, uint16 cat, uint16 mask)
-{
-	// Create BODY at position x,y
-	b2BodyDef body;
-	switch (type)
+	if(bodyA->GetFixtureList()->GetFilterData().categoryBits & (uint)ColliderLayers::PLATFORMS ||
+	   bodyB->GetFixtureList()->GetFilterData().categoryBits & (uint)ColliderLayers::PLATFORMS )
 	{
-		using enum BodyType;
-		case DYNAMIC:
-			body.type = b2_dynamicBody;
-			break;
-		case STATIC:
-			body.type = b2_staticBody;
-			break;
-		case KINEMATIC:
-			body.type = b2_kinematicBody;
-			break;
-		case UNKNOWN:
-			LOG("CreateRectangle Received UNKNOWN BodyType");
-			return nullptr;
+		return;
 	}
-	body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
 
-	// Add BODY to the world
-	b2Body *b = world->CreateBody(&body);
-
-	// Create SHAPE
-	b2CircleShape circle;
-	circle.m_radius = PIXEL_TO_METERS(radius);
-
-	// Create FIXTURE
-	b2FixtureDef fixture;
-	fixture.shape = &circle;
-	fixture.density = 1.0f;
-	fixture.filter.categoryBits = cat;
-	fixture.filter.maskBits = mask;
-	fixture.restitution = rest;
-
-	// Add fixture to the BODY
-	b->CreateFixture(&fixture);
-
-	// Create our custom PhysBody class
-	auto pbody = std::make_unique<PhysBody>();
-	pbody->body = b;
-	b->SetUserData(pbody.get());
-	pbody->width = radius * 2;
-	pbody->height = radius * 2;
-
-	// Return our PhysBody class
-	return pbody;
+	/* Play sound when colliding
+	std::array<b2PointState, 2>state1{};
+	std::array<b2PointState, 2>state2{};
+	b2GetPointStates(state1.data(), state2.data(), oldManifold, contact->GetManifold());
+	if(state2[0] == b2_addState)
+	{
+		b2Vec2 point = worldManifold.points[0];
+		b2Vec2 vA = pBodyA->body->GetLinearVelocityFromWorldPoint(point);
+		b2Vec2 vB = pBodyB->body->GetLinearVelocityFromWorldPoint(point);
+		float32 approachVelocity = b2Dot(vB-vA, worldManifold.normal);
+		if(approachVelocity > 1.0f)
+		{
+			//PlayCollisionSound
+		}
+	}
+	*/
 }
 
-
-//--------------- Body
+//---------------- Body Creation
 
 b2Body *Physics::CreateBody(iPoint pos, BodyType type, float angle, fPoint damping, float gravityScale, bool fixedRotation, bool bullet) const
 {
@@ -331,6 +309,24 @@ std::unique_ptr<PhysBody> Physics::CreatePhysBody(b2Body *body, iPoint width_hei
 	body->SetUserData(pBody.get());
 
 	return pBody;
+}
+
+//--------------- Create Quick Shapes
+
+std::unique_ptr<PhysBody> Physics::CreateQuickPlatform(ShapeData &shapeData, iPoint pos, iPoint width_height)
+{
+	auto body = CreateBody(pos);
+	auto fixtureDef = CreateFixtureDef(shapeData);
+	body->CreateFixture(fixtureDef.get());
+	return CreatePhysBody(body, width_height, ColliderLayers::PLATFORMS);
+}
+
+std::unique_ptr<PhysBody> Physics::CreateQuickPhysBody(iPoint position, BodyType bodyType, ShapeData shapeData, uint16 cat, uint16 mask, iPoint width_height, bool sensor)
+{
+	auto body = CreateBody(position, bodyType);
+	auto fixtureDef = CreateFixtureDef(shapeData, cat, mask, sensor);
+	body->CreateFixture(fixtureDef.get());
+	return CreatePhysBody(body, width_height, static_cast<ColliderLayers>(cat));
 }
 
 

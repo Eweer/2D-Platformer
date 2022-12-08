@@ -194,7 +194,7 @@ void Player::SendContact(b2Contact *c)
 
 }
 
-void Player::OnCollision(PhysBody* physA, PhysBody* physB) 
+void Player::OnCollisionStart(PhysBody* physA, PhysBody* physB) 
 {
 	switch (physB->ctype)
 	{

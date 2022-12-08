@@ -67,7 +67,7 @@ public:
 		return pugi::xml_node();
 	}
 
-	virtual void OnCollision(PhysBody* bodyA, PhysBody* bodyB)
+	virtual void OnCollisionStart(PhysBody* bodyA, PhysBody* bodyB)
 	{
 		// To Override
 	}

@@ -1,9 +1,11 @@
-#pragma once
+#ifndef __PHYSICS_H__
+#define __PHYSICS_H__
 #include "Module.h"
 #include "Defs.h"
 #include "BitMaskColliderLayers.h"
 #include "Entity.h"
 
+#include <unordered_set>
 #include <unordered_map>
 #include <variant>
 #include <utility>
@@ -11,7 +13,6 @@
 #include "Box2D/Box2D/Box2D.h"
 
 // Tell the compiler to reference the compiled Box2D libraries
-
 #ifdef _DEBUG
 #pragma comment( lib, "../Game/Source/External/Box2D/libx86/DebugLib/Box2D.lib" )
 #else
@@ -26,8 +27,8 @@ constexpr auto PIXELS_PER_METER = 50.0f;
 // Box2D -> Screen
 constexpr auto METER_PER_PIXEL = 1.0f/PIXELS_PER_METER;
 
-#define METERS_TO_PIXELS(m) ((int) floor(PIXELS_PER_METER * m))
-#define PIXEL_TO_METERS(p)  ((float) METER_PER_PIXEL * p)
+#define METERS_TO_PIXELS(m) (static_cast<int>(floor(PIXELS_PER_METER * m)))
+#define PIXEL_TO_METERS(p)  (static_cast<float>(METER_PER_PIXEL) * p)
 
 constexpr auto DEGTORAD = 0.0174532925199432957f;
 constexpr auto RADTODEG = 57.295779513082320876f;
@@ -189,25 +190,23 @@ class Physics : public Module, public b2ContactListener
 {
 public:
 
-	// Constructors & Destructors
+	//---------------- Constructors & Destructors
 	Physics();
 	~Physics() final;
 
-	// Main module steps
+	//---------------- Main module steps
 	bool Start() final;
 	bool PreUpdate() final;
 	bool PostUpdate() final;
 	bool CleanUp() final;
 
-	// Create basic physics objects
-	std::unique_ptr<PhysBody> CreateRectangle(int x, int y, int width, int height, BodyType type, float32 gravityScale = 1.0f, float rest = 0.0f, uint16 cat = (uint16)ColliderLayers::PLATFORMS, uint16 mask = (uint16)ColliderLayers::PLAYER);
-	std::unique_ptr<PhysBody> CreateCircle(int x, int y, int radius, BodyType type, float rest = 0.0f, uint16 cat = (uint16)ColliderLayers::PLATFORMS, uint16 mask = (uint16)ColliderLayers::PLAYER);
 
-	std::unique_ptr<PhysBody> CreateQuickPlatform(
-		ShapeData &shapeData,
-		iPoint pos,
-		iPoint width_height = iPoint(0, 0)
-	);
+	//---------------- Contact
+	void BeginContact(b2Contact *contact) final;
+	void EndContact(b2Contact *contact) final;
+	void PreSolve(b2Contact *contact, const b2Manifold *oldManifold) final;
+
+	//---------------- Body Creation
 
 	b2Body *CreateBody(
 		iPoint pos,
@@ -236,32 +235,53 @@ public:
 		ColliderLayers cType = ColliderLayers::UNKNOWN
 	) const;
 
-	// Create joints
+	//---------------- Create Quick Shapes
+
+	std::unique_ptr<PhysBody> CreateQuickPlatform(
+		ShapeData &shapeData,
+		iPoint pos,
+		iPoint width_height = iPoint(0, 0)
+	);
+
+	std::unique_ptr<PhysBody> CreateQuickPhysBody(
+		iPoint position,
+		BodyType bodyType,
+		ShapeData shapeData,
+		uint16 cat,
+		uint16 mask,
+		iPoint width_height = iPoint(0, 0),
+		bool sensor = false
+	);
+
+	//---------------- Joints
+
+	//---- Mouse
+
 	b2MouseJoint *CreateMouseJoint(PhysBody *ground, PhysBody *target, b2Vec2 position, float dampingRatio = 0.5f, float frequecyHz = 2.0f, float maxForce = 100.0f);
 	b2MouseJoint *CreateMouseJoint(b2Body *ground, b2Body *target, b2Vec2 position, float dampingRatio = 0.5f, float frequecyHz = 2.0f, float maxForce = 100.0f);
 
-	// b2ContactListener ---
-	void BeginContact(b2Contact *contact) final;
+	//---------------- Utils
 
-	// Utils
+	//---- Position
 	iPoint WorldVecToIPoint(const b2Vec2 &v) const;
 	b2Vec2 IPointToWorldVec(const iPoint &p) const;
 
+	//---- World
 	void ToggleStep();
-
 	b2Vec2 GetWorldGravity() const;
 
+	//---- Destroy
 	void DestroyBody(b2Body *b = nullptr) const;
 
-	// Get Info
+	//---- Debug
 	bool IsDebugActive() const;
 
 private:
 
-	// Debug
+	//---- Debug
 	void DrawDebug(const b2Body *body, const int32 count, const b2Vec2 *vertices, Uint8 r, Uint8 g, Uint8 b, Uint8 a = (Uint8)255U) const;
 
-	// Joints
+	//---- Joints
 	void DragSelectedObject();
 	bool IsMouseOverObject(b2Fixture const *f) const;
 	void DestroyMouseJoint();
@@ -278,4 +298,8 @@ private:
 	// Mouse Joint
 	b2Body *selected = nullptr;
 	b2MouseJoint *mouseJoint = nullptr;
+
+	std::unordered_map<b2Body *, std::unordered_set<b2Body *>> collisionMap;
 };
+
+#endif

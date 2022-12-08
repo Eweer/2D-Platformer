@@ -29,7 +29,7 @@ public:
 
 	void SendContact(b2Contact *c) final;
 
-	void OnCollision(PhysBody* physA, PhysBody* physB) final;
+	void OnCollisionStart(PhysBody* physA, PhysBody* physB) final;
 
 private:
 	CharacterJump jump;

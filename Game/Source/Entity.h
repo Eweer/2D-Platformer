@@ -83,7 +83,8 @@ public:
 	virtual void CreatePhysBody() { /* Method to Override */ };
 	
 	virtual void SendContact(b2Contact *c) { /* Method to Override */ };
-	virtual void OnCollision(PhysBody *physA, PhysBody *physB) { /* Method to Override */ };
+	virtual void OnCollisionStart(PhysBody *physA, PhysBody *physB) { /* Method to Override */ };
+	virtual void OnCollisionEnd(PhysBody *physA, PhysBody *physB) { /* Method to OVerride */ }
 
 	bool active = true;
 
