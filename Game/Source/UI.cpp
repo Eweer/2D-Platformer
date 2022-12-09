@@ -3,6 +3,10 @@
 #include "Textures.h"
 #include "Fonts.h"
 #include "Render.h"
+#include "Physics.h"
+#include "EntityManager.h"
+#include "Player.h"
+#include "Input.h"
 
 #include "Defs.h"
 #include "Point.h"
@@ -26,6 +30,7 @@ bool UI::Awake(pugi::xml_node &)
 bool UI::Start()
 {
 	fCleanCraters = app->fonts->Load("CleanCraters");
+	player = app->entityManager->GetPlayerCharacter();
 	return true;
 }
 
@@ -42,6 +47,9 @@ bool UI::PreUpdate()
 bool UI::PostUpdate()
 {
 	DrawFPS(pTopLeft);
+	DrawGravity(pTopLeft);
+	DrawPlayerPosition(pTopLeft);
+	DrawMousePosition(pTopLeft);
 	if(bDrawPause) DrawPause(pMiddle);
 	return true;
 }
@@ -69,7 +77,52 @@ void UI::DrawFPS(iPoint &position) const
 	if(app->render->vSyncActive != app->render->vSyncOnRestart)
 		app->fonts->Draw("Restart for VSync changes.", position, fCleanCraters);
 	else
-		app->fonts->Draw(std::format("Vsync is {}.", app->render->vSyncActive ? "enabled" : "disabled"), position, fCleanCraters);
+		app->fonts->Draw(std::format("VSync is {}.", app->render->vSyncActive ? "enabled" : "disabled"), position, fCleanCraters);
+	
+	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
+}
+
+void UI::DrawGravity(iPoint &position) const
+{
+	app->fonts->Draw(
+		std::format(
+			"Gravity: \"{},{}\"",
+			app->physics->GetWorldGravity().x,
+			app->physics->GetWorldGravity().y
+		),
+		position,
+		fCleanCraters
+	);
+	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
+
+}
+
+void UI::DrawPlayerPosition(iPoint &position) const
+{
+	app->fonts->Draw(
+		std::format(
+			"Player position: \"{},{}\"",
+			player->position.x,
+			player->position.y
+		),
+		position,
+		fCleanCraters
+	);
+	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
+}
+
+void UI::DrawMousePosition(iPoint &position) const
+{
+	app->fonts->Draw(
+		std::format(
+			"Mouse position: \"{},{}\"",
+			app->input->mouseX,
+			app->input->mouseY
+		),
+		position,
+		fCleanCraters
+	);
+	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
 }
 
 bool UI::Pause(int phase)
@@ -83,12 +136,6 @@ bool UI::Pause(int phase)
 		default:
 			return true;
 	}
-}
-
-// Called before quitting
-bool UI::CleanUp()
-{
-	return true;
 }
 
 bool UI::TogglePauseDraw()

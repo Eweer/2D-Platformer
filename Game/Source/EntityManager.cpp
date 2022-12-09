@@ -316,6 +316,14 @@ bool EntityManager::Pause(int phase)
 	return true;
 }
 
+Player *EntityManager::GetPlayerCharacter() const
+{
+	if(auto it = allEntities.find("player");
+	   it != allEntities.end())
+		return dynamic_cast<Player *>(it->second.entities.front().get());
+	return nullptr;
+}
+
 void EntityManager::CreateAllColliders()
 {
 	for(auto const &[entityType, entityInfo] : allEntities)

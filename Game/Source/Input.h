@@ -78,6 +78,8 @@ private:
 	int mouseMotionY;
 	int mouseX;
 	int mouseY;
+	
+	friend class UI;
 };
 
 #endif // __INPUT_H__

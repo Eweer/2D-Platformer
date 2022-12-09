@@ -40,6 +40,7 @@ private:
 
 	std::string playerCharacter;
 
+	friend class UI;
 };
 
 #endif // __PLAYER_H__

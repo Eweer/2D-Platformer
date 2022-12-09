@@ -2,6 +2,8 @@
 #define __UI_H__
 
 #include "Module.h"
+#include "Entity.h"
+#include "Player.h"
 
 #include "Defs.h"
 #include "Point.h"
@@ -26,22 +28,23 @@ public:
 	// Called each loop iteration
 	bool PostUpdate() final;
 
-	void DrawPause(iPoint &position) const;
-
-	void DrawFPS(iPoint &position) const;
-
 	bool Pause(int phase) final;
-
-	// Called before quitting
-	bool CleanUp() final;
 
 	bool TogglePauseDraw();
 
 private:
+	void DrawPause(iPoint &position) const;
+	void DrawFPS(iPoint &position) const;
+	void DrawGravity(iPoint &position) const;
+	void DrawPlayerPosition(iPoint &position) const;
+	void DrawMousePosition(iPoint &position) const;
+
 	bool bDrawPause = false;
 	int fCleanCraters = 0;
 	iPoint pTopLeft = {10, 10};
 	iPoint pMiddle = {0, 0};
+
+	Player *player = nullptr;
 };
 
 #endif
