@@ -163,7 +163,7 @@ void Fonts::Draw(std::string_view text, iPoint position, int fontId, bool isFixe
 					[[fallthrough]];
 				// If newLine == 2, we need to go to next line now
 				case 2:
-					position.y += font.lineHeight;
+					position.y += font.lineHeight + font.spacing.y;
 					xAdvance = 0;
 					newLine = 0;
 					//In any of the two cases, if elem is an space we don't draw it
@@ -185,7 +185,7 @@ void Fonts::Draw(std::string_view text, iPoint position, int fontId, bool isFixe
 									 pivot.y
 			);
 			
-			xAdvance += it->second.xAdvance + 2;
+			xAdvance += it->second.xAdvance + font.spacing.x;
 
 			if(maxX.first == SCREEN_FIT && xAdvance + position.x > camera.w - camera.x) [[unlikely]]
 				newLine = 2;

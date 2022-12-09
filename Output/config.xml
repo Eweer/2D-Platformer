@@ -5,7 +5,7 @@
 		<organization>UPC</organization>
 	</app>
 	<render>
-		<vsync value="false" />
+		<vsync value="true" />
 	</render>
 	<window>
 		<resolution width="1024" height="768" scale="1" />

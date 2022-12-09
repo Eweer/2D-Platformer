@@ -1,9 +1,11 @@
 #ifndef __PHYSICS_H__
 #define __PHYSICS_H__
+
 #include "Module.h"
+#include "Entity.h"
+
 #include "Defs.h"
 #include "BitMaskColliderLayers.h"
-#include "Entity.h"
 
 #include <unordered_set>
 #include <unordered_map>

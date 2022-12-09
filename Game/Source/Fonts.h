@@ -1,18 +1,20 @@
-#ifndef __ModuleFonts_H__
-#define __ModuleFonts_H__
+#ifndef __FONTS_H__
+#define __FONTS_H__
 
 #include "Module.h"
+
+#include "Defs.h"
+#include "Point.h"
 
 #include <queue>
 #include <vector>
 #include <unordered_map>
 
+#include "SDL/include/SDL.h"
 #include "SDL/include/SDL_pixels.h"
 
 constexpr auto MAX_FONTS = 10;
 constexpr auto MAX_FONT_CHARS = 256;
-
-struct SDL_Texture;
 
 enum class FontDrawNewLine
 {
@@ -72,7 +74,9 @@ private:
 	std::string path;
 	std::vector<Font> fonts;
 	std::priority_queue<int, std::vector<int>, std::greater<int>> freeVectorElements;
+
+	friend class UI;
 };
 
 
-#endif // __ModuleFonts_H__
+#endif // __FONTS_H__

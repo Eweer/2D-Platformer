@@ -9,6 +9,7 @@
 #include "Map.h"
 #include "Physics.h"
 #include "Fonts.h"
+#include "UI.h"
 
 #include "Defs.h"
 #include "Log.h"
@@ -31,6 +32,7 @@ App::App(int argc, char* args[]) : argc(argc), args(args)
 	entityManager = std::make_unique<EntityManager>();
 	map = std::make_unique<Map>();
 	fonts = std::make_unique<Fonts>();
+	ui = std::make_unique<UI>();
 
 	// Ordered for awake / Start / Update
 	// Reverse order of CleanUp
@@ -43,6 +45,7 @@ App::App(int argc, char* args[]) : argc(argc), args(args)
 	AddModule(entityManager.get());
 	AddModule(map.get());
 	AddModule(fonts.get());
+	AddModule(ui.get());
 
 	// Render last to swap buffer
 	AddModule(render.get());
