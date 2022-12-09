@@ -150,6 +150,19 @@ bool Render::PostUpdate()
 	return true;
 }
 
+bool Render::Pause(int phase)
+{
+	switch(phase)
+	{
+		case 1:
+			return PreUpdate();
+		case 3:
+			return PostUpdate();
+		default:
+			return true;
+	}
+}
+
 // Called before quitting
 bool Render::CleanUp()
 {

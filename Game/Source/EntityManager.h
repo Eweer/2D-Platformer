@@ -35,6 +35,8 @@ public:
 	// Called every frame
 	bool Update(float dt) final;
 
+	bool Pause(int phase) final;
+
 	// Called before quitting
 	bool CleanUp() final;
 

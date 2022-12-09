@@ -308,19 +308,42 @@ bool App::SaveAttributeToConfig(std::string const &moduleName, std::string const
 	return false;
 }
 
+
+bool App::DoPaused() const
+{
+	// PreUpdate
+	int phase = 1;
+	input->Pause(phase);
+	ui->Pause(phase);
+	render->Pause(phase);
+
+	// Update
+	phase++;
+	map->Pause(phase);
+	entityManager->Pause(phase);
+
+	// PostUpdate
+	phase++;
+	ui->Pause(phase);
+	render->Pause(phase);
+	return false;
+}
+
 bool App::PauseGame() const
 {
 	physics->ToggleStep();
+	ui->TogglePauseDraw();
 	while (input->GetKey(SDL_SCANCODE_P) == KEY_DOWN || input->GetKey(SDL_SCANCODE_P) == KEY_REPEAT)
 	{
-		input->PreUpdate();
+		DoPaused();
 		if (app->input->GetKey(SDL_SCANCODE_ESCAPE) == KEY_DOWN) return false;
 	}
 	while (input->GetKey(SDL_SCANCODE_P) == KEY_IDLE || input->GetKey(SDL_SCANCODE_P) == KEY_UP)
 	{
-		input->PreUpdate();
+		DoPaused();
 		if (app->input->GetKey(SDL_SCANCODE_ESCAPE) == KEY_DOWN) return false;
 	}
+	ui->TogglePauseDraw();
 	physics->ToggleStep();
 
 	return true;

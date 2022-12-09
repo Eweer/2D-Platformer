@@ -107,6 +107,9 @@ private:
 	// Call modules after each loop iteration
 	bool PostUpdate();
 
+	// Calls the pause on modules so they can still render
+	bool DoPaused() const;
+
 	int argc;
 	char** args;
 	std::string title;

@@ -303,6 +303,19 @@ bool EntityManager::Update(float dt)
 	return true;
 }
 
+bool EntityManager::Pause(int phase)
+{
+	for(auto const &[entityType, entityInfo] : allEntities)
+	{
+		for(auto const &entity : entityInfo.entities)
+		{
+			if(!IsEntityActive(entity.get())) continue;
+			if(!entity->Pause()) return false;
+		}
+	}
+	return true;
+}
+
 void EntityManager::CreateAllColliders()
 {
 	for(auto const &[entityType, entityInfo] : allEntities)

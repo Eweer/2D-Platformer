@@ -163,6 +163,10 @@ public:
 	// Called each loop iteration
 	void Draw() const;
 
+	void DrawLayer(const MapLayer *layer) const;
+
+	bool Pause(int phase) final;
+
 	// Called before quitting
 	bool CleanUp() final;
 

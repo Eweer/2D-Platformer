@@ -67,6 +67,15 @@ public:
 		double angle = 0.0f
 	) const;
 
+	void DrawMiddlePoint(
+		std::string_view text,
+		iPoint position,
+		int fontId,
+		bool isFixed = true,
+		std::pair<FontDrawNewLine, int> maxX = {FontDrawNewLine::NONE, 0},
+		iPoint pivot = iPoint(0,0),
+		double angle = 0.0f
+	) const;
 
 private:
 	int CheckIfNewLine(int x, int xAdvance, std::pair<FontDrawNewLine, int> maxX, int &i) const;

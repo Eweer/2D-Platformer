@@ -34,12 +34,7 @@ bool UI::PreUpdate()
 {
 	// Return all coordinates to their original values
 	pTopLeft = {10, 10};
-	return true;
-}
-
-// Called each loop iteration
-bool UI::Update(float dt)
-{
+	pMiddle = {app->render->camera.w / 2, app->render->camera.h / 2};
 	return true;
 }
 
@@ -47,7 +42,14 @@ bool UI::Update(float dt)
 bool UI::PostUpdate()
 {
 	DrawFPS(pTopLeft);
+	if(bDrawPause) DrawPause(pMiddle);
 	return true;
+}
+
+void UI::DrawPause(iPoint &position) const
+{
+	app->fonts->DrawMiddlePoint("GAME PAUSED", position, fCleanCraters);
+	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
 }
 
 void UI::DrawFPS(iPoint &position) const
@@ -70,8 +72,26 @@ void UI::DrawFPS(iPoint &position) const
 		app->fonts->Draw(std::format("Vsync is {}.", app->render->vSyncActive ? "enabled" : "disabled"), position, fCleanCraters);
 }
 
+bool UI::Pause(int phase)
+{
+	switch(phase)
+	{
+		case 1:
+			return PreUpdate();
+		case 3:
+			return PostUpdate();
+		default:
+			return true;
+	}
+}
+
 // Called before quitting
 bool UI::CleanUp()
 {
 	return true;
+}
+
+bool UI::TogglePauseDraw()
+{
+	return bDrawPause = !bDrawPause;
 }

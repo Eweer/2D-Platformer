@@ -162,6 +162,16 @@ bool Player::Update()
 	return true;
 }
 
+bool Player::Pause() const
+{
+	return app->render->DrawCharacterTexture(
+		texture->GetCurrentFrame(),
+		iPoint(position.x - colliderOffset.x, position.y - colliderOffset.y),
+		(bool)dir,
+		texture->GetFlipPivot()
+	);
+}
+
 bool Player::CleanUp()
 {
 	return true;

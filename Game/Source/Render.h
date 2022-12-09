@@ -30,6 +30,8 @@ public:
 	bool Update(float dt) final;
 	bool PostUpdate() final;
 
+	bool Pause(int phase) final;
+
 	// Called before quitting
 	bool CleanUp() final;
 

@@ -165,6 +165,12 @@ bool Item::Update()
 	return true;
 }
 
+bool Item::Pause() const
+{
+	if(anim) app->render->DrawTexture(anim->GetCurrentFrame(), position.x, position.y);
+	return true;
+}
+
 bool Item::CleanUp()
 {
 	return true;

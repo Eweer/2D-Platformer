@@ -134,6 +134,12 @@ bool Input::PreUpdate()
 	return true;
 }
 
+// Called when game is paused
+bool Input::Pause(int phase)
+{
+	return PreUpdate();
+}
+
 // Called before quitting
 bool Input::CleanUp()
 {

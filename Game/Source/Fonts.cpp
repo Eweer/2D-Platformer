@@ -8,6 +8,7 @@
 #include <ranges>
 #include <algorithm>
 #include <string>
+#include <iterator>
 
 // Constructor
 Fonts::Fonts() : Module()
@@ -128,12 +129,7 @@ void Fonts::Draw(std::string_view text, iPoint position, int fontId, bool isFixe
 		LOG("%s: Invalid font id %d", __func__, fontId);
 		return;
 	}
-	if(text.empty())
-	{
-		LOG("%s: Text is empty", __func__);
-		return;
-	}
-	
+
 	Font const &font = fonts[fontId];
 	int xAdvance = 0;
 	// 0 = no new line, 1 = new line on space, 2 = new line now
@@ -195,6 +191,29 @@ void Fonts::Draw(std::string_view text, iPoint position, int fontId, bool isFixe
 		}
 		else LOG("Character %s could not be found in %s", elem, font.name.c_str());
 	}
+}
+
+void Fonts::DrawMiddlePoint(std::string_view text, iPoint position, int fontId, bool isFixed, std::pair<FontDrawNewLine, int> maxX, iPoint pivot, double angle) const
+{
+	if(!in_range(fontId, 0, static_cast<int>(fonts.size())))
+	{
+		LOG("%s: Invalid font id %d", __func__, fontId);
+		return;
+	}
+	int total = 0;
+	Font const &font = fonts[fontId];
+	for(int i = 1; auto const &elem : text)
+	{
+		if(i == text.size() - 1) break;
+		if(auto it = font.fontTable.find(elem);
+		   it != font.fontTable.end())
+		{
+			total += it->second.rect.w + it->second.xAdvance + font.spacing.x;
+		}
+	}
+	position.x -= (total / 4);
+	position.y -= font.lineHeight;
+	Draw(text, position, fontId, isFixed, maxX, pivot, angle);
 }
 
 // WARNING: Modifies i. If you need to use it after calling this function, you need to do it before

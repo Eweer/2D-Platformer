@@ -48,29 +48,9 @@ void Map::Draw() const
 	
 	for(auto const &layer : mapData.mapLayers)
 	{
-		if(auto const drawProperty = layer->GetPropertyValue("Draw");
-		   !*(std::get_if<bool>(&drawProperty)))
-		{
-			continue;
-		}
-		
-		for (int x = 0; x < layer->width; x++)
-		{
-			for (int y = 0; y < layer->height; y++)
-			{
-				uint gid = layer->GetGidValue(x, y);
-				
-				if(gid <= 0) continue;
+		DrawLayer(layer.get());
 
-				TileSet* tileset = GetTilesetFromTileId(gid);
-				
-				SDL_Rect r = tileset->GetTileRect(gid);
-				iPoint pos = MapToWorld(x, y);
-
-				app->render->DrawTexture(tileset->texture, pos.x, pos.y,&r);
-			}
-		}
-
+		// Advance Tile animations of Layer
 		for(auto &elem : layer->tileData)
 		{
 			if(!elem.active) continue;
@@ -79,7 +59,46 @@ void Map::Draw() const
 	}
 }
 
-// Ttranslates x,y coordinates from map positions to world positions
+void Map::DrawLayer(const MapLayer *layer) const
+{
+	if(auto const drawProperty = layer->GetPropertyValue("Draw");
+		   !*(std::get_if<bool>(&drawProperty)))
+	{
+		return;
+	}
+
+	for(int x = 0; x < layer->width; x++)
+	{
+		for(int y = 0; y < layer->height; y++)
+		{
+			uint gid = layer->GetGidValue(x, y);
+
+			if(gid <= 0) continue;
+
+			TileSet *tileset = GetTilesetFromTileId(gid);
+
+			SDL_Rect r = tileset->GetTileRect(gid);
+			iPoint pos = MapToWorld(x, y);
+
+			app->render->DrawTexture(tileset->texture, pos.x, pos.y, &r);
+		}
+	}
+}
+
+bool Map::Pause(int phase)
+{
+	if(!mapLoaded || phase == 1 || phase == 3)
+		return true;
+
+	for(auto const &layer : mapData.mapLayers)
+	{
+		DrawLayer(layer.get());
+	}
+
+	return true;
+}
+
+// Translates x,y coordinates from map positions to world positions
 iPoint Map::MapToWorld(int x, int y) const
 {
 	iPoint ret;
