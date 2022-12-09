@@ -62,6 +62,8 @@ public:
 
 	virtual bool Update();
 
+	virtual bool Pause() const;
+
 	virtual bool CleanUp();
 
 	virtual bool LoadState(pugi::xml_node const &);

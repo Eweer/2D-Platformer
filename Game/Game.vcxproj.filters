@@ -55,6 +55,9 @@
     <ClCompile Include="Source\Fonts.cpp">
       <Filter>Source\Modules</Filter>
     </ClCompile>
+    <ClCompile Include="Source\UI.cpp">
+      <Filter>Source\Modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Defs.h">
@@ -127,6 +130,9 @@
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="Source\Fonts.h">
+      <Filter>Headers\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\UI.h">
       <Filter>Headers\Modules</Filter>
     </ClInclude>
   </ItemGroup>

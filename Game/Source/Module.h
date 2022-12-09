@@ -51,6 +51,12 @@ public:
 		return true;
 	}
 
+	// Called when game is paused
+	virtual bool Pause(int phase)
+	{
+		return true;
+	}
+
 	// Called before quitting
 	virtual bool CleanUp()
 	{

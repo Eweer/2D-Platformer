@@ -3,6 +3,7 @@
 
 #include "Module.h"
 #include "Entity.h"
+#include "Player.h"
 #include "Map.h"
 
 #include <deque>
@@ -35,6 +36,8 @@ public:
 	// Called every frame
 	bool Update(float dt) final;
 
+	bool Pause(int phase) final;
+
 	// Called before quitting
 	bool CleanUp() final;
 
@@ -57,13 +60,17 @@ public:
 
 	void CreateAllColliders();
 
+private:
+
 	using EntityMap = std::unordered_map<std::string, EntityInfo, StringHash, std::equal_to<>>;
-	
 	// key1 = ColliderLayer
 	// value 1, key 2 = string type of entity
 	// value2 = <vector of entities, list of empty elements, map of animations>
 	EntityMap allEntities;
 
+	Player *GetPlayerCharacter() const;
+
+	friend class UI;
 };
 
 

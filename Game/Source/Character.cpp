@@ -54,6 +54,11 @@ bool Character::Update()
 	return true;
 }
 
+bool Character::Pause() const
+{
+	return true;
+}
+
 bool Character::CleanUp()
 {
 	texture->CleanUp();

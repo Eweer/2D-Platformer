@@ -23,6 +23,7 @@ class EntityManager;
 class Map;
 class Physics;
 class Fonts;
+class UI;
 
 class App
 {
@@ -84,6 +85,7 @@ public:
 	std::unique_ptr<Map> map;
 	std::unique_ptr<Physics> physics;
 	std::unique_ptr<Fonts> fonts;
+	std::unique_ptr<UI> ui;
 
 private:
 
@@ -104,6 +106,9 @@ private:
 
 	// Call modules after each loop iteration
 	bool PostUpdate();
+
+	// Calls the pause on modules so they can still render
+	bool DoPaused() const;
 
 	int argc;
 	char** args;

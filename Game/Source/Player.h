@@ -25,6 +25,8 @@ public:
 
 	bool Update() final;
 
+	bool Pause() const final;
+
 	bool CleanUp() final;
 
 	void SendContact(b2Contact *c) final;
@@ -38,6 +40,7 @@ private:
 
 	std::string playerCharacter;
 
+	friend class UI;
 };
 
 #endif // __PLAYER_H__

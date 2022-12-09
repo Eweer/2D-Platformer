@@ -1,18 +1,20 @@
-#ifndef __ModuleFonts_H__
-#define __ModuleFonts_H__
+#ifndef __FONTS_H__
+#define __FONTS_H__
 
 #include "Module.h"
+
+#include "Defs.h"
+#include "Point.h"
 
 #include <queue>
 #include <vector>
 #include <unordered_map>
 
+#include "SDL/include/SDL.h"
 #include "SDL/include/SDL_pixels.h"
 
 constexpr auto MAX_FONTS = 10;
 constexpr auto MAX_FONT_CHARS = 256;
-
-struct SDL_Texture;
 
 enum class FontDrawNewLine
 {
@@ -65,6 +67,15 @@ public:
 		double angle = 0.0f
 	) const;
 
+	void DrawMiddlePoint(
+		std::string_view text,
+		iPoint position,
+		int fontId,
+		bool isFixed = true,
+		std::pair<FontDrawNewLine, int> maxX = {FontDrawNewLine::NONE, 0},
+		iPoint pivot = iPoint(0,0),
+		double angle = 0.0f
+	) const;
 
 private:
 	int CheckIfNewLine(int x, int xAdvance, std::pair<FontDrawNewLine, int> maxX, int &i) const;
@@ -72,7 +83,9 @@ private:
 	std::string path;
 	std::vector<Font> fonts;
 	std::priority_queue<int, std::vector<int>, std::greater<int>> freeVectorElements;
+
+	friend class UI;
 };
 
 
-#endif // __ModuleFonts_H__
+#endif // __FONTS_H__

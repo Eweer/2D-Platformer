@@ -34,19 +34,21 @@ public:
 	Input();
 
 	// Destructor
-	virtual ~Input();
+	~Input() final;
 
 	// Called before render is available
-	bool Awake(pugi::xml_node&);
+	bool Awake(pugi::xml_node&) final;
 
 	// Called before the first frame
-	bool Start();
+	bool Start() final;
 
 	// Called each loop iteration
-	bool PreUpdate();
+	bool PreUpdate() final;
+
+	bool Pause(int phase) final;
 
 	// Called before quitting
-	bool CleanUp();
+	bool CleanUp() final;
 
 	// Check key states (includes mouse and joy buttons)
 	KeyState GetKey(int id) const
@@ -76,6 +78,8 @@ private:
 	int mouseMotionY;
 	int mouseX;
 	int mouseY;
+	
+	friend class UI;
 };
 
 #endif // __INPUT_H__

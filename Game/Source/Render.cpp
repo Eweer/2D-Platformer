@@ -140,13 +140,27 @@ bool Render::PostUpdate()
 	
 	if(!vSyncActive) renderLastTime = SDL_GetTicks();
 	
-	fpsTimer++;
-	if(SDL_GetTicks() - fpsTimer > static_cast<uint32>(fps_UI_seconds_interval * 1000))
+	fpsCounter++;
+	if(fpsLast < SDL_GetTicks() - static_cast<uint32>(fps_UI_seconds_interval * 1000))
 	{
-		fps = fpsTimer;
-		fpsTimer = SDL_GetTicks();
+		fpsLast = SDL_GetTicks();
+		fps = fpsCounter;
+		fpsCounter = 0;
 	}
 	return true;
+}
+
+bool Render::Pause(int phase)
+{
+	switch(phase)
+	{
+		case 1:
+			return PreUpdate();
+		case 3:
+			return PostUpdate();
+		default:
+			return true;
+	}
 }
 
 // Called before quitting

@@ -69,6 +69,11 @@ bool Entity::Update()
 	return true;
 }
 
+bool Entity::Pause() const
+{
+	return true;
+}
+
 bool Entity::CleanUp()
 {
 	return true;

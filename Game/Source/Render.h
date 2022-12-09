@@ -30,6 +30,8 @@ public:
 	bool Update(float dt) final;
 	bool PostUpdate() final;
 
+	bool Pause(int phase) final;
+
 	// Called before quitting
 	bool CleanUp() final;
 
@@ -116,10 +118,14 @@ private:
 	uint32 renderLastTime = 0;
 	
 	// -------- Required for showing FPS on screen
-	// Current FPS
+	// FPS on last update
 	uint32 fps = 0;
+	// Frames since last tick
+	uint32 fpsCounter = 0;
 	// Last tick in which we updated the current fps
-	uint32 fpsTimer = 0;
+	uint32 fpsLast = 0;
+
+	friend class UI;
 };
 
 #endif // __RENDER_H__

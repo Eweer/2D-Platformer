@@ -25,6 +25,8 @@ public:
 
 	bool Update() override;
 
+	bool Pause() const override;
+
 	bool CleanUp() override;
 
 	void AddTexturesAndAnimationFrames() override;

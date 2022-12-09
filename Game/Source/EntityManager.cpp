@@ -303,6 +303,27 @@ bool EntityManager::Update(float dt)
 	return true;
 }
 
+bool EntityManager::Pause(int phase)
+{
+	for(auto const &[entityType, entityInfo] : allEntities)
+	{
+		for(auto const &entity : entityInfo.entities)
+		{
+			if(!IsEntityActive(entity.get())) continue;
+			if(!entity->Pause()) return false;
+		}
+	}
+	return true;
+}
+
+Player *EntityManager::GetPlayerCharacter() const
+{
+	if(auto it = allEntities.find("player");
+	   it != allEntities.end())
+		return dynamic_cast<Player *>(it->second.entities.front().get());
+	return nullptr;
+}
+
 void EntityManager::CreateAllColliders()
 {
 	for(auto const &[entityType, entityInfo] : allEntities)
