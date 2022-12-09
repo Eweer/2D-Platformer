@@ -31,12 +31,16 @@ public:
 
 	void SendContact(b2Contact *c) final;
 
-	void OnCollisionStart(PhysBody* physA, PhysBody* physB) final;
+	void OnCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB) final;
+	void BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB) final;
 
 private:
 	CharacterJump jump;
 	uint cameraXCorrection = 0;
 	uint cameraYCorrection  = 0;
+
+	bool bKeepMomentum = false;
+	b2Vec2 velocityToKeep = {0.0f, 0.0f};
 
 	std::string playerCharacter;
 

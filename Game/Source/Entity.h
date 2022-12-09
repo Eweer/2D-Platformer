@@ -85,8 +85,9 @@ public:
 	virtual void CreatePhysBody() { /* Method to Override */ };
 	
 	virtual void SendContact(b2Contact *c) { /* Method to Override */ };
-	virtual void OnCollisionStart(PhysBody *physA, PhysBody *physB) { /* Method to Override */ };
-	virtual void OnCollisionEnd(PhysBody *physA, PhysBody *physB) { /* Method to OVerride */ }
+	virtual void OnCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB) { /* Method to Override */ };
+	virtual void OnCollisionEnd(PhysBody *physA, PhysBody *physB) { /* Method to OVerride */ };
+	virtual void BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB) { /* Method to Override */ };
 
 	bool active = true;
 

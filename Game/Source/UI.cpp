@@ -48,8 +48,9 @@ bool UI::PostUpdate()
 {
 	DrawFPS(pTopLeft);
 	DrawGravity(pTopLeft);
-	DrawPlayerPosition(pTopLeft);
 	DrawMousePosition(pTopLeft);
+	DrawPlayerPosition(pTopLeft);
+	DrawPlayerJumps(pTopLeft);
 	if(bDrawPause) DrawPause(pMiddle);
 	return true;
 }
@@ -122,6 +123,20 @@ void UI::DrawMousePosition(iPoint &position) const
 		position,
 		fCleanCraters
 	);
+	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
+}
+
+void UI::DrawPlayerJumps(iPoint &position) const
+{
+	app->fonts->Draw(std::format("Max Jumps: {}", player->jump.maxJumps), position, fCleanCraters);
+	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
+	app->fonts->Draw(std::format("Is Jumping: {}", player->jump.bJumping ? "Yes." : "No."), position, fCleanCraters);
+	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
+	app->fonts->Draw(std::format("Current Jumps: {}", player->jump.currentJumps), position, fCleanCraters);
+	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
+	app->fonts->Draw(std::format("Jump Impulse: {}", player->jump.jumpImpulse), position, fCleanCraters);
+	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
+	app->fonts->Draw(std::format("Time since last jump: {}", player->jump.timeSinceLastJump), position, fCleanCraters);
 	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
 }
 

@@ -10,6 +10,7 @@
 #include "Physics.h"
 #include "BitMaskColliderLayers.h"
 #include "Map.h"
+#include "Entity.h"
 #include <iostream>
 
 Player::Player() : Character(ColliderLayers::PLAYER)
@@ -34,7 +35,8 @@ bool Player::Awake()
 		.currentJumps = 0, 
 		.maxJumps = parameters.attribute("maxjumps").as_int(), 
 		.timeSinceLastJump = 0, 
-		.jumpImpulse = parameters.attribute("jumpimpulse").as_float()
+		.jumpImpulse = parameters.attribute("jumpimpulse").as_float(),
+		.bInAir = false
 	};
 	
 	SetStartingParameters();
@@ -60,6 +62,11 @@ bool Player::Start()
 
 bool Player::Update()
 {
+	if(bKeepMomentum)
+	{
+		pBody->body->SetLinearVelocity(b2Vec2(velocityToKeep.x, 0));
+		bKeepMomentum = false;
+	}
 	if(timeUntilReset > 120)
 	{
 		SetStartingPosition();
@@ -96,12 +103,12 @@ bool Player::Update()
 	float maxVel = 5.0f;
 	bool moveCamera = false;
 
-	if(app->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN && !jump.bJumping && jump.currentJumps <= jump.maxJumps)
+	if(app->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN && !jump.bJumping && jump.currentJumps < jump.maxJumps)
 	{
 		jump.bJumping = true;
 		jump.timeSinceLastJump = 0;
 		jump.currentJumps++;
-
+		jump.bInAir = true;
 		impulse.y = jump.jumpImpulse * -1;
 
 		pBody->body->SetLinearVelocity(b2Vec2(vel.x, 0));
@@ -195,21 +202,34 @@ void Player::SendContact(b2Contact *c)
 
 }
 
-void Player::OnCollisionStart(PhysBody* physA, PhysBody* physB) 
+void Player::BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB)
 {
-	switch (physB->ctype)
+	switch (pBodyB->ctype)
 	{
 		using enum ColliderLayers;
 		case ITEMS:
 			LOG("Collision ITEMS");
 			break;
 		case PLATFORMS:
+		{
 			LOG("Collision PLATFORMS");
- 			if(pBody->body->GetPosition().y < physB->body->GetPosition().y)
+ 			if(jump.bInAir
+			   && pBody->ground->ptr == fixtureA
+			   && pBody->body->GetPosition().y < pBodyB->body->GetPosition().y)
 			{
-				jump = {false, 0, jump.maxJumps, 0, jump.jumpImpulse};
+				bKeepMomentum = true;
+				velocityToKeep = pBody->body->GetLinearVelocity();
+				jump = {
+					.bJumping = false,
+					.currentJumps = 0,
+					.maxJumps = jump.maxJumps,
+					.timeSinceLastJump = 0,
+					.jumpImpulse = jump.jumpImpulse,
+					.bInAir = false
+				};
 			}
 			break;
+		}
 		case PLAYER:
 		{
 			break;
@@ -229,5 +249,12 @@ void Player::OnCollisionStart(PhysBody* physA, PhysBody* physB)
 		case UNKNOWN:
 			LOG("Collision UNKNOWN");
 			break;
+	}
+}
+
+void Player::OnCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB)
+{
+	if(!bKeepMomentum && jump.bInAir)
+	{
 	}
 }

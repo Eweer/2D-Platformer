@@ -8,6 +8,7 @@ struct CharacterJump
 	int maxJumps = 0;
 	int timeSinceLastJump = 0;
 	float jumpImpulse = 0.0f;
+	bool bInAir = false;
 };
 
 class Character : public Entity
@@ -50,6 +51,10 @@ public:
 	
 	virtual void jumpOnNextUpdate(bool bStartJumpOnUpdate) { /*Method to Override*/ };
 
+	uint16 SetMaskFlag(std::string_view name, pugi::xml_node const &colliderGroupNode, pugi::xml_node const &colliderNode);
+	
+	void OnCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB) override;
+	void BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB) override;
 	float score = 0;
 	uint scoreMultiplier = 1;
 	std::pair<uint, uint> scoreList;

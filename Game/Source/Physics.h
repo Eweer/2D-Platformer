@@ -192,6 +192,17 @@ public:
 	}
 };
 
+class FixtureData
+{
+public:
+	FixtureData() = default;
+	explicit FixtureData(std::string const &n, b2Fixture *f) : name(n), ptr(f) {};
+	~FixtureData() = default;
+
+	std::string name = "";
+	b2Fixture *ptr = nullptr;
+};
+
 // types of bodies
 enum class BodyType
 {
@@ -233,6 +244,7 @@ public:
 	ColliderLayers ctype = ColliderLayers::UNKNOWN;
 	std::vector<std::unique_ptr<b2FixtureDef>> fixtures;
 	std::vector<iPoint> offsets;
+	std::unique_ptr<FixtureData> ground;
 };
 
 // Module --------------------------------------
@@ -253,8 +265,10 @@ public:
 
 	//---------------- Contact
 	void BeginContact(b2Contact *contact) final;
-	void EndContact(b2Contact *contact) final;
 	void PreSolve(b2Contact *contact, const b2Manifold *oldManifold) final;
+	void PostSolve(b2Contact *contact, const b2ContactImpulse *impule) final;
+	void EndContact(b2Contact *contact) final;
+
 
 	//---------------- Body Creation
 

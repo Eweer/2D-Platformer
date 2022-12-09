@@ -39,6 +39,8 @@ private:
 	void DrawPlayerPosition(iPoint &position) const;
 	void DrawMousePosition(iPoint &position) const;
 
+	void DrawPlayerJumps(iPoint &position) const;
+
 	bool bDrawPause = false;
 	int fCleanCraters = 0;
 	iPoint pTopLeft = {10, 10};

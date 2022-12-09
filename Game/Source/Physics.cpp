@@ -176,9 +176,13 @@ void Physics::BeginContact(b2Contact *contact)
 		   success)
 		{
 			collisionMap[pBodyB->body].insert(pBodyA->body);
-			if(pBodyA->listener) pBodyA->listener->OnCollisionStart(pBodyA, pBodyB);
-			if(pBodyB->listener) pBodyB->listener->OnCollisionStart(pBodyB, pBodyA);
+			auto fA = contact->GetFixtureA();
+			auto fB = contact->GetFixtureB();
+
+			if(pBodyA->listener) pBodyA->listener->BeforeCollisionStart(fA, fB, pBodyA, pBodyB);
+			if(pBodyB->listener) pBodyB->listener->BeforeCollisionStart(fB, fA, pBodyB, pBodyA);
 		}
+		else contact->SetEnabled(false);
 	}
 }
 
@@ -231,6 +235,19 @@ void Physics::PreSolve(b2Contact *contact, const b2Manifold *oldManifold)
 {
 	b2WorldManifold worldManifold;
 	contact->GetWorldManifold(&worldManifold);
+	// our custom PhysBody classes
+	auto pBodyA = static_cast<PhysBody *>(contact->GetFixtureA()->GetBody()->GetUserData());
+	auto pBodyB = static_cast<PhysBody *>(contact->GetFixtureB()->GetBody()->GetUserData());
+
+	if(pBodyA && pBodyB)
+	{
+		auto fA = contact->GetFixtureA();
+		auto fB = contact->GetFixtureB();
+
+		if(pBodyA->listener) pBodyA->listener->OnCollisionStart(fA, fB,pBodyA, pBodyB);
+		if(pBodyB->listener) pBodyB->listener->OnCollisionStart(fB, fA, pBodyB, pBodyA);
+	}
+	/*
 	auto bodyA = contact->GetFixtureA()->GetBody();
 	auto bodyB = contact->GetFixtureB()->GetBody();
 
@@ -239,7 +256,7 @@ void Physics::PreSolve(b2Contact *contact, const b2Manifold *oldManifold)
 	{
 		return;
 	}
-
+	*/
 	/* Play sound when colliding
 	std::array<b2PointState, 2>state1{}
 	std::array<b2PointState, 2>state2{}
@@ -256,6 +273,11 @@ void Physics::PreSolve(b2Contact *contact, const b2Manifold *oldManifold)
 		}
 	}
 	*/
+}
+
+void Physics::PostSolve(b2Contact *contact, const b2ContactImpulse *impulse)
+{
+	
 }
 
 //---------------- Body Creation

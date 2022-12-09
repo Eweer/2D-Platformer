@@ -58,9 +58,10 @@ public:
 
 	bool DoesEntityExist(Entity const *entity = nullptr) const;
 
-	void CreateAllColliders();
 
 private:
+	void CreateAllColliders();
+	Player *GetPlayerCharacter() const;
 
 	using EntityMap = std::unordered_map<std::string, EntityInfo, StringHash, std::equal_to<>>;
 	// key1 = ColliderLayer
@@ -68,7 +69,6 @@ private:
 	// value2 = <vector of entities, list of empty elements, map of animations>
 	EntityMap allEntities;
 
-	Player *GetPlayerCharacter() const;
 
 	friend class UI;
 };

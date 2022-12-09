@@ -174,15 +174,7 @@ void Character::CreatePhysBody()
 			pBody->listener = this;
 		}
 		
-		uint16 maskFlag = 0x0001;
-		if(StrEquals(name, "player"))
-		{
-			using enum ColliderLayers;
-			if(StrEquals(colliderGroupNode.attribute("name").as_string(), "CharacterSensor"))
-				maskFlag = (uint16)(ENEMIES | TRIGGERS | CHECKPOINTS);
-			else if(StrEquals(colliderGroupNode.attribute("name").as_string(), "Terrain"))
-				maskFlag = (uint16)(PLATFORMS | ITEMS);
-		}
+		
 		
 		for(auto const &elem : colliderGroupNode.children())
 		{
@@ -223,6 +215,8 @@ void Character::CreatePhysBody()
 			}
 			else if(StrEquals(shapeType, "circle"))
 			{
+				
+				
 				tempData.push_back(
 					{
 						colliderGroupNode.attribute("radius").as_float(),
@@ -249,7 +243,8 @@ void Character::CreatePhysBody()
 				}
 
 				float32 friction = elem.attribute("friction") ? elem.attribute("friction").as_float() : 1.0f;
-				
+				uint16 maskFlag = SetMaskFlag(name, colliderGroupNode, elem);
+
 				auto fixtureDef = app->physics->CreateFixtureDef(
 					shape,
 					static_cast<uint16>(type),
@@ -261,10 +256,47 @@ void Character::CreatePhysBody()
 					fixPos
 				);
 
-				pBody->body->CreateFixture(fixtureDef.get());
+				auto fixturePtr = pBody->body->CreateFixture(fixtureDef.get());
+
+				if(StrEquals(elem.attribute("name").as_string(), "ground"))
+				{
+					pBody->ground = std::make_unique<FixtureData>(
+						std::string(elem.attribute("name").as_string()),
+						fixturePtr
+					);
+				}
 			}
 		}
 	}
+}
+
+uint16 Character::SetMaskFlag(std::string_view name, pugi::xml_node const &colliderGroupNode, pugi::xml_node const &colliderNode)
+{
+	uint16 maskFlag = 0x0001;
+	if(StrEquals(name, "player"))
+	{
+		using enum ColliderLayers;
+		if(StrEquals(colliderGroupNode.attribute("name").as_string(), "CharacterSensor"))
+			maskFlag = (uint16)(ENEMIES | TRIGGERS | CHECKPOINTS);
+		else if(StrEquals(colliderGroupNode.attribute("name").as_string(), "Terrain"))
+		{
+			maskFlag = (uint16)(PLATFORMS | ITEMS);
+			/*if(StrEquals(colliderNode.attribute("name").as_string(), "Ground"))
+			else
+				maskFlag = (uint16)(ITEMS);*/
+		}
+	}
+	return maskFlag;
+}
+
+void Character::BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB)
+{
+	/* To override */
+}
+
+void Character::OnCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB)
+{
+	/* To override */
 }
 
 void Character::AddTexturesAndAnimationFrames()
