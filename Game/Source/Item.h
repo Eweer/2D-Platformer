@@ -20,6 +20,9 @@ public:
 	bool Update() override;
 	bool Pause() const override;
 
+	void BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB) final;
+
+	void PickUpEffect() const;
 
 	TileInfo const *info = nullptr;
 	std::unordered_map<std::string, std::vector<std::pair<ShapeData, iPoint>>, StringHash, std::equal_to<>> colliderMap;

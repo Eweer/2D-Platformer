@@ -50,6 +50,8 @@ public:
 
 	bool active = true;
 
+	bool disableOnNextUpdate = false;
+
 	std::string name = "unknown";
 	ColliderLayers type = ColliderLayers::UNKNOWN;
 

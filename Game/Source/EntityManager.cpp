@@ -274,6 +274,18 @@ bool EntityManager::DoesEntityExist(Entity const *entity) const
 	return false;
 }
 
+bool EntityManager::PreUpdate()
+{
+	for(auto const &[entityType, entityInfo] : allEntities)
+	{
+		for(auto const &entity : entityInfo.entities)
+		{
+			if(entity->disableOnNextUpdate) entity->Stop();
+		}
+	}
+	return true;
+};
+
 bool EntityManager::Update(float dt)
 {
 	for(auto const &[entityType, entityInfo] : allEntities)

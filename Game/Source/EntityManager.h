@@ -3,6 +3,7 @@
 
 #include "Module.h"
 #include "Entity.h"
+
 #include "BitMaskColliderLayers.h"
 
 #include <deque>
@@ -35,6 +36,7 @@ public:
 	bool Start() final;
 
 	// Called every frame
+	bool PreUpdate() final;
 	bool Update(float dt) final;
 
 	bool Pause(int phase) final;

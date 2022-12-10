@@ -127,3 +127,21 @@ bool Item::Pause() const
 	if(anim) app->render->DrawTexture(anim->GetCurrentFrame(), position.x, position.y);
 	return true;
 }
+
+void Item::BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB)
+{
+	switch(pBodyB->ctype)
+	{
+		using enum ColliderLayers;
+		case PLAYER:
+		{
+			PickUpEffect();
+			Disable();
+			break;
+		}
+		default:
+			break;
+	}
+}
+
+void Item::PickUpEffect() const { /* TODO */ };

@@ -1,10 +1,8 @@
 #include "Character.h"
 #include "App.h"
 
-// Modules
 #include "Render.h"
 
-// Utils
 #include "Log.h"
 
 #include <regex>

@@ -178,10 +178,3 @@ void Player::BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, Phys
 			break;
 	}
 }
-
-void Player::OnCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB)
-{
-	if(!bKeepMomentum && jump.bInAir)
-	{
-	}
-}

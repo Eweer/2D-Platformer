@@ -49,12 +49,14 @@ bool Entity::Stop()
 {
 	app->physics->DestroyBody(pBody->body);
 	pBody.reset();
+	disableOnNextUpdate = false;
 	return true;
 }
 
 // Sets starting Position and creates PhysBody
 void Entity::SpawnEntity()
 {
+	disableOnNextUpdate = false;
 	position = startingPosition;
 	CreatePhysBody();
 }
@@ -83,7 +85,7 @@ void Entity::Disable()
 	if(active)
 	{
 		active = false;
-		Stop();
+		disableOnNextUpdate = true;
 	}
 }
 
