@@ -49,7 +49,7 @@ bool Character::Update()
 
 	app->render->DrawTexture(texture->UpdateAndGetFrame(), position.x, position.y);
 
-	if(hp <= 0) active = false;
+	if(hp <= 0) Disable();
 
 	return true;
 }
