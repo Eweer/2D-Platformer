@@ -17,48 +17,48 @@ namespace CL
 	};
 
 
-	inline CL::ColliderLayers operator|(CL::ColliderLayers a, CL::ColliderLayers b)
+	inline ColliderLayers operator|(ColliderLayers a, ColliderLayers b)
 	{
 		return static_cast<ColliderLayers>(static_cast<uint16>(a) | static_cast<uint16>(b));
 	}
 
-	inline CL::ColliderLayers operator&(CL::ColliderLayers a, CL::ColliderLayers b)
+	inline ColliderLayers operator&(ColliderLayers a, ColliderLayers b)
 	{
 		return static_cast<ColliderLayers>(static_cast<uint16>(a) & static_cast<uint16>(b));
 	}
 
-	inline CL::ColliderLayers operator^(CL::ColliderLayers a, CL::ColliderLayers b)
+	inline ColliderLayers operator^(ColliderLayers a, ColliderLayers b)
 	{
 		return static_cast<ColliderLayers>(static_cast<uint16>(a) ^ static_cast<uint16>(b));
 	}
 
-	inline CL::ColliderLayers operator~(CL::ColliderLayers a)
+	inline ColliderLayers operator~(ColliderLayers a)
 	{
 		return static_cast<ColliderLayers>(~static_cast<uint16>(a));
 	}
 
-	inline CL::ColliderLayers &operator|=(CL::ColliderLayers &a, CL::ColliderLayers b)
+	inline ColliderLayers &operator|=(ColliderLayers &a, ColliderLayers b)
 	{
 		return a = a | b;
 	}
 
-	inline CL::ColliderLayers  operator&=(CL::ColliderLayers  a, CL::ColliderLayers b)
+	inline ColliderLayers  operator&=(ColliderLayers  a, ColliderLayers b)
 	{
 		return a = a & b;
 	}
 
-	inline CL::ColliderLayers  operator^=(CL::ColliderLayers  a, CL::ColliderLayers b)
+	inline ColliderLayers  operator^=(ColliderLayers  a, ColliderLayers b)
 	{
 		return a = a ^ b;
 	}
 
-	inline bool operator !=(const CL::ColliderLayers &a, const uint &b)
+	inline bool operator !=(const ColliderLayers &a, const uint &b)
 	{
 		return static_cast<uint16>(a) != b;
 	}
 
 	template <ColliderLayers>
-	inline bool operator ==(const CL::ColliderLayers &a, const CL::ColliderLayers &b)
+	inline bool operator ==(const ColliderLayers &a, const ColliderLayers &b)
 	{
 		return static_cast<uint16>(a) == static_cast<uint16>(b);
 	}
