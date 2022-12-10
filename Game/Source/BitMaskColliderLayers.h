@@ -16,7 +16,6 @@ namespace CL
 		UNKNOWN = 0x8000
 	};
 
-
 	inline ColliderLayers operator|(ColliderLayers a, ColliderLayers b)
 	{
 		return static_cast<ColliderLayers>(static_cast<uint16>(a) | static_cast<uint16>(b));

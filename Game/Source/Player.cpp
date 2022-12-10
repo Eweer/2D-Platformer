@@ -12,7 +12,7 @@ Player::Player()
 	name = "player";
 }
 
-Player::Player(pugi::xml_node const &itemNode = pugi::xml_node()) : Character(itemNode)
+Player::Player(pugi::xml_node const &itemNode = pugi::xml_node(), int newId) : Character(itemNode, newId)
 { 
 	name = "player";
 }

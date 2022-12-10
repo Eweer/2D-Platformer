@@ -3,6 +3,7 @@
 
 #include "Player.h"
 #include "Item.h"
+#include "Enemy.h"
 
 #include "Map.h"
 
@@ -69,23 +70,40 @@ bool EntityManager::CleanUp()
 
 void EntityManager::CreateEntity(std::string const &entityClass, pugi::xml_node const &parameters)
 {
+	// Get correct ID (check if queue is empty or not)
+	int id = (allEntities[entityClass].emptyElements.empty())
+		? allEntities[entityClass].entities.size() - 1
+		: allEntities[entityClass].emptyElements.front();
+
+	// Initialize pointer if node is a character, nullptr otherwise
+	std::unique_ptr<Character>characterPtr = nullptr;
 	if(StrEquals(entityClass, "player"))
 	{
-		if(allEntities[entityClass].emptyElements.empty()) [[likely]]
-		{
-			allEntities[entityClass].entities.push_back(std::make_unique<Player>(parameters));
-			allEntities[entityClass].type = CL::ColliderLayers::PLAYER;
-		}
-		else [[unlikely]]
-		{
-			auto playerPtr = std::make_unique<Player>(parameters);
-			allEntities[entityClass].entities[allEntities[entityClass].emptyElements.front()].reset(playerPtr.release());
-			allEntities[entityClass].emptyElements.pop_front();
-		}
+		characterPtr = std::make_unique<Player>(parameters);
+		allEntities[entityClass].type = CL::ColliderLayers::PLAYER;
+	}
+	else if(StrEquals(entityClass, "enemy"))
+	{
+		characterPtr = std::make_unique<Enemy>(parameters, id);
+		allEntities[entityClass].type = CL::ColliderLayers::ENEMIES;
 	}
 	else
 	{
+		// If it's not a previous case, we either misstyped something or it's an item/object
 		LOG("Entity %s could not be created.", entityClass);
+		return;
+	}
+
+	// Move the pointer to its place
+	if(allEntities[entityClass].emptyElements.empty()) [[likely]]
+	{
+		allEntities[entityClass].entities.push_back(std::move(characterPtr));
+		allEntities[entityClass].type = CL::ColliderLayers::PLAYER;
+	}
+	else [[unlikely]]
+	{
+		allEntities[entityClass].entities[id].reset(characterPtr.release());
+		allEntities[entityClass].emptyElements.pop_front();
 	}
 }
 

@@ -10,23 +10,21 @@
 
 constexpr uint Character_SIZE = 30;
 
+//---------- Constructors
 Character::Character() = default;
-
-Character::Character(pugi::xml_node const &itemNode = pugi::xml_node()) : Entity(itemNode) {}
-
+Character::Character(pugi::xml_node const &itemNode = pugi::xml_node(), int newId = 0) : Entity(itemNode, newId) {}
 Character::~Character() = default;
 
-bool Character::Awake()
-{
-	return true;
-}
+//---------- Load Parameters
 
-bool Character::Start()
-{
-	SpawnEntity();
-	InitializeTexture();
 
-	return true;
+void Character::SetPaths()
+{
+	texturePath = parameters.parent().attribute("texturepath").as_string();
+
+	fxPath = parameters.parent().attribute("audiopath").as_string();
+	fxPath += parameters.parent().attribute("fxfolder").as_string();
+
 }
 
 void Character::InitializeTexture() const
@@ -39,42 +37,83 @@ void Character::InitializeTexture() const
 		texture->SetAnimStyle(AnimIteration::LOOP_FROM_START);
 }
 
-bool Character::Update()
+//---------- Create character
+
+bool Character::Start()
 {
-	//Update Character position in pixels
-	position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x) - Character_SIZE/2;
-	position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y) - Character_SIZE/2;
-
-	app->render->DrawTexture(texture->UpdateAndGetFrame(), position.x, position.y);
-
-	if(hp <= 0) Disable();
+	SpawnEntity();
+	InitializeTexture();
 
 	return true;
 }
 
-bool Character::Pause() const
+void Character::AddTexturesAndAnimationFrames()
 {
-	return app->render->DrawCharacterTexture(
-		texture->GetCurrentFrame(),
-		iPoint(position.x - colliderOffset.x, position.y - colliderOffset.y),
-		(bool)dir,
-		texture->GetFlipPivot()
-	);
-}
+	texture = std::make_unique<Animation>();
+	
+	std::string entityFolder = "";
+	if(!CreateEntityPath(entityFolder)) return;
+	
+	auto animDataNode = parameters.child("animationdata");
+	
+	textureOffset = {
+		.x = animDataNode.child("properties").attribute("pivotx").as_int(),
+		.y = animDataNode.child("properties").attribute("pivoty").as_int()
+	};
 
-bool Character::CleanUp()
-{
-	texture->CleanUp();
-	return true;
-}
+	texture->setPivot(textureOffset);
+	
+	struct dirent **folderList;
+	const char *dirPath = entityFolder.c_str();
+	int nCharacterFolder = scandir(dirPath, &folderList, nullptr, DescAlphasort);
+	
+	if(nCharacterFolder < 0) return;
 
-void Character::SetPaths()
-{
-	texturePath = parameters.parent().attribute("texturepath").as_string();
+	//for each file/folder in Character folder
+	while(nCharacterFolder--)
+	{
+		if(folderList[nCharacterFolder]->d_name[0] == '.')
+		{
+			free(folderList[nCharacterFolder]);
+			continue;
+		}
+		struct dirent **nameList;
+		std::string animationPath = entityFolder + std::string(folderList[nCharacterFolder]->d_name) + "/";
+		int nAnimationContents = scandir(animationPath.c_str(), &nameList, nullptr, DescAlphasort);
+		
+		if(nAnimationContents < 0) break;
 
-	fxPath = parameters.parent().attribute("audiopath").as_string();
-	fxPath += parameters.parent().attribute("fxfolder").as_string();
+		//for each file in subfolders of Character folder
+		while(nAnimationContents--)
+		{
+			if(nameList[nAnimationContents]->d_name[0] == '.')
+			{
+				free(nameList[nAnimationContents]);
+				continue;
+			}
+			
+			std::string frameName = nameList[nAnimationContents]->d_name;
+			std::string framesPath = animationPath + std::string(nameList[nAnimationContents]->d_name);
 
+			LOG("Loaded %s.", framesPath.c_str());
+
+			auto action = std::string(folderList[nCharacterFolder]->d_name);
+			action[0] = std::tolower(action[0], std::locale());
+
+			//if it's not the first frame with such name we continue looping
+			if(texture->AddFrame(framesPath.c_str(), action) != 1) [[likely]]
+				continue;
+
+			//if it's the first frame we set the action animation parameters 
+			// (or default them in case they don't exist)
+			SetAnimationParameters(animDataNode, action);
+
+			free(nameList[nAnimationContents]);
+		}
+		free(nameList);
+		free(folderList[nCharacterFolder]);
+	}
+	free(folderList);
 }
 
 void Character::CreatePhysBody() 
@@ -244,19 +283,39 @@ void Character::CreatePhysBody()
 	}
 }
 
-uint16 Character::SetMaskFlag(std::string_view name, pugi::xml_node const &colliderGroupNode, pugi::xml_node const &colliderNode) const
+//---------- Main Loop
+
+bool Character::Update()
 {
-	uint16 maskFlag = 0x0001;
-	if(StrEquals(name, "player"))
-	{
-		using enum CL::ColliderLayers;
-		if(StrEquals(colliderGroupNode.attribute("name").as_string(), "CharacterSensor"))
-			maskFlag = static_cast<uint16>(ENEMIES | TRIGGERS | CHECKPOINTS);
-		else if(StrEquals(colliderGroupNode.attribute("name").as_string(), "Terrain"))
-			maskFlag = static_cast<uint16>(PLATFORMS | ITEMS);
-	}
-	return maskFlag;
+	//Update Character position in pixels
+	position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x) - Character_SIZE/2;
+	position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y) - Character_SIZE/2;
+
+	app->render->DrawTexture(texture->UpdateAndGetFrame(), position.x, position.y);
+
+	if(hp <= 0) Disable();
+
+	return true;
 }
+
+bool Character::Pause() const
+{
+	return app->render->DrawCharacterTexture(
+		texture->GetCurrentFrame(),
+		iPoint(position.x - colliderOffset.x, position.y - colliderOffset.y),
+		(bool)dir,
+		texture->GetFlipPivot()
+	);
+}
+
+//---------- Destroy Entity
+
+bool Character::CleanUp()
+{
+	return true;
+}
+
+//---------- Collisions
 
 void Character::BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB)
 {
@@ -268,10 +327,15 @@ void Character::OnCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysB
 	/* To override */
 }
 
+//---------- Utils
+
 bool Character::CreateEntityPath(std::string &entityFolder) const
 {
 	if(!parameters.attribute("class").empty())
 		entityFolder = std::string(parameters.attribute("class").as_string()) + "/";
+
+	if(!parameters.attribute("level").empty())
+		entityFolder = std::string(parameters.attribute("level").as_string()) + "/";
 
 	if(!parameters.attribute("name").empty())
 		entityFolder = std::string(parameters.attribute("name").as_string()) + "/" + entityFolder;
@@ -288,76 +352,7 @@ bool Character::CreateEntityPath(std::string &entityFolder) const
 	return true;
 }
 
-void Character::AddTexturesAndAnimationFrames()
-{
-	texture = std::make_unique<Animation>();
-	
-	std::string entityFolder = "";
-	if(!CreateEntityPath(entityFolder)) return;
-	
-	auto animDataNode = parameters.child("animationdata");
-	
-	textureOffset = {
-		.x = animDataNode.child("properties").attribute("pivotx").as_int(),
-		.y = animDataNode.child("properties").attribute("pivoty").as_int()
-	};
-
-	texture->setPivot(textureOffset);
-	
-	struct dirent **folderList;
-	const char *dirPath = entityFolder.c_str();
-	int nCharacterFolder = scandir(dirPath, &folderList, nullptr, DescAlphasort);
-	
-	if(nCharacterFolder < 0) return;
-
-	//for each file/folder in Character folder
-	while(nCharacterFolder--)
-	{
-		if(folderList[nCharacterFolder]->d_name[0] == '.')
-		{
-			free(folderList[nCharacterFolder]);
-			continue;
-		}
-		struct dirent **nameList;
-		std::string animationPath = entityFolder + std::string(folderList[nCharacterFolder]->d_name) + "/";
-		int nAnimationContents = scandir(animationPath.c_str(), &nameList, nullptr, DescAlphasort);
-		
-		if(nAnimationContents < 0) break;
-
-		//for each file in subfolders of Character folder
-		while(nAnimationContents--)
-		{
-			if(nameList[nAnimationContents]->d_name[0] == '.')
-			{
-				free(nameList[nAnimationContents]);
-				continue;
-			}
-			
-			std::string frameName = nameList[nAnimationContents]->d_name;
-			std::string framesPath = animationPath + std::string(nameList[nAnimationContents]->d_name);
-
-			LOG("Loaded %s.", framesPath.c_str());
-
-			auto action = std::string(folderList[nCharacterFolder]->d_name);
-			action[0] = std::tolower(action[0], std::locale());
-
-			//if it's not the first frame with such name we continue looping
-			if(texture->AddFrame(framesPath.c_str(), action) != 1) [[likely]]
-				continue;
-
-			//if it's the first frame we set the action animation parameters 
-			// (or default them in case they don't exist)
-			SetAnimationParameters(animDataNode, action);
-
-			free(nameList[nAnimationContents]);
-		}
-		free(nameList);
-		free(folderList[nCharacterFolder]);
-	}
-	free(folderList);
-}
-
-void Character::SetAnimationParameters(pugi::xml_node const &animDataNode, std::string const &action)
+void Character::SetAnimationParameters(pugi::xml_node const &animDataNode, std::string const &action) const
 {
 	auto animationParameters = animDataNode.find_child_by_attribute("name", action.c_str());
 
@@ -371,6 +366,20 @@ void Character::SetAnimationParameters(pugi::xml_node const &animDataNode, std::
 	else
 		texture->SetAnimStyle(AnimIteration::LOOP_FROM_START);
 
+}
+
+uint16 Character::SetMaskFlag(std::string_view name, pugi::xml_node const &colliderGroupNode, pugi::xml_node const &colliderNode) const
+{
+	uint16 maskFlag = 0x0001;
+	if(StrEquals(name, "player"))
+	{
+		using enum CL::ColliderLayers;
+		if(StrEquals(colliderGroupNode.attribute("name").as_string(), "CharacterSensor"))
+			maskFlag = static_cast<uint16>(ENEMIES | TRIGGERS | CHECKPOINTS);
+		else if(StrEquals(colliderGroupNode.attribute("name").as_string(), "Terrain"))
+			maskFlag = static_cast<uint16>(PLATFORMS | ITEMS);
+	}
+	return maskFlag;
 }
 
 /*

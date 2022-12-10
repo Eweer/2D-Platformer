@@ -20,11 +20,10 @@ class Character : public Entity
 public:
 	//---------- Constructors
 	explicit Character();
-	explicit Character(const pugi::xml_node &itemNode);
+	explicit Character(const pugi::xml_node &itemNode, int newId);
 	~Character() override;
 
 	//---------- Load Parameters
-	bool Awake() override;
 	void SetPaths();
 	void InitializeTexture() const;
 
@@ -51,7 +50,7 @@ public:
 private:
 	//---- Utils
 	bool CreateEntityPath(std::string &entityFolder) const;
-	void SetAnimationParameters(pugi::xml_node const &animDataNode, std::string const &action);
+	void SetAnimationParameters(pugi::xml_node const &animDataNode, std::string const &action) const;
 	uint16 SetMaskFlag(
 		std::string_view name,
 		pugi::xml_node const &colliderGroupNode,

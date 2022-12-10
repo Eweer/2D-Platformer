@@ -9,7 +9,6 @@ class ShapeData;
 class Item : public Entity
 {
 public:
-
 	Item();
 	Item(TileInfo const *tileInfo, iPoint pos, int width, int height);
 	~Item() override;

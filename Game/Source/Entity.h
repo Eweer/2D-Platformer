@@ -22,7 +22,7 @@ class Entity
 public:
 
 	explicit Entity() = default;
-	explicit Entity(pugi::xml_node const &itemNode);
+	explicit Entity(pugi::xml_node const &itemNode, int newId);
 	virtual ~Entity() = default;
 
 	virtual bool Awake();
@@ -45,13 +45,14 @@ public:
 	virtual pugi::xml_node SaveState(pugi::xml_node const &);
 
 	virtual void OnCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB) { /* Method to Override */ };
-	virtual void OnCollisionEnd(PhysBody *physA, PhysBody *physB) { /* Method to OVerride */ };
+	virtual void OnCollisionEnd(PhysBody *physA, PhysBody *physB) { /* Method to Override */ };
 	virtual void BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB) { /* Method to Override */ };
 
 	bool active = true;
 
 	bool disableOnNextUpdate = false;
 
+	int id = -1;
 	std::string name = "unknown";
 	CL::ColliderLayers type = CL::ColliderLayers::UNKNOWN;
 

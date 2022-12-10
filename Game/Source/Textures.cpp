@@ -46,7 +46,7 @@ bool Textures::Start()
 bool Textures::CleanUp()
 {
 	LOG("Freeing textures and Image library");
-
+	textures.clear();
 	IMG_Quit();
 	return true;
 }
@@ -82,7 +82,7 @@ SDL_Texture* Textures::LoadSurface(SDL_Surface* surface)
 }
 
 // Unload texture
-bool Textures::UnLoad(SDL_Texture const *texture)
+bool Textures::Unload(SDL_Texture const *texture)
 {
 	for(auto it = textures.begin(); it != textures.end(); it++)
 	{

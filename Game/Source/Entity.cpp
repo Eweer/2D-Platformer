@@ -1,15 +1,15 @@
 #include "Entity.h"
 #include "App.h"
 
-// Modules
+// Modules included
 #include "Input.h"
 #include "Render.h"
 #include "Physics.h"
 
-// Utils
+// Utils included
 #include "Log.h"
 
-// Libraries
+// Libraries included
 #include "dirent.h"
 
 #include <regex>
@@ -17,7 +17,7 @@
 #pragma warning(push)
 #pragma warning(disable : 123)
 
-Entity::Entity(pugi::xml_node const &itemNode) : parameters(itemNode) {}
+Entity::Entity(pugi::xml_node const &itemNode, int newId) : id(newId), parameters(itemNode) {}
 
 bool Entity::Awake()
 {

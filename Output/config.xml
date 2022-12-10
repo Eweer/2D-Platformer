@@ -20,7 +20,7 @@
 	</audio>
 	<entitymanager items="Assets/Animations/Items/" />
 	<scene assetpath="Assets/" texturepath="Assets/Animations/" audiopath="Assets/Audio/" fxfolder="Fx/" musicfolder="Music/">
-		<player name="Player" class="Mage" x="44" y="427" renderable="true" maxjumps="2" jumpimpulse="5">
+		<player name="Player" class="Mage" x="44" y="427" maxjumps="2" jumpimpulse="5">
 			<physics bodytype="dynamic" gravityscale="1" restitution="0" friction="1" colliderlayers="2" />
 			<animationdata>
 				<properties width="128" height="128" pivotx="42" pivoty="85" animstyle="4" animloop="true" />

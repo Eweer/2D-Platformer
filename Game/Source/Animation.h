@@ -137,7 +137,7 @@ public:
 	{
 		std::string name = animName;
 		name[0] = std::tolower(animName[0], std::locale());
-		frames[name].emplace_back(std::move(app->tex->Load(pathToPNG)));
+		frames[name].push_back(app->tex->Load(pathToPNG));
 		if(currentAnimName == "unknown") currentAnimName = name;
 		return GetFrameCount(name);
 	}
@@ -146,19 +146,6 @@ public:
 	{
 		frames["unknown"].push_back(texture);
 		return this;
-	}
-
-	bool CleanUp()
-	{
-		for(auto const &[key, vec]: frames)
-		{
-			for(auto &elem : vec)
-			{
-				app->tex->UnLoad(elem);
-			}
-		}
-		if(staticImage) app->tex->UnLoad(staticImage);
-		return true;
 	}
 
 	bool GetAnimFinished() const

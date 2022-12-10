@@ -8,9 +8,7 @@ class Player : public Character
 public:
 
 	Player();
-
-	explicit Player(const pugi::xml_node &itemNode);
-	
+	explicit Player(const pugi::xml_node &itemNode, int newId = 0);
 	~Player() final;
 
 	bool Awake() final;

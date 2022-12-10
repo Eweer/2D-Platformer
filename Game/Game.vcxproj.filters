@@ -58,6 +58,9 @@
     <ClCompile Include="Source\UI.cpp">
       <Filter>Source\Modules</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Enemy.cpp">
+      <Filter>Source\Entities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Defs.h">
@@ -132,11 +135,14 @@
     <ClInclude Include="Source\UI.h">
       <Filter>Headers\Modules</Filter>
     </ClInclude>
-    <ClInclude Include="Source\AdjacencyList.h">
-      <Filter>Source\Entities</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Animation.h">
       <Filter>Source\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Enemy.h">
+      <Filter>Headers\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\AdjacencyList.h">
+      <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

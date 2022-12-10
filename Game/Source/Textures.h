@@ -30,7 +30,7 @@ public:
 	// Load Texture
 	SDL_Texture* Load(const char* path);
 	SDL_Texture* LoadSurface(SDL_Surface* surface);
-	bool UnLoad(SDL_Texture const *texture);
+	bool Unload(SDL_Texture const *texture);
 	void GetSize(SDL_Texture* const texture, uint& width, uint& height) const;
 
 	std::list<std::unique_ptr<SDL_Texture, std::function<void(SDL_Texture *)>>>textures;
