@@ -14,7 +14,7 @@ struct TileInfo;
 
 struct EntityInfo
 {
-	ColliderLayers type = ColliderLayers::UNKNOWN;
+	CL::ColliderLayers type = CL::ColliderLayers::UNKNOWN;
 	std::vector<std::unique_ptr<Entity>> entities;
 	std::deque<unsigned int> emptyElements;
 	std::unordered_map<int, std::unique_ptr<Animation>> animation;

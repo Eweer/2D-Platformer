@@ -74,7 +74,7 @@ void EntityManager::CreateEntity(std::string const &entityClass, pugi::xml_node 
 		if(allEntities[entityClass].emptyElements.empty()) [[likely]]
 		{
 			allEntities[entityClass].entities.push_back(std::make_unique<Player>(parameters));
-			allEntities[entityClass].type = ColliderLayers::PLAYER;
+			allEntities[entityClass].type = CL::ColliderLayers::PLAYER;
 		}
 		else [[unlikely]]
 		{
@@ -118,7 +118,7 @@ bool EntityManager::DestroyEntity(std::string const &type, int id)
 
 bool EntityManager::LoadAllTextures()
 {
-	using enum ColliderLayers;
+	using enum CL::ColliderLayers;
 	auto excludedFlag = PLATFORMS | ITEMS;
 	for(auto const &[name, info] : allEntities)
 	{
@@ -141,7 +141,7 @@ bool EntityManager::LoadEntities(TileInfo const *tileInfo, iPoint pos, int width
 	aux[0] = std::tolower(aux[0], std::locale());
 	
 	allEntities[aux].entities.push_back(std::make_unique<Item>(tileInfo, pos, width, height));
-	allEntities[aux].type = static_cast<ColliderLayers>(*(std::get_if<int>(&tileInfo->properties.find("ColliderLayers")->second)));
+	allEntities[aux].type = static_cast<CL::ColliderLayers>(*(std::get_if<int>(&tileInfo->properties.find("ColliderLayers")->second)));
 
 	return true;
 }

@@ -133,7 +133,7 @@ void Player::BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, Phys
 {
 	switch (pBodyB->ctype)
 	{
-		using enum ColliderLayers;
+		using enum CL::ColliderLayers;
 		case ITEMS:
 			LOG("Collision ITEMS");
 			break;

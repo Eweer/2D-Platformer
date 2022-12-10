@@ -251,8 +251,8 @@ void Physics::PreSolve(b2Contact *contact, const b2Manifold *oldManifold)
 	auto bodyA = contact->GetFixtureA()->GetBody();
 	auto bodyB = contact->GetFixtureB()->GetBody();
 
-	if(bodyA->GetFixtureList()->GetFilterData().categoryBits & (uint)ColliderLayers::PLATFORMS ||
-	   bodyB->GetFixtureList()->GetFilterData().categoryBits & (uint)ColliderLayers::PLATFORMS )
+	if(bodyA->GetFixtureList()->GetFilterData().categoryBits & (uint)CL::ColliderLayers::PLATFORMS ||
+	   bodyB->GetFixtureList()->GetFilterData().categoryBits & (uint)CL::ColliderLayers::PLATFORMS )
 	{
 		return;
 	}
@@ -326,7 +326,7 @@ std::unique_ptr<b2FixtureDef> Physics::CreateFixtureDef(ShapeData &shapeData, ui
 	return fixture;
 }
 
-std::unique_ptr<PhysBody> Physics::CreatePhysBody(b2Body *body, iPoint width_height, ColliderLayers cType) const
+std::unique_ptr<PhysBody> Physics::CreatePhysBody(b2Body *body, iPoint width_height, CL::ColliderLayers cType) const
 {
 	auto pBody = std::make_unique<PhysBody>(body, width_height, cType);
 	body->SetUserData(pBody.get());
@@ -341,7 +341,7 @@ std::unique_ptr<PhysBody> Physics::CreateQuickPlatform(ShapeData &shapeData, iPo
 	auto body = CreateBody(pos);
 	auto fixtureDef = CreateFixtureDef(shapeData);
 	body->CreateFixture(fixtureDef.get());
-	return CreatePhysBody(body, width_height, ColliderLayers::PLATFORMS);
+	return CreatePhysBody(body, width_height, CL::ColliderLayers::PLATFORMS);
 }
 
 std::unique_ptr<PhysBody> Physics::CreateQuickPhysBody(iPoint position, BodyType bodyType, ShapeData shapeData, uint16 cat, uint16 mask, iPoint width_height, bool sensor)
@@ -349,7 +349,7 @@ std::unique_ptr<PhysBody> Physics::CreateQuickPhysBody(iPoint position, BodyType
 	auto body = CreateBody(position, bodyType);
 	auto fixtureDef = CreateFixtureDef(shapeData, cat, mask, sensor);
 	body->CreateFixture(fixtureDef.get());
-	return CreatePhysBody(body, width_height, static_cast<ColliderLayers>(cat));
+	return CreatePhysBody(body, width_height, static_cast<CL::ColliderLayers>(cat));
 }
 
 

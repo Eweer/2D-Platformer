@@ -53,7 +53,7 @@ public:
 	bool disableOnNextUpdate = false;
 
 	std::string name = "unknown";
-	ColliderLayers type = ColliderLayers::UNKNOWN;
+	CL::ColliderLayers type = CL::ColliderLayers::UNKNOWN;
 
 	iPoint position;
 	iPoint startingPosition;

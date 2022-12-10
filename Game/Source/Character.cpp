@@ -88,7 +88,7 @@ void Character::CreatePhysBody()
 		return;
 	}
 	
-	type = (ColliderLayers)currentNode.attribute("colliderlayers").as_int();
+	type = static_cast<CL::ColliderLayers>(currentNode.attribute("colliderlayers").as_int());
 	
 	float32 gravity = currentNode.attribute("gravityscale") ? currentNode.attribute("gravityscale").as_float() : 1.0f;
 	float32 restitution = currentNode.attribute("restitution") ? currentNode.attribute("restitution").as_float() : 1.0f;
@@ -249,7 +249,7 @@ uint16 Character::SetMaskFlag(std::string_view name, pugi::xml_node const &colli
 	uint16 maskFlag = 0x0001;
 	if(StrEquals(name, "player"))
 	{
-		using enum ColliderLayers;
+		using enum CL::ColliderLayers;
 		if(StrEquals(colliderGroupNode.attribute("name").as_string(), "CharacterSensor"))
 			maskFlag = static_cast<uint16>(ENEMIES | TRIGGERS | CHECKPOINTS);
 		else if(StrEquals(colliderGroupNode.attribute("name").as_string(), "Terrain"))

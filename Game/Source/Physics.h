@@ -216,7 +216,7 @@ class PhysBody
 {
 public:
 	explicit PhysBody() = default;
-	explicit PhysBody(b2Body *newBody, iPoint width_height = iPoint(0, 0), ColliderLayers cType = ColliderLayers::UNKNOWN) :
+	explicit PhysBody(b2Body *newBody, iPoint width_height = iPoint(0, 0), CL::ColliderLayers cType = CL::ColliderLayers::UNKNOWN) :
 		width(width_height.x),
 		height(width_height.y),
 		body(newBody),
@@ -240,7 +240,7 @@ public:
 	int height = 0;
 	b2Body *body = nullptr;
 	Entity *listener = nullptr;
-	ColliderLayers ctype = ColliderLayers::UNKNOWN;
+	CL::ColliderLayers ctype = CL::ColliderLayers::UNKNOWN;
 	std::vector<std::unique_ptr<b2FixtureDef>> fixtures;
 	std::vector<iPoint> offsets;
 	std::unique_ptr<FixtureData> ground;
@@ -283,8 +283,8 @@ public:
 
 	std::unique_ptr<b2FixtureDef> CreateFixtureDef(
 		ShapeData &shapeData,
-		uint16 cat = (uint16)ColliderLayers::PLATFORMS,
-		uint16 mask = (uint16)ColliderLayers::PLAYER,
+		uint16 cat = (uint16)CL::ColliderLayers::PLATFORMS,
+		uint16 mask = (uint16)CL::ColliderLayers::PLAYER,
 		bool isSensor = false,
 		float density = 1.0f,
 		float friction = 1.0f,
@@ -295,7 +295,7 @@ public:
 	std::unique_ptr<PhysBody> CreatePhysBody(
 		b2Body *body = nullptr,
 		iPoint width_height = iPoint(0,0),
-		ColliderLayers cType = ColliderLayers::UNKNOWN
+		CL::ColliderLayers cType = CL::ColliderLayers::UNKNOWN
 	) const;
 
 	//---------------- Create Quick Shapes

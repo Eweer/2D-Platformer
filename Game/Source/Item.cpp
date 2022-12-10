@@ -70,7 +70,7 @@ void Item::CreatePhysBody()
 		app->physics->CreatePhysBody(
 			itemBody,
 			iPoint(width, height),
-			ColliderLayers::ITEMS
+			CL::ColliderLayers::ITEMS
 		)
 	);
 	pBody = std::move(physBodyPtr);
@@ -85,8 +85,8 @@ void Item::CreatePhysBody()
 			std::unique_ptr<b2FixtureDef> fixtureDef(
 				app->physics->CreateFixtureDef(
 					shape,
-					(uint16)ColliderLayers::ITEMS,
-					(uint16)ColliderLayers::PLAYER,
+					(uint16)CL::ColliderLayers::ITEMS,
+					(uint16)CL::ColliderLayers::PLAYER,
 					true
 				)
 			);
@@ -130,17 +130,10 @@ bool Item::Pause() const
 
 void Item::BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB)
 {
-	switch(pBodyB->ctype)
+	if(pBodyB->ctype == CL::ColliderLayers::PLAYER)
 	{
-		using enum ColliderLayers;
-		case PLAYER:
-		{
-			PickUpEffect();
-			Disable();
-			break;
-		}
-		default:
-			break;
+		PickUpEffect();
+		Disable();
 	}
 }
 
