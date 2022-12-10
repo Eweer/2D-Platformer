@@ -6,126 +6,107 @@
 #include <vector>
 #include <memory>
 #include <algorithm>
-#include <any>
-
-/*
-template<class UnaryPred>
-std::any Find2(std::string_view action, UnaryPred predicate)
-{
-	auto findVertex = [action](std::unique_ptr<Vertex> const &v)
-	{
-		return StrEquals(v->action, action);
-	}
-}
-*/
 
 template <typename T>
 struct Vertex
 {
 public:
-	explicit Vertex(T name) : action(name) {};
+	explicit Vertex() = default;
+	explicit Vertex(T name) : value(name) {};
 
 	int AddEdge(int destination)
 	{
+		// Check if destination is already on the array
+		for(auto i = 0; auto const &elem : edges)
+		{
+			if(elem == destination)
+				return i;
+			i++;
+		}
+		// If it's not, add it
 		edges.push_back(destination);
 		return static_cast<int>(edges.size()) - 1;
 	}
 
-	T action;
+	T value;
 	std::vector<int> edges;
 };
 
-template <typename T>
-struct graphvector : std::vector<std::unique_ptr<Vertex<T>>>
-{
-	std::vector<std::unique_ptr<Vertex<T>>> &operator[](std::size_t i)
-	{
-
-	}
-};
-
+/* Directed Graph
+*/
 template <typename T>
 class AdjacencyList
 {
 public:
-	using graph2d = std::vector<std::unique_ptr<Vertex<T>>>;
+	using graph2d = std::vector<Vertex<T>>;
 
 	AdjacencyList() = default;
 	~AdjacencyList() = default;
 
-	int AddVertex(T action)
+	int AddVertex(T value)
 	{
-		if(auto i = GetIndex(action); i >= 0)
+		if(auto i = GetIndex(value); i >= 0)
 			return i;
 
-		graph.push_back(std::make_unique<Vertex<T>>(action));
+		graph.push_back(Vertex<T>(value));
 		return static_cast<int>(graph.size()) - 1;
 	}
 
 	int AddEdge(T origin, T destination)
 	{
-		Vertex<T> *v = At(origin);
-		if(!v)
+		auto iEdge = GetIndex(destination);
+
+		// If destination does not exist in graph
+		if(iEdge == -1)
 		{
-			AddVertex(origin);
-			v = At(origin);
+			// Add the Vertex and update iEdge value with the new index
+			iEdge = AddVertex(destination);
 		}
 
-		// If destination exists
-		if(auto i = GetIndex(destination); i != -1)
-		{
-			return v->AddEdge(i);
-		}
-		// If destination doesn't exist we add it.
-		return v->AddEdge(AddVertex(destination));
-
-	}
-
-	int AddVertexAndEdge(T origin, T destination, int first, int second)
-	{
-
+		auto v = At(origin);
+		// Add the edge to the Vertex array
+		return v->AddEdge(iEdge);
 	}
 
 	// Returns index if action is on the array, -1 if no match
-	int GetIndex(T action) const
+	int GetIndex(T value) const
 	{
 		for(int i = 0; auto const &elem : graph)
 		{
-			if(elem.get()->action == action)
+			if(elem.value == value)
 				return i;
+			i++;
 		}
 		return -1;
 	}
 
 	// Returns iterator to element, iterator == graph.last() if no match
-	graph2d::iterator Find(T action)
+	graph2d::iterator Find(T value)
 	{
-		for(auto it = graph.begin(); it != graph.end(); ++it)
-		{
-			if((*it)->action == action)
-			{
-				return it;
-			}
-		}
+		if(auto it = std::ranges::find_if(graph.begin(), graph.end(),
+										  [value](Vertex<T> const &v)
+										  {
+											  return v.value == value;
+										  }
+		); it != graph.end())
+			return it;
+
 		return graph.end();
 	}
 
-	// Returns vertex of action, nullptr if no match
-	Vertex<T> *At(T action)
+	// Returns vertex of action, adds vertex if no match
+	Vertex<T> *At(T value)
 	{
-		if(auto it = std::ranges::find_if(graph.begin(), graph.end(),
-										  [action](std::unique_ptr<Vertex<T>> const &v)
-										  {
-											  return v->action == action;
-										  }
-		); it != graph.end())
-			return it->get();
-
-		return nullptr;
+		for(int i = 0; auto const &elem : graph)
+		{
+			if(elem.value == value)
+				return &graph[i];
+			i++;
+		}
+		return &graph[AddVertex(value)];
 	}
 
 private:
-	int currentAction = 0;
-	std::vector<std::unique_ptr<Vertex<T>>> graph;
+	std::vector<Vertex<T>> graph;
 };
 #endif	// __CHARACTERLOGIC_H__
