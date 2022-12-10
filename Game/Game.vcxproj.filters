@@ -135,6 +135,9 @@
     <ClInclude Include="Source\UI.h">
       <Filter>Headers\Modules</Filter>
     </ClInclude>
+    <ClInclude Include="Source\CharacterLogic.h">
+      <Filter>Source\Entities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="External">
