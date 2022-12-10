@@ -1,5 +1,9 @@
-#pragma once
+#ifndef __CHARACTER_H__
+#define __CHARACTER_H__
+
 #include "Entity.h"
+
+#include "Physics.h"
 
 struct CharacterJump
 {
@@ -14,59 +18,46 @@ struct CharacterJump
 class Character : public Entity
 {
 public:
-
+	//---------- Constructors
 	explicit Character();
-
-	explicit Character(ColliderLayers type);
-
 	explicit Character(const pugi::xml_node &itemNode);
-
 	~Character() override;
 
+	//---------- Load Parameters
 	bool Awake() override;
+	void SetPaths();
+	void InitializeTexture() const;
 
+	//---------- Create character
 	bool Start() override;
-
-	bool Update() override;
-
-	bool Pause() const override;
-
-	bool CleanUp() override;
-	
-	void ResetScore();
-
-	uint GetScore() const;
-
-	void AddMultiplier(uint n);
-
-	int GetTimeUntilReset() const;
-
-	std::pair<uint, uint> GetScoreList() const;
-
+	void AddTexturesAndAnimationFrames();
 	void CreatePhysBody() override;
 
-	void SetStartingPosition();
+	//---------- Main Loop
+	bool Update() override;
+	bool Pause() const override;
 
-	void AddTexturesAndAnimationFrames() override;
+	//---------- Destroy Entity
+	bool CleanUp() override;
 	
-	virtual void jumpOnNextUpdate(bool bStartJumpOnUpdate) { /*Method to Override*/ };
-
-	uint16 SetMaskFlag(std::string_view name, pugi::xml_node const &colliderGroupNode, pugi::xml_node const &colliderNode);
-	
+	//---------- Collisions
 	void OnCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB) override;
 	void BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB) override;
-	float score = 0;
-	uint scoreMultiplier = 1;
-	std::pair<uint, uint> scoreList;
 
 	uint hp = 3;
-
-	SDL_Texture *hpTexture = nullptr;
-
-	int timeUntilReset = -1;
-
 	int dir = 1;
+	SDL_Point textureOffset = {0,0};
 
-	std::string currentCharacter = "";
-	SDL_Point textureOffset;
+private:
+	//---- Utils
+	bool CreateEntityPath(std::string &entityFolder) const;
+	void SetAnimationParameters(pugi::xml_node const &animDataNode, std::string const &action);
+	uint16 SetMaskFlag(
+		std::string_view name,
+		pugi::xml_node const &colliderGroupNode,
+		pugi::xml_node const &colliderNode
+	) const;
+
 };
+
+#endif // __CHARACTER_H__

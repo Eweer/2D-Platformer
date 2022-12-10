@@ -1,22 +1,21 @@
 #ifndef __POINT_H__
 #define __POINT_H__
 
-#include "Defs.h"
+#include <cmath>
+#include <compare>
 
-#include <math.h>
-
-template<class TYPE>
+template<class T>
 class Point
 {
 public:
 
-	TYPE x = 0;
-	TYPE y = 0;
+	T x = 0;
+	T y = 0;
 
-	Point& Create(const TYPE& a, const TYPE& b)
+	Point& Create(const T& a, const T& b)
 	{
-		this->x = a;
-		this->y = b;
+		x = a;
+		y = b;
 
 		return *this;
 	}
@@ -32,7 +31,7 @@ public:
 		return r;
 	}
 
-	Point operator + (const Point &v) const
+	Point operator +(const Point &v) const
 	{
 		Point r;
 
@@ -42,7 +41,7 @@ public:
 		return r;
 	}
 
-	Point operator *(uint i)
+	Point operator *(T i)
 	{
 		Point r;
 
@@ -91,23 +90,23 @@ public:
 	}
 
 	// Distances ---------------------------------------------
-	TYPE DistanceTo(const Point& v) const
+	T DistanceTo(const Point& v) const
 	{
-		TYPE fx = x - v.x;
-		TYPE fy = y - v.y;
+		T fx = x - v.x;
+		T fy = y - v.y;
 
-		return sqrtf((fx*fx) + (fy*fy));
+		return sqrt((fx*fx) + (fy*fy));
 	}
 
-	TYPE DistanceNoSqrt(const Point& v) const
+	T DistanceNoSqrt(const Point& v) const
 	{
-		TYPE fx = x - v.x;
-		TYPE fy = y - v.y;
+		T fx = x - v.x;
+		T fy = y - v.y;
 
 		return (fx*fx) + (fy*fy);
 	}
 
-	TYPE DistanceManhattan(const Point& v) const
+	T DistanceManhattan(const Point& v) const
 	{
 		return abs(v.x - x) + abs(v.y - y);
 	}

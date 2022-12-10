@@ -2,18 +2,14 @@
 #define __MAP_H__
 
 #include "Module.h"
-#include "Point.h"
-#include "Defs.h"
-#include "Log.h"
 #include "Physics.h"
 
-#include <unordered_map>
+#include "Defs.h"
+#include "Point.h"
+
 #include <functional>
 #include <vector>
-#include <variant>
-#include <memory>
 #include <cstdlib>			//	std::rand
-#include <string>
 
 #include "PugiXml/src/pugixml.hpp"
 

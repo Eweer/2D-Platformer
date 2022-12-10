@@ -1,8 +1,6 @@
 #ifndef __BITMASKCOLLIDERLAYERS_H__
 #define __BITMASKCOLLIDERLAYERS_H__
 
-#include "Defs.h"
-
 using uint16 = unsigned short;
 
 enum class ColliderLayers
@@ -50,6 +48,11 @@ inline ColliderLayers  operator&=(ColliderLayers  a, ColliderLayers b)
 inline ColliderLayers  operator^=(ColliderLayers  a, ColliderLayers b)
 {
 	return a = a ^ b;
+}
+
+inline bool operator !=(const ColliderLayers &a,const uint &b)
+{
+	return static_cast<uint16>(a) != b;
 }
 
 #endif

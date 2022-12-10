@@ -478,7 +478,7 @@ b2Vec2 Physics::GetWorldGravity() const
 //---- Destroy
 void Physics::DestroyBody(b2Body *b) const
 {
-	if (b) world->DestroyBody(b);
+	if(b) world->DestroyBody(b);
 }
 
 //--------------- PhysBody

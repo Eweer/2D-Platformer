@@ -3,18 +3,19 @@
 
 #include "Module.h"
 #include "Entity.h"
-#include "Player.h"
-#include "Map.h"
+#include "BitMaskColliderLayers.h"
 
 #include <deque>
-#include <utility>		//std::pair
+#include <vector>
 
-
+class Player;
+struct TileInfo;
 
 struct EntityInfo
 {
+	ColliderLayers type = ColliderLayers::UNKNOWN;
 	std::vector<std::unique_ptr<Entity>> entities;
-	std::deque<uint> emptyElements;
+	std::deque<unsigned int> emptyElements;
 	std::unordered_map<int, std::unique_ptr<Animation>> animation;
 };
 
@@ -42,9 +43,9 @@ public:
 	bool CleanUp() final;
 
 	// Additional methods
-	void CreateEntity(std::string const &type, pugi::xml_node parameters = pugi::xml_node());
+	void CreateEntity(std::string const &type, pugi::xml_node const &parameters = pugi::xml_node());
 
-	bool DestroyEntity(Entity const *entity, std::string const &type);
+	bool DestroyEntity(Entity const *entity, std::string_view type);
 
 	bool DestroyEntity(std::string const &type,  int id);
 
@@ -69,6 +70,7 @@ private:
 	// value2 = <vector of entities, list of empty elements, map of animations>
 	EntityMap allEntities;
 
+	std::string itemPath;
 
 	friend class UI;
 };

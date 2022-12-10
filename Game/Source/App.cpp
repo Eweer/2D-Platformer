@@ -14,10 +14,7 @@
 #include "Defs.h"
 #include "Log.h"
 
-#include <iostream>
 #include <sstream>
-
-#include <memory>
 
 // Constructor
 App::App(int argc, char* args[]) : argc(argc), args(args)

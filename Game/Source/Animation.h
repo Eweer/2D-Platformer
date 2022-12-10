@@ -5,15 +5,14 @@
 
 #include "App.h"
 #include "Textures.h"
+
 #include "Defs.h"
 #include "Point.h"
 
-#include <iostream>
 #include <vector>
-#include <memory>
-#include <unordered_map>
-#include <string>
 #include <locale>
+
+#include "SDL/include/SDL_rect.h"
 
 struct SDL_Texture;
 
@@ -228,6 +227,7 @@ public:
 
 	std::string GetCurrentAnimName() const
 	{
+		if(currentAnimName.empty()) return "unknown";
 		return currentAnimName;
 	}
 	
@@ -279,14 +279,6 @@ public:
 		return (uint)currentFrame == frames.at(currentAnimName).size() - 1;
 	}
 	
-	iPoint GetFrameSize() const
-	{
-		/*iPoint ret;
-		SDL_Texture *aux = frames[currentAnimName][0];
-		SDL_QueryTexture, nullptr, nullptr, &ret.x, &ret.y);
-		return ret;*/
-	}
-
 	void DoLoopsOfAnimation(uint loops, AnimIteration style)
 	{
 		if(loops <= 0) return;
@@ -298,7 +290,10 @@ public:
 
 	void setPivot(SDL_Point const &p)
 	{
-		animPivot = {.x = p.x, .y = p.y};
+		animPivot = {
+			.x = p.x,
+			.y = p.y
+		};
 	}
 
 private:

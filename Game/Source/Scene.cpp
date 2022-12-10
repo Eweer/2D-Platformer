@@ -13,7 +13,6 @@
 #include "Log.h"
 
 #include <format>
-#include <string>
 
 Scene::Scene() : Module()
 {

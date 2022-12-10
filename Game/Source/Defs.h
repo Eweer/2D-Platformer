@@ -5,13 +5,15 @@
 
 #include <string>
 #include <cstdio>
-#include <unordered_map>
-#include <variant>
+
 #include <stdarg.h>
 #include <initializer_list>
+
 #include <ranges>
 #include <algorithm>
-#include <string>
+
+#include <variant>
+#include <unordered_map>
 
 template<typename T1, typename T2, typename T3>
 constexpr auto in_range(T1 value, T2  min, T3  max) 

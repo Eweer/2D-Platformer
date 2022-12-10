@@ -1,23 +1,15 @@
 #include "EntityManager.h"
+#include "App.h"
+
 #include "Player.h"
 #include "Item.h"
-#include "App.h"
-#include "Textures.h"
-#include "Scene.h"
-#include "BitMaskColliderLayers.h"
-#include "Animation.h"
-#include "Physics.h"
+
+#include "Map.h"
 
 #include "Defs.h"
 #include "Log.h"
-#include "dirent.h"
 
-#include <algorithm>
-#include <ranges>
-#include <vector>
 #include <regex>
-#include <variant>
-#include <string>		// std::string, std::stoi
 #include <locale>		// std::tolower
 
 EntityManager::EntityManager() : Module()
@@ -32,6 +24,9 @@ EntityManager::~EntityManager() = default;
 bool EntityManager::Awake(pugi::xml_node& config)
 {
 	LOG("Loading Entity Manager");
+
+	itemPath = config.attribute("items").as_string();
+
 	for(auto const &[entityType, entityInfo] : allEntities)
 	{
 		for(auto const &entity : entityInfo.entities)
@@ -72,39 +67,29 @@ bool EntityManager::CleanUp()
 	return true;
 }
 
-void EntityManager::CreateEntity(std::string const &type, pugi::xml_node parameters)
+void EntityManager::CreateEntity(std::string const &entityClass, pugi::xml_node const &parameters)
 {
-	if(StrEquals(type, "player"))
+	if(StrEquals(entityClass, "player"))
 	{
-		if(allEntities[type].emptyElements.empty()) [[likely]]
+		if(allEntities[entityClass].emptyElements.empty()) [[likely]]
 		{
-			allEntities[type].entities.push_back(std::make_unique<Player>(parameters));
+			allEntities[entityClass].entities.push_back(std::make_unique<Player>(parameters));
+			allEntities[entityClass].type = ColliderLayers::PLAYER;
 		}
 		else [[unlikely]]
 		{
-			allEntities[type].entities[allEntities[type].emptyElements.front()].reset(new Player(parameters));
-			allEntities[type].emptyElements.pop_front();
-		}
-	}
-	else if(StrEquals(type, "item"))
-	{
-		if(allEntities[type].emptyElements.empty()) [[likely]]
-		{
-			allEntities[type].entities.push_back(std::make_unique<Item>());
-		}
-		else [[unlikely]]
-		{
-			allEntities[type].entities[allEntities[type].emptyElements.front()].reset(new Item());
-			allEntities[type].emptyElements.pop_front();
+			auto playerPtr = std::make_unique<Player>(parameters);
+			allEntities[entityClass].entities[allEntities[entityClass].emptyElements.front()].reset(playerPtr.release());
+			allEntities[entityClass].emptyElements.pop_front();
 		}
 	}
 	else
 	{
-		LOG("Entity %s could not be created.", type);
+		LOG("Entity %s could not be created.", entityClass);
 	}
 }
 
-bool EntityManager::DestroyEntity(Entity const *entity, std::string const &type)
+bool EntityManager::DestroyEntity(Entity const *entity, std::string_view type)
 {
 	if(auto vec = allEntities.find(type); vec != allEntities.end())
 	{
@@ -133,12 +118,18 @@ bool EntityManager::DestroyEntity(std::string const &type, int id)
 
 bool EntityManager::LoadAllTextures()
 {
-	if(auto const &it = allEntities.find("player"); it != allEntities.end())
+	using enum ColliderLayers;
+	auto excludedFlag = PLATFORMS | ITEMS;
+	for(auto const &[name, info] : allEntities)
 	{
-		for(auto const &entity : it->second.entities)
+		// If the type matches any value in excludedFlag go to next entity
+		if((info.type & excludedFlag) != 0) continue;
+
+		// If it doesn't, add textures for all entities with that name
+		for(auto const &entity : info.entities)
 		{
 			if(!IsEntityActive(entity.get())) continue;
-			entity->AddTexturesAndAnimationFrames();
+			dynamic_cast<Character *>(entity.get())->AddTexturesAndAnimationFrames();
 		}
 	}
 	return true;
@@ -150,6 +141,7 @@ bool EntityManager::LoadEntities(TileInfo const *tileInfo, iPoint pos, int width
 	aux[0] = std::tolower(aux[0], std::locale());
 	
 	allEntities[aux].entities.push_back(std::make_unique<Item>(tileInfo, pos, width, height));
+	allEntities[aux].type = static_cast<ColliderLayers>(*(std::get_if<int>(&tileInfo->properties.find("ColliderLayers")->second)));
 
 	return true;
 }
@@ -172,8 +164,7 @@ void EntityManager::LoadItemAnimations()
 
 	// TODO: Refractor this to use <filesystem> instead of dirent
 	struct dirent **folderList;
-	std::string entityFolder = "Assets/Animations/Items/";
-	const char *dirPath = entityFolder.c_str();
+	const char *dirPath = itemPath.c_str();
 
 	int nItemFolder = scandir(dirPath, &folderList, nullptr, DescAlphasort);
 
@@ -228,7 +219,7 @@ void EntityManager::LoadItemAnimations()
 
 		// Create the path of the file
 		// fileName = "Assets/Output/Item/" + "coin0_rotating000.png"
-		std::string fileName = entityFolder + std::string(m[0]);
+		std::string fileName = itemPath + std::string(m[0]);
 
 		auto animationName = std::string(m[3]);
 		[[likely]] if(auto const frameCount = allEntities[entityClass].animation[variation]->AddFrame(fileName.c_str(), animationName); 

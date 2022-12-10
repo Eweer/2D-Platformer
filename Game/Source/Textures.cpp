@@ -61,7 +61,8 @@ SDL_Texture* Textures::Load(const char* path)
 		texture = LoadSurface(surface);
 		SDL_FreeSurface(surface);
 	}	
-	else LOG("Could not load surface with path: %s. IMG_Load: %s", path, IMG_GetError());
+	else 
+		LOG("Could not load surface with path: %s. IMG_Load: %s", path, IMG_GetError());
 
 	return texture;
 }

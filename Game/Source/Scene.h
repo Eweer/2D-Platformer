@@ -2,8 +2,6 @@
 #define __SCENE_H__
 
 #include "Module.h"
-#include "Player.h"
-#include "Item.h"
 
 struct SDL_Texture;
 

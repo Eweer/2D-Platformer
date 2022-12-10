@@ -1,24 +1,16 @@
-﻿#include "App.h"
+﻿#include "Map.h"
+#include "App.h"
 #include "Render.h"
-#include "Textures.h"
-#include "Map.h"
-#include "Physics.h"
 #include "EntityManager.h"
 
-#include "Defs.h"
 #include "Log.h"
 #include "BitMaskColliderLayers.h"
 
 #include <memory>
 #include <cmath>
 #include <algorithm>
-#include <vector>
-#include <variant>
-#include <unordered_map>
 #include <utility>
-
-#include <iostream>
-
+#include <regex>
 
 #include "SDL_image/include/SDL_image.h"
 

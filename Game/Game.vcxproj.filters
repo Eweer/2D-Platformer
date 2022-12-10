@@ -114,9 +114,6 @@
     <ClInclude Include="Source\Item.h">
       <Filter>Headers\Entities</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Animation.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Character.h">
       <Filter>Headers\Entities</Filter>
     </ClInclude>
@@ -135,7 +132,10 @@
     <ClInclude Include="Source\UI.h">
       <Filter>Headers\Modules</Filter>
     </ClInclude>
-    <ClInclude Include="Source\CharacterLogic.h">
+    <ClInclude Include="Source\AdjacencyList.h">
+      <Filter>Source\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Animation.h">
       <Filter>Source\Entities</Filter>
     </ClInclude>
   </ItemGroup>

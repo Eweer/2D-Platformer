@@ -1,19 +1,13 @@
 #include "Player.h"
 #include "App.h"
-#include "Textures.h"
-#include "Audio.h"
+
 #include "Input.h"
 #include "Render.h"
-#include "Scene.h"
-#include "Log.h"
-#include "Point.h"
-#include "Physics.h"
-#include "BitMaskColliderLayers.h"
 #include "Map.h"
-#include "Entity.h"
-#include <iostream>
 
-Player::Player() : Character(ColliderLayers::PLAYER)
+#include "Log.h"
+
+Player::Player()
 {
 	name = "player";
 }
@@ -27,9 +21,6 @@ Player::~Player() = default;
 
 bool Player::Awake() 
 {
-	currentCharacter = parameters.attribute("class").as_string();
-	scoreList.first = parameters.attribute("highscore").as_uint();
-	scoreList.second = 0;
 	jump = { 
 		.bJumping = false, 
 		.currentJumps = 0, 
@@ -38,23 +29,11 @@ bool Player::Awake()
 		.jumpImpulse = parameters.attribute("jumpimpulse").as_float(),
 		.bInAir = false
 	};
-	
-	SetStartingParameters();
 
-	return true;
-}
-
-bool Player::Start() 
-{
-
-	CreatePhysBody();
-	texture->SetCurrentAnimation("idle");
-	if(!texture->Start("idle"))
-	{
-		LOG("Couldnt start %s anim", texture->GetCurrentAnimName());
-		return false;
-	}
-	texture->SetAnimStyle(AnimIteration::LOOP_FROM_START);
+	startingPosition = {
+		parameters.attribute("x").as_int(),
+		parameters.attribute("y").as_int()
+	};
 
 
 	return true;
@@ -67,31 +46,7 @@ bool Player::Update()
 		pBody->body->SetLinearVelocity(b2Vec2(velocityToKeep.x, 0));
 		bKeepMomentum = false;
 	}
-	if(timeUntilReset > 120)
-	{
-		SetStartingPosition();
-		timeUntilReset = -1;
-		if(hp <= 0)
-		{
-			if((uint)score > scoreList.first)
-			{
-				scoreList.first = (uint)score;
-				//app->SaveToConfig("scene", "Character", "highscore", std::to_string(scoreList.first))
-			}
-			scoreList.second = (uint)score;
-			ResetScore();
-			hp = 3;
-		}
-	}
-	else if(timeUntilReset >= 0)
-	{
-		timeUntilReset++;
-	}
-	else
-	{
-		score += 0.002f * (float)scoreMultiplier;
-	}
-
+	
 	if(jump.bJumping)
 	{
 		if(app->input->GetKey(SDL_SCANCODE_SPACE) == KEY_UP) jump.bJumping = false;
@@ -169,37 +124,9 @@ bool Player::Update()
 	return true;
 }
 
-bool Player::Pause() const
-{
-	return app->render->DrawCharacterTexture(
-		texture->GetCurrentFrame(),
-		iPoint(position.x - colliderOffset.x, position.y - colliderOffset.y),
-		(bool)dir,
-		texture->GetFlipPivot()
-	);
-}
-
 bool Player::CleanUp()
 {
 	return true;
-}
-
-void Player::SendContact(b2Contact *c)
-{
-	auto const *pBodyA = (PhysBody *)c->GetFixtureA()->GetBody()->GetUserData();
-	auto const *pBodyB = (PhysBody *)c->GetFixtureB()->GetBody()->GetUserData();
-	std::cout << "Fixture A: " << pBodyA << std::endl;
-	std::cout << "Fixture B: " << pBodyB << std::endl;
-	std::cout << "[" 
-		<< std::to_string(c->GetManifold()->points[0].localPoint.x) << ", " 
-		<< std::to_string(c->GetManifold()->points[0].localPoint.y) << "]" << std::endl;
-	std::cout << "[" 
-		<< std::to_string(c->GetManifold()->localPoint.x) << ", " 
-		<< std::to_string(c->GetManifold()->localPoint.y) << "]" << std::endl;
-	std::cout << "[" 
-		<< std::to_string(c->GetManifold()->localNormal.x) << ", " 
-		<< std::to_string(c->GetManifold()->localNormal.y) << "]" << std::endl;
-
 }
 
 void Player::BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB)

@@ -32,8 +32,7 @@ public:
 	std::vector<int> edges;
 };
 
-/* Directed Graph
-*/
+/* Directed Graph */
 template <typename T>
 class AdjacencyList
 {
