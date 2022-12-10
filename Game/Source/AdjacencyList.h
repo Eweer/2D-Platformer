@@ -1,5 +1,5 @@
-#ifndef __CHARACTERLOGIC_H__
-#define __CHARACTERLOGIC_H__
+#ifndef __ADJACENCYLIST_H__
+#define __ADJACENCYLIST_H__
 
 #include "Defs.h"
 
@@ -109,4 +109,4 @@ public:
 private:
 	std::vector<Vertex<T>> graph;
 };
-#endif	// __CHARACTERLOGIC_H__
+#endif	// __ADJACENCYLIST_H__
