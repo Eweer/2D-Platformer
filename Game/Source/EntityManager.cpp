@@ -72,7 +72,7 @@ void EntityManager::CreateEntity(std::string const &entityClass, pugi::xml_node 
 {
 	// Get correct ID (check if queue is empty or not)
 	int id = (allEntities[entityClass].emptyElements.empty())
-		? allEntities[entityClass].entities.size() - 1
+		? allEntities[entityClass].entities.size()
 		: allEntities[entityClass].emptyElements.front();
 
 	// Initialize pointer if node is a character, nullptr otherwise
@@ -96,10 +96,7 @@ void EntityManager::CreateEntity(std::string const &entityClass, pugi::xml_node 
 
 	// Move the pointer to its place
 	if(allEntities[entityClass].emptyElements.empty()) [[likely]]
-	{
 		allEntities[entityClass].entities.push_back(std::move(characterPtr));
-		allEntities[entityClass].type = CL::ColliderLayers::PLAYER;
-	}
 	else [[unlikely]]
 	{
 		allEntities[entityClass].entities[id].reset(characterPtr.release());

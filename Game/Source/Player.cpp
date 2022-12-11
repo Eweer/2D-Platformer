@@ -124,11 +124,6 @@ bool Player::Update()
 	return true;
 }
 
-bool Player::CleanUp()
-{
-	return true;
-}
-
 void Player::BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB)
 {
 	switch (pBodyB->ctype)

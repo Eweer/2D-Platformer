@@ -7,7 +7,7 @@
 
 #include "Defs.h"
 #include "Log.h"
-
+#include "BitMaskColliderLayers.h"
 #include "math.h"
 
 #include <variant>
@@ -339,7 +339,8 @@ std::unique_ptr<PhysBody> Physics::CreatePhysBody(b2Body *body, iPoint width_hei
 std::unique_ptr<PhysBody> Physics::CreateQuickPlatform(ShapeData &shapeData, iPoint pos, iPoint width_height)
 {
 	auto body = CreateBody(pos);
-	auto fixtureDef = CreateFixtureDef(shapeData);
+	auto maskFlag =  static_cast<uint16>(CL::ColliderLayers::PLAYER | CL::ColliderLayers::ENEMIES);
+	auto fixtureDef = CreateFixtureDef(shapeData, 0x0001, maskFlag);
 	body->CreateFixture(fixtureDef.get());
 	return CreatePhysBody(body, width_height, CL::ColliderLayers::PLATFORMS);
 }

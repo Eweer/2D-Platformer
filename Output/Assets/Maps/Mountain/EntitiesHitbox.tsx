@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.9" tiledversion="1.9.2" name="EntitiesHitbox" class="Characters" tilewidth="128" tileheight="128" tilecount="6" columns="0" objectalignment="topleft">
+<tileset version="1.9" tiledversion="1.9.2" name="EntitiesHitbox" class="Characters" tilewidth="128" tileheight="128" tilecount="12" columns="0" objectalignment="topleft">
  <grid orientation="orthogonal" width="1" height="1"/>
  <properties>
   <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="2"/>
@@ -121,5 +121,67 @@
    </property>
   </properties>
   <image width="128" height="128" source="../../Animations/Player/Mage/Walk/walk6.png"/>
+ </tile>
+ <tile id="7" class="Dwarf">
+  <properties>
+   <property name="Parameters" type="class" propertytype="Animation">
+    <properties>
+     <property name="AnimIteration" propertytype="AnimIteration" value="LOOP_FROM_START"/>
+     <property name="AnimationFrame" type="int" value="1"/>
+     <property name="AnimationName" propertytype="PlayerAnimation" value="Walk"/>
+     <property name="AnimationSpeed" type="float" value="0.2"/>
+    </properties>
+   </property>
+  </properties>
+  <image width="128" height="128" source="../../Animations/Enemies/Mountain/Dwarf/Walk/walk1.png"/>
+  <objectgroup draworder="index" id="2">
+   <object id="1" name="Sensor" class="Dynamic" x="24" y="44" width="57" height="48">
+    <polygon points="12,2 28,2 40,11 40,26 42,35 41.2453,39 35,45 10,45 7,42 -1,39 2,24 6,17"/>
+   </object>
+   <object id="2" name="Ground" class="Dynamic" x="41" y="84" width="7" height="7">
+    <ellipse/>
+   </object>
+   <object id="3" name="BottomRight" class="Dynamic" x="59" y="81" width="7" height="7">
+    <ellipse/>
+   </object>
+   <object id="4" name="Front" class="Dynamic" x="59" y="62" width="7" height="7">
+    <ellipse/>
+   </object>
+   <object id="5" name="TopRight" class="Dynamic" x="54" y="47" width="7" height="7">
+    <ellipse/>
+   </object>
+   <object id="6" name="Top" class="Dynamic" x="41" y="42" width="7" height="7">
+    <ellipse/>
+   </object>
+   <object id="7" name="TopLeft" class="Dynamic" x="27" y="50" width="7" height="7">
+    <ellipse/>
+   </object>
+   <object id="8" name="BottomLeft" class="Dynamic" x="21" y="78" width="7" height="7">
+    <ellipse/>
+   </object>
+  </objectgroup>
+  <animation>
+   <frame tileid="7" duration="170"/>
+   <frame tileid="8" duration="170"/>
+   <frame tileid="9" duration="170"/>
+   <frame tileid="10" duration="170"/>
+   <frame tileid="11" duration="170"/>
+   <frame tileid="12" duration="170"/>
+  </animation>
+ </tile>
+ <tile id="8">
+  <image width="128" height="128" source="../../Animations/Enemies/Mountain/Dwarf/Walk/walk2.png"/>
+ </tile>
+ <tile id="9">
+  <image width="128" height="128" source="../../Animations/Enemies/Mountain/Dwarf/Walk/walk3.png"/>
+ </tile>
+ <tile id="10">
+  <image width="128" height="128" source="../../Animations/Enemies/Mountain/Dwarf/Walk/walk4.png"/>
+ </tile>
+ <tile id="11">
+  <image width="128" height="128" source="../../Animations/Enemies/Mountain/Dwarf/Walk/walk5.png"/>
+ </tile>
+ <tile id="12">
+  <image width="128" height="128" source="../../Animations/Enemies/Mountain/Dwarf/Walk/walk6.png"/>
  </tile>
 </tileset>

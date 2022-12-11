@@ -9,6 +9,8 @@ public:
 	Enemy();
 	explicit Enemy(const pugi::xml_node &itemNode, int newId);
 	~Enemy() final;
+
+	bool Awake() override;
 };
 
 #endif // __ENEMY_H__

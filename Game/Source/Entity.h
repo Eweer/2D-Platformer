@@ -4,6 +4,7 @@
 #include "Point.h"
 #include "Animation.h"
 #include "BitMaskColliderLayers.h"
+#include "PugiXml/src/pugixml.hpp"
 
 class b2Fixture;
 class PhysBody;

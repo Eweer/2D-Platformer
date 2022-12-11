@@ -35,9 +35,6 @@ public:
 	//---------- Main Loop
 	bool Update() override;
 	bool Pause() const override;
-
-	//---------- Destroy Entity
-	bool CleanUp() override;
 	
 	//---------- Collisions
 	void OnCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB) override;

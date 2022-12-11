@@ -31,9 +31,9 @@ void Character::InitializeTexture() const
 {
 	if(!texture) return;
 
-	if(!texture->Start(texture->GetCurrentAnimName()))
+	if(!texture->Start("idle"))
 		LOG("Couldnt start %s anim", texture->GetCurrentAnimName());
-	if(texture->GetAnimStyle() == AnimIteration::UNKNOWN)
+	if(texture->GetAnimStyle() != AnimIteration::LOOP_FROM_START)
 		texture->SetAnimStyle(AnimIteration::LOOP_FROM_START);
 }
 
@@ -288,10 +288,14 @@ void Character::CreatePhysBody()
 bool Character::Update()
 {
 	//Update Character position in pixels
-	position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x) - Character_SIZE/2;
-	position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y) - Character_SIZE/2;
-
-	app->render->DrawTexture(texture->UpdateAndGetFrame(), position.x, position.y);
+	position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x);
+	position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y);
+	app->render->DrawCharacterTexture(
+		texture->UpdateAndGetFrame(),
+		iPoint(position.x - colliderOffset.x, position.y - colliderOffset.y),
+		(bool)dir,
+		texture->GetFlipPivot()
+	);
 
 	if(hp <= 0) Disable();
 
@@ -308,12 +312,6 @@ bool Character::Pause() const
 	);
 }
 
-//---------- Destroy Entity
-
-bool Character::CleanUp()
-{
-	return true;
-}
 
 //---------- Collisions
 
@@ -335,7 +333,7 @@ bool Character::CreateEntityPath(std::string &entityFolder) const
 		entityFolder = std::string(parameters.attribute("class").as_string()) + "/";
 
 	if(!parameters.attribute("level").empty())
-		entityFolder = std::string(parameters.attribute("level").as_string()) + "/";
+		entityFolder = std::string(parameters.attribute("level").as_string()) + "/" + entityFolder;
 
 	if(!parameters.attribute("name").empty())
 		entityFolder = std::string(parameters.attribute("name").as_string()) + "/" + entityFolder;
@@ -377,7 +375,15 @@ uint16 Character::SetMaskFlag(std::string_view name, pugi::xml_node const &colli
 		if(StrEquals(colliderGroupNode.attribute("name").as_string(), "CharacterSensor"))
 			maskFlag = static_cast<uint16>(ENEMIES | TRIGGERS | CHECKPOINTS);
 		else if(StrEquals(colliderGroupNode.attribute("name").as_string(), "Terrain"))
-			maskFlag = static_cast<uint16>(PLATFORMS | ITEMS);
+			maskFlag = static_cast<uint16>(ENEMIES | PLATFORMS | ITEMS);
+	}
+	else if(StrEquals(name, "enemy"))
+	{
+		using enum CL::ColliderLayers;
+		if(StrEquals(colliderGroupNode.attribute("name").as_string(), "CharacterSensor"))
+			maskFlag = static_cast<uint16>(TRIGGERS | PLAYER);
+		else if(StrEquals(colliderGroupNode.attribute("name").as_string(), "Terrain"))
+			maskFlag = static_cast<uint16>(PLATFORMS | PLAYER);
 	}
 	return maskFlag;
 }
