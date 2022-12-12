@@ -316,6 +316,8 @@ public:
 		bool sensor = false
 	);
 
+	std::unique_ptr<PhysBody> CreateQuickProjectile(iPoint position, CL::ColliderLayers mask);
+
 	//---------------- Joints
 
 	//---- Mouse

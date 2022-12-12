@@ -2,6 +2,7 @@
 #define __PLAYER_H__
 
 #include "Character.h"
+#include "Projectile.h"
 
 class Player : public Character
 {
@@ -26,6 +27,8 @@ private:
 	b2Vec2 velocityToKeep = {0.0f, 0.0f};
 
 	std::string playerCharacter;
+
+	std::vector<std::unique_ptr<Projectile>> projectiles;
 
 	friend class UI;
 };

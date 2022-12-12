@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.9" tiledversion="1.9.2" name="EntitiesHitbox" class="Characters" tilewidth="128" tileheight="128" tilecount="12" columns="0" objectalignment="topleft">
+<tileset version="1.9" tiledversion="1.9.2" name="EntitiesHitbox" class="Characters" tilewidth="128" tileheight="128" tilecount="21" columns="0" objectalignment="topleft">
  <grid orientation="orthogonal" width="1" height="1"/>
  <properties>
   <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="2"/>
@@ -183,5 +183,40 @@
  </tile>
  <tile id="12">
   <image width="128" height="128" source="../../Animations/Enemies/Mountain/Dwarf/Walk/walk6.png"/>
+ </tile>
+ <tile id="13">
+  <image width="32" height="32" source="../../Animations/Player/Mage/Fire/fire1.png"/>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="1" y="21" width="30" height="8"/>
+  </objectgroup>
+  <animation>
+   <frame tileid="13" duration="170"/>
+   <frame tileid="14" duration="170"/>
+   <frame tileid="15" duration="170"/>
+  </animation>
+ </tile>
+ <tile id="14">
+  <image width="32" height="32" source="../../Animations/Player/Mage/Fire/fire2.png"/>
+ </tile>
+ <tile id="15">
+  <image width="32" height="32" source="../../Animations/Player/Mage/Fire/fire3.png"/>
+ </tile>
+ <tile id="16">
+  <image width="32" height="32" source="../../Animations/Player/Mage/Fire/fire4.png"/>
+ </tile>
+ <tile id="17">
+  <image width="32" height="32" source="../../Animations/Player/Mage/Fire/fire5.png"/>
+ </tile>
+ <tile id="18">
+  <image width="32" height="32" source="../../Animations/Player/Mage/Fire/fire6.png"/>
+ </tile>
+ <tile id="19">
+  <image width="32" height="32" source="../../Animations/Player/Mage/Fire/fire7.png"/>
+ </tile>
+ <tile id="20">
+  <image width="32" height="32" source="../../Animations/Player/Mage/Fire/fire8.png"/>
+ </tile>
+ <tile id="21">
+  <image width="32" height="32" source="../../Animations/Player/Mage/Fire/fire9.png"/>
  </tile>
 </tileset>

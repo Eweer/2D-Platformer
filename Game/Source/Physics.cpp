@@ -338,11 +338,12 @@ std::unique_ptr<PhysBody> Physics::CreatePhysBody(b2Body *body, iPoint width_hei
 
 std::unique_ptr<PhysBody> Physics::CreateQuickPlatform(ShapeData &shapeData, iPoint pos, iPoint width_height)
 {
+	using enum CL::ColliderLayers;
 	auto body = CreateBody(pos);
-	auto maskFlag =  static_cast<uint16>(CL::ColliderLayers::PLAYER | CL::ColliderLayers::ENEMIES);
+	auto maskFlag =  static_cast<uint16>(PLAYER | ENEMIES);
 	auto fixtureDef = CreateFixtureDef(shapeData, 0x0001, maskFlag);
 	body->CreateFixture(fixtureDef.get());
-	return CreatePhysBody(body, width_height, CL::ColliderLayers::PLATFORMS);
+	return CreatePhysBody(body, width_height, PLATFORMS);
 }
 
 std::unique_ptr<PhysBody> Physics::CreateQuickPhysBody(iPoint position, BodyType bodyType, ShapeData shapeData, uint16 cat, uint16 mask, iPoint width_height, bool sensor)
@@ -353,6 +354,16 @@ std::unique_ptr<PhysBody> Physics::CreateQuickPhysBody(iPoint position, BodyType
 	return CreatePhysBody(body, width_height, static_cast<CL::ColliderLayers>(cat));
 }
 
+std::unique_ptr<PhysBody> Physics::CreateQuickProjectile(iPoint position, CL::ColliderLayers mask)
+{
+	using enum CL::ColliderLayers;
+	auto body = CreateBody(position);
+	auto catFlag = static_cast<uint16>(PLAYER | ENEMIES);
+	ShapeData s("Rectangle", std::vector<b2Vec2>({PIXEL_TO_METERS(position)}));
+	auto fixtureDef = CreateFixtureDef(s, catFlag, static_cast<uint16>(mask));
+	body->CreateFixture(fixtureDef.get());
+	return CreatePhysBody(body, iPoint(8, 30), PLAYER);
+}
 
 //--------------- Joints
 

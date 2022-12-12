@@ -53,6 +53,18 @@ bool Player::Update()
 		jump.timeSinceLastJump++;
 	}
 
+	if(app->input->GetMouseButtonDown(1) == KEY_DOWN)
+	{
+		using enum CL::ColliderLayers;
+		auto projPtr = std::make_unique<Projectile>(
+			texture->GetAnim("fire"),
+			position,
+			ENEMIES | PLATFORMS,
+			5
+		);
+		projectiles.push_back(std::move(projPtr));
+	}
+
 	b2Vec2 vel = pBody->body->GetLinearVelocity();
 	b2Vec2 impulse = b2Vec2_zero;
 	float maxVel = 5.0f;
@@ -108,6 +120,11 @@ bool Player::Update()
 	);
 
 	SDL_Rect camera = app->render->GetCamera();
+
+	for(auto const &elem : projectiles)
+	{
+		elem->Update();
+	}
 	
 	if(moveCamera && camera.x <= 0 && position.x >= startingPosition.x)
 	{
