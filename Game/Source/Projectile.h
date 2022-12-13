@@ -89,14 +89,13 @@ public:
 		bodyPtr->CreateFixture(fixPtr.get());
 		
 		// Create PhysBody
-		uint16 cat = 0x0001;
-		if((info.bitmask & PLAYER) != PLAYER) cat = static_cast<uint16>(PLAYER);
-		else if((info.bitmask & ENEMIES) != ENEMIES) cat = static_cast<uint16>(ENEMIES);
+		if((info.bitmask & PLAYER) != PLAYER) source = PLAYER;
+		else if((info.bitmask & ENEMIES) != ENEMIES) source = ENEMIES;
 
 		auto pbodyPtr = app->physics->CreatePhysBody(
 			bodyPtr,
 			info.width_height,
-			static_cast<CL::ColliderLayers>(cat)
+			BULLET
 		);
 
 		pBody = std::move(pbodyPtr);
@@ -164,6 +163,7 @@ public:
 	int animTimer = 0;
 	int flipValue = 0;
 	float degree = 0.0f;
+	CL::ColliderLayers source;
 	iPoint position = {0,0};
 	SDL_Point rotationCenter = {0,0};
 	iPoint animOffset = {0,0};

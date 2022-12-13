@@ -11,6 +11,8 @@ public:
 	~Enemy() final;
 
 	bool Awake() override;
+
+	void OnCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB) override;
 };
 
 #endif // __ENEMY_H__
