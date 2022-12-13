@@ -82,6 +82,8 @@ constexpr b2Vec2 PIXEL_TO_METERS(T p)
 constexpr auto DEGTORAD = 0.0174532925199432957f;
 constexpr auto RADTODEG = 57.295779513082320876f;
 
+class Projectile;
+
 // if type = "circle" -> data[0] = radius
 // if type = "edge" -> data[0] = point1, data[1] = point2
 // if type = "rectangle" -> data[0] = width, data[1] = height
@@ -226,6 +228,7 @@ public:
 	int height = 0;
 	b2Body *body = nullptr;
 	Entity *listener = nullptr;
+	Projectile *pListener = nullptr;
 	CL::ColliderLayers ctype = CL::ColliderLayers::UNKNOWN;
 	std::vector<std::unique_ptr<b2FixtureDef>> fixtures;
 	std::vector<iPoint> offsets;
@@ -358,4 +361,4 @@ private:
 	std::unordered_map<b2Body *, std::unordered_set<b2Body *>> collisionMap;
 };
 
-#endif
+#endif // __PHYSICS_H__

@@ -180,7 +180,9 @@ void Physics::BeginContact(b2Contact *contact)
 			auto fB = contact->GetFixtureB();
 
 			if(pBodyA->listener) pBodyA->listener->BeforeCollisionStart(fA, fB, pBodyA, pBodyB);
+			else if(pBodyA->pListener) pBodyA->pListener->BeforeCollisionStart(fA, fB, pBodyA, pBodyB);
 			if(pBodyB->listener) pBodyB->listener->BeforeCollisionStart(fB, fA, pBodyB, pBodyA);
+			else if(pBodyB->pListener) pBodyB->pListener->BeforeCollisionStart(fB, fA, pBodyB, pBodyA);
 		}
 		else contact->SetEnabled(false);
 	}
@@ -220,6 +222,7 @@ void Physics::EndContact(b2Contact *contact)
 			i->second.erase(pBodyB->body);
 			if(collisionMap.at(pBodyA->body).empty()) collisionMap.erase(i);
 			if(pBodyA->listener) pBodyA->listener->OnCollisionEnd(pBodyA, pBodyB);
+			else if(pBodyA->pListener) pBodyA->pListener->OnCollisionEnd(pBodyA, pBodyB);
 		}
 		
 		if(auto i = collisionMap.find(pBodyB->body); i != collisionMap.end())
@@ -227,6 +230,7 @@ void Physics::EndContact(b2Contact *contact)
 			i->second.erase(pBodyA->body);
 			if(collisionMap.at(pBodyB->body).empty()) collisionMap.erase(i);
 			if(pBodyB->listener) pBodyB->listener->OnCollisionEnd(pBodyB, pBodyA);
+			else if(pBodyB->pListener) pBodyB->pListener->OnCollisionEnd(pBodyB, pBodyA);
 		}
 	}
 }
@@ -245,7 +249,9 @@ void Physics::PreSolve(b2Contact *contact, const b2Manifold *oldManifold)
 		auto fB = contact->GetFixtureB();
 
 		if(pBodyA->listener) pBodyA->listener->OnCollisionStart(fA, fB,pBodyA, pBodyB);
+		else if(pBodyA->pListener) pBodyA->pListener->OnCollisionStart(fA, fB, pBodyA, pBodyB);
 		if(pBodyB->listener) pBodyB->listener->OnCollisionStart(fB, fA, pBodyB, pBodyA);
+		else if(pBodyB->pListener) pBodyB->pListener->OnCollisionStart(fB, fA, pBodyB, pBodyA);
 	}
 	/*
 	auto bodyA = contact->GetFixtureA()->GetBody();
@@ -340,7 +346,7 @@ std::unique_ptr<PhysBody> Physics::CreateQuickPlatform(ShapeData &shapeData, iPo
 {
 	using enum CL::ColliderLayers;
 	auto body = CreateBody(pos);
-	auto maskFlag =  static_cast<uint16>(PLAYER | ENEMIES);
+	auto maskFlag =  static_cast<uint16>(PLAYER | ENEMIES | BULLET | ITEMS);
 	auto fixtureDef = CreateFixtureDef(shapeData, 0x0001, maskFlag);
 	body->CreateFixture(fixtureDef.get());
 	return CreatePhysBody(body, width_height, PLATFORMS);

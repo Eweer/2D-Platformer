@@ -3,6 +3,8 @@
 
 #include "Character.h"
 #include "Projectile.h"
+#include <deque>
+#include <vector>
 
 class Player : public Character
 {

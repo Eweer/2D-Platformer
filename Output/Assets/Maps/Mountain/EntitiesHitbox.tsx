@@ -188,7 +188,10 @@
   <image width="32" height="32" source="../../Animations/Player/Mage/Fire/fire1.png"/>
   <objectgroup draworder="index" id="2">
    <object id="1" x="1" y="21" width="30" height="8">
-    <polygon points="0,3 8,0 26,0 30,3 30,5 26,8 8,8 0,5"/>
+    <polygon points="0,3 8,0 26,0 28,3 28,5 26,8 8,8 0,5"/>
+   </object>
+   <object id="2" x="0" y="24" width="2" height="2">
+    <ellipse/>
    </object>
   </objectgroup>
   <animation>

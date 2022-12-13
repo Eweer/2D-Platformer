@@ -4,10 +4,13 @@
 #include "Physics.h"
 #include "Render.h"
 #include "Input.h"
-#include "Physics.h"
+#include "Log.h"
 #include "Animation.h"
 #include "Point.h"
 #include "BitMaskColliderLayers.h"
+#include "Textures.h"
+#include "Physics.h"
+
 
 class ProjectileData
 {
@@ -50,29 +53,46 @@ public:
 		animation = anim;
 		position = origin;
 
+
+		direction = PIXEL_TO_METERS(app->input->GetMousePosition() - origin);
+		direction.Normalize();
+
+		flipValue = (direction.x < 0) ? 2 : 0;
+
 		animOffset = info.position;
+
+		uint tw = 0;
+		uint th = 0;
+		app->tex->GetSize(anim[0], tw, th);
+
+		rotationCenter.x = info.position.x;
+		rotationCenter.y = to_bool(flipValue) ? th - info.position.y : info.position.y;
+
+		degree = atan2f(direction.y, direction.x) * 180.0f/std::numbers::pi_v<float>;
 
 		// Create Body
 		auto bodyPtr = app->physics->CreateBody(
 			origin,
-			BodyType::DYNAMIC
+			BodyType::DYNAMIC,
+			degree
 		);
 		bodyPtr->SetGravityScale(0);
 		bodyPtr->SetBullet(true);
 
 		// Create Fixture
 		using enum CL::ColliderLayers;
-		uint16 cat = 0x0001;
-		if((info.bitmask & PLAYER) == PLAYER) cat = static_cast<uint16>(PLAYER);
-		else if((info.bitmask & ENEMIES) == ENEMIES) cat = static_cast<uint16>(ENEMIES);
 		auto fixPtr = app->physics->CreateFixtureDef(
 			info.shape,
-			cat,
+			static_cast<uint16>(BULLET),
 			static_cast<uint16>(info.bitmask)
 		);
 		bodyPtr->CreateFixture(fixPtr.get());
 		
 		// Create PhysBody
+		uint16 cat = 0x0001;
+		if((info.bitmask & PLAYER) != PLAYER) cat = static_cast<uint16>(PLAYER);
+		else if((info.bitmask & ENEMIES) != ENEMIES) cat = static_cast<uint16>(ENEMIES);
+
 		auto pbodyPtr = app->physics->CreatePhysBody(
 			bodyPtr,
 			info.width_height,
@@ -80,30 +100,72 @@ public:
 		);
 
 		pBody = std::move(pbodyPtr);
-		
-		direction = PIXEL_TO_METERS(app->input->GetMousePosition() - origin);
-		direction.Normalize();
+
 		auto s = PIXEL_TO_METERS(info.speed);
 		pBody->body->SetLinearVelocity({direction.x * s, direction.y * s});
+		pBody->pListener = this;
 	}
 	Projectile(const Projectile &) = default;
 	Projectile(Projectile &&) = default;
-	~Projectile() = default;
+	virtual ~Projectile() = default;
 
 	Projectile &operator =(const Projectile &) = default;
 
 	bool Update()
 	{
-		position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x);
-		position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y);
+		animTimer++;
+		if(animTimer >= 6)
+		{
+			currentFrame++;
+			animTimer = 0;
+		}
+
+		if(bExploding)
+		{
+			if(bDestroyPBody)
+			{
+				app->physics->DestroyBody(pBody->body);
+				bDestroyPBody = false;
+			}
+			if(currentFrame >= animation.size()) return false;
+		}
+		if(!bExploding)
+		{
+			position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x);
+			position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y);
+			if(currentFrame >= 3) currentFrame = 0;
+		}
+
 		app->render->DrawCharacterTexture(
-			animation[0],
-			iPoint(position.x - animOffset.x, position.y - animOffset.y)
+				animation[currentFrame],
+				iPoint(position.x - animOffset.x, position.y - animOffset.y),
+				false,
+				rotationCenter,
+				iPoint(INT_MAX, INT_MAX),
+				degree,
+				flipValue
 		);
 		return true;
 	}
 
+	void OnCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB)
+	{
+		bExploding = true;
+		bDestroyPBody= true;
+		animTimer = 0;
+	}
+	
+	virtual void OnCollisionEnd(PhysBody *physA, PhysBody *physB) { /* Method to Override */ };
+	virtual void BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB) { /* Method to Override */ };
+
+	bool bDestroyPBody = false;
+	bool bExploding = false;
+	int currentFrame = 0;
+	int animTimer = 0;
+	int flipValue = 0;
+	float degree = 0.0f;
 	iPoint position = {0,0};
+	SDL_Point rotationCenter = {0,0};
 	iPoint animOffset = {0,0};
 	std::vector<SDL_Texture *>animation;
 	b2Vec2 direction = {0,0};

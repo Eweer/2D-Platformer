@@ -10,6 +10,7 @@
 #include <string>
 #include <unordered_map>
 #include <regex>
+#include <list>
 
 Player::Player()
 {
@@ -135,6 +136,14 @@ bool Player::Update()
 		projectiles.push_back(std::move(projPtr));
 	}
 
+	
+	for(auto it = projectiles.begin(); it < projectiles.end(); ++it)
+	{
+		if(!it->get()) continue;
+		if(it->get()->Update()) continue;
+		projectiles.erase(it);
+	}
+	
 	b2Vec2 vel = pBody->body->GetLinearVelocity();
 	b2Vec2 impulse = b2Vec2_zero;
 	float maxVel = 5.0f;
@@ -191,11 +200,6 @@ bool Player::Update()
 
 	SDL_Rect camera = app->render->GetCamera();
 
-	for(auto const &elem : projectiles)
-	{
-		elem->Update();
-	}
-	
 	if(moveCamera && camera.x <= 0 && position.x >= startingPosition.x)
 	{
 		if(abs(camera.x) + cameraXCorrection <= app->map->GetWidth() * app->map->GetTileWidth())
