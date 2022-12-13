@@ -65,6 +65,7 @@ bool Player::LoadProjectileData()
 			}
 		);
 	}
+
 	using enum CL::ColliderLayers;
 	CL::ColliderLayers maskAux = (ENEMIES | PLATFORMS);
 	ProjectileData projAux(
@@ -77,8 +78,9 @@ bool Player::LoadProjectileData()
 		iPoint(
 			elem.attribute("width").as_int(),
 			elem.attribute("height").as_int()
-		), 
-		maskAux
+		),
+		maskAux,
+		elem.attribute("speed").as_int()
 	);
 
 	std::string pName = elem.attribute("name").as_string();
@@ -128,8 +130,7 @@ bool Player::Update()
 		auto projPtr = std::make_unique<Projectile>(
 			texture->GetAnim("fire"),
 			position,
-			projectileMap["fire"],
-			250
+			projectileMap["fire"]
 		);
 		projectiles.push_back(std::move(projPtr));
 	}

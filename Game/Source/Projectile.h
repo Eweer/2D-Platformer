@@ -13,16 +13,18 @@ class ProjectileData
 {
 public:
 	ProjectileData() = default;
-	explicit ProjectileData(std::string const &s, std::vector<b2Vec2> const &p, iPoint pos, iPoint wh, CL::ColliderLayers cl)
-		: shape(ShapeData(s, p)), position(pos), width_height(wh), bitmask(cl)
+	explicit ProjectileData(std::string const &s, std::vector<b2Vec2> const &p, iPoint pos, iPoint wh, CL::ColliderLayers cl, int sp)
+		: shape(ShapeData(s, p)), position(pos), width_height(wh), bitmask(cl), speed(sp)
 	{
 	};
 	ProjectileData(const ProjectileData &other) = default;
 	ProjectileData &operator=(const ProjectileData &other)
 	{
-		shape.Create("polygon", other.shape.data);
+		shape.Create(other.shape.data);
 		position = other.position;
 		width_height = other.width_height;
+		bitmask = other.bitmask;
+		speed = other.speed;
 		return *this;
 	}
 	~ProjectileData() = default;
@@ -30,19 +32,16 @@ public:
 	ShapeData shape;
 	iPoint position = {0,0};
 	iPoint width_height = {0,0};
-	CL::ColliderLayers bitmask;
+	CL::ColliderLayers bitmask = CL::ColliderLayers::UNKNOWN;
+	int speed = 0;
 };
 
 class Projectile
 {
 public:
 	Projectile() = default;
-	explicit Projectile(
-		std::vector<SDL_Texture *> const &anim,
-		iPoint origin,
-		ProjectileData &info,
-		int speed
-	) {
+	explicit Projectile(std::vector<SDL_Texture *> const &anim, iPoint origin, ProjectileData &info)
+	{
 		if(anim.empty())
 		{
 			LOG("Projectile could not be created. Anim not found.");
@@ -84,7 +83,7 @@ public:
 		
 		direction = PIXEL_TO_METERS(app->input->GetMousePosition() - origin);
 		direction.Normalize();
-		auto s = PIXEL_TO_METERS(speed);
+		auto s = PIXEL_TO_METERS(info.speed);
 		pBody->body->SetLinearVelocity({direction.x * s, direction.y * s});
 	}
 	Projectile(const Projectile &) = default;
