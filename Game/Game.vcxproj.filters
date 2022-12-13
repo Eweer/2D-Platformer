@@ -144,6 +144,9 @@
     <ClInclude Include="Source\AdjacencyList.h">
       <Filter>Utils</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Projectile.h">
+      <Filter>Source\Entities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="External">

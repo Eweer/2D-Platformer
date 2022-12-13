@@ -54,7 +54,8 @@ public:
 		const bool flip = false,
 		SDL_Point pivot = SDL_Point(INT_MAX, INT_MAX),
 		const iPoint offset = iPoint(INT_MAX, INT_MAX),
-		const double angle = 0
+		const double angle = 0,
+		int flipValue = 0
 	) const;
 
 	bool DrawRectangle(

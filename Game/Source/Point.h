@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <compare>
+#include <numbers>
 
 template<class T>
 class Point
@@ -39,6 +40,11 @@ public:
 		r.y = y + v.y;
 
 		return r;
+	}
+
+	Point operator +(int const &a) const
+	{
+		return {x + a, y + a};
 	}
 
 	Point operator *(T i)
@@ -109,6 +115,12 @@ public:
 	T DistanceManhattan(const Point& v) const
 	{
 		return abs(v.x - x) + abs(v.y - y);
+	}
+
+	float Degree(const Point &v) const
+	{
+		//Radiants
+		return std::atan(static_cast<float>(v.y-y)/static_cast<float>(v.x-x)) * 360.0f/std::numbers::pi_v<float>;
 	}
 };
 

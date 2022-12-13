@@ -373,7 +373,7 @@ uint16 Character::SetMaskFlag(std::string_view name, pugi::xml_node const &colli
 	{
 		using enum CL::ColliderLayers;
 		if(StrEquals(colliderGroupNode.attribute("name").as_string(), "CharacterSensor"))
-			maskFlag = static_cast<uint16>(ENEMIES | TRIGGERS | CHECKPOINTS);
+			maskFlag = static_cast<uint16>(ENEMIES | TRIGGERS | CHECKPOINTS | BULLET);
 		else if(StrEquals(colliderGroupNode.attribute("name").as_string(), "Terrain"))
 			maskFlag = static_cast<uint16>(ENEMIES | PLATFORMS | ITEMS);
 	}
@@ -381,7 +381,7 @@ uint16 Character::SetMaskFlag(std::string_view name, pugi::xml_node const &colli
 	{
 		using enum CL::ColliderLayers;
 		if(StrEquals(colliderGroupNode.attribute("name").as_string(), "CharacterSensor"))
-			maskFlag = static_cast<uint16>(TRIGGERS | PLAYER);
+			maskFlag = static_cast<uint16>(TRIGGERS | PLAYER | BULLET);
 		else if(StrEquals(colliderGroupNode.attribute("name").as_string(), "Terrain"))
 			maskFlag = static_cast<uint16>(PLATFORMS | PLAYER);
 	}

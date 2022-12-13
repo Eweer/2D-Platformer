@@ -283,6 +283,13 @@ public:
 		};
 	}
 
+	std::vector<SDL_Texture *>GetAnim(std::string_view anim)
+	{
+		if(auto it = frames.find(anim); it != frames.end())
+			return it->second;
+		return std::vector<SDL_Texture *>();
+	}
+
 private:
 	float FunctionCooldown = 1.1f;
 	float TimeSinceLastFunctionCall = 0;

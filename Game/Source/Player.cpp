@@ -4,8 +4,13 @@
 #include "Input.h"
 #include "Render.h"
 #include "Map.h"
-
+#include "Projectile.h"
 #include "Log.h"
+
+#include <string>
+#include <unordered_map>
+#include <regex>
+#include <list>
 
 Player::Player()
 {
@@ -19,13 +24,79 @@ Player::Player(pugi::xml_node const &itemNode = pugi::xml_node(), int newId) : C
 
 Player::~Player() = default;
 
-bool Player::Awake() 
+bool Player::LoadProjectileData()
 {
-	jump = { 
-		.bJumping = false, 
-		.currentJumps = 0, 
-		.maxJumps = parameters.attribute("maxjumps").as_int(), 
-		.timeSinceLastJump = 0, 
+	auto elem = parameters.child("projectile");
+	std::vector<b2Vec2> tempData;
+	std::string shapeType = elem.attribute("shape").as_string();
+
+	if(StrEquals(shapeType, "chain") || StrEquals(shapeType, "polygon"))
+	{
+		const std::string xyStr = elem.attribute("points").as_string();
+		static const std::regex r(R"((-?\d{1,3})(?:\.\d+)*,(-?\d{1,3})(?:\.\d+)*)");
+		auto xyStrBegin = std::sregex_iterator(xyStr.begin(), xyStr.end(), r);
+		auto xyStrEnd = std::sregex_iterator();
+
+		for(std::sregex_iterator i = xyStrBegin; i != xyStrEnd; ++i)
+		{
+			std::smatch match = *i;
+			tempData.push_back(
+				{
+					PIXEL_TO_METERS(stoi(match[1].str())),
+					PIXEL_TO_METERS(stoi(match[2].str()))
+				}
+			);
+		}
+	}
+	else if(StrEquals(shapeType, "rectangle"))
+	{
+		tempData.push_back(
+			{
+				PIXEL_TO_METERS(elem.attribute("width").as_int()),
+				PIXEL_TO_METERS(elem.attribute("height").as_int())
+			}
+		);
+	}
+	else if(StrEquals(shapeType, "circle"))
+	{
+		tempData.push_back(
+			{
+				elem.attribute("radius").as_float(),
+				0
+			}
+		);
+	}
+
+	using enum CL::ColliderLayers;
+	CL::ColliderLayers maskAux = (ENEMIES | PLATFORMS);
+	ProjectileData projAux(
+		shapeType,
+		tempData,
+		iPoint(
+			elem.attribute("x").as_int(),
+			elem.attribute("y").as_int()
+		),
+		iPoint(
+			elem.attribute("width").as_int(),
+			elem.attribute("height").as_int()
+		),
+		maskAux,
+		elem.attribute("speed").as_int()
+	);
+
+	std::string pName = elem.attribute("name").as_string();
+	projectileMap[pName] = projAux;
+	
+	return true;
+}
+
+bool Player::Awake()
+{
+	jump = {
+		.bJumping = false,
+		.currentJumps = 0,
+		.maxJumps = parameters.attribute("maxjumps").as_int(),
+		.timeSinceLastJump = 0,
 		.jumpImpulse = parameters.attribute("jumpimpulse").as_float(),
 		.bInAir = false
 	};
@@ -35,6 +106,7 @@ bool Player::Awake()
 		parameters.attribute("y").as_int()
 	};
 
+	LoadProjectileData();
 
 	return true;
 }
@@ -53,6 +125,25 @@ bool Player::Update()
 		jump.timeSinceLastJump++;
 	}
 
+	if(app->input->GetMouseButtonDown(1) == KEY_DOWN)
+	{
+		using enum CL::ColliderLayers;
+		auto projPtr = std::make_unique<Projectile>(
+			texture->GetAnim("fire"),
+			position,
+			projectileMap["fire"]
+		);
+		projectiles.push_back(std::move(projPtr));
+	}
+
+	
+	for(auto it = projectiles.begin(); it < projectiles.end(); ++it)
+	{
+		if(!it->get()) continue;
+		if(it->get()->Update()) continue;
+		projectiles.erase(it);
+	}
+	
 	b2Vec2 vel = pBody->body->GetLinearVelocity();
 	b2Vec2 impulse = b2Vec2_zero;
 	float maxVel = 5.0f;
@@ -108,7 +199,7 @@ bool Player::Update()
 	);
 
 	SDL_Rect camera = app->render->GetCamera();
-	
+
 	if(moveCamera && camera.x <= 0 && position.x >= startingPosition.x)
 	{
 		if(abs(camera.x) + cameraXCorrection <= app->map->GetWidth() * app->map->GetTileWidth())

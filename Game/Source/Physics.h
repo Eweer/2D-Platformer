@@ -82,6 +82,8 @@ constexpr b2Vec2 PIXEL_TO_METERS(T p)
 constexpr auto DEGTORAD = 0.0174532925199432957f;
 constexpr auto RADTODEG = 57.295779513082320876f;
 
+class Projectile;
+
 // if type = "circle" -> data[0] = radius
 // if type = "edge" -> data[0] = point1, data[1] = point2
 // if type = "rectangle" -> data[0] = width, data[1] = height
@@ -97,32 +99,10 @@ public:
 	{
 		this->Create(type, newData);
 	}
-	explicit ShapeData(b2Shape const *newShape, std::vector<b2Vec2> const &newData = std::vector<b2Vec2>()) : data(newData)
-	{
-		if (!newShape) LOG("Error in creating Shape (ShapeData). Shape constructor is nullptr");
-		else
-		{
-			switch (newShape->GetType())
-			{
-				case b2Shape::Type::e_circle:
-					shape = std::make_unique<b2CircleShape>();
-					break;
-				case b2Shape::Type::e_edge:
-					shape = std::make_unique<b2EdgeShape>();
-					break;
-				case b2Shape::Type::e_polygon:
-					shape = std::make_unique<b2PolygonShape>();
-					break;
-				case b2Shape::Type::e_chain:
-					shape = std::make_unique<b2ChainShape>();
-					break;
-				default:
-					break;
-			}
-		}
-	}
 	explicit ShapeData(ShapeData &&other) noexcept : shape(std::move(other.shape)), data(std::move(other.data))
 	{};
+	explicit ShapeData(const ShapeData &other) : shape(other.shape.get()), data(other.data) {};
+	ShapeData &operator=(const ShapeData &) = default;
 	~ShapeData() = default;
 	
 	void Create(std::string const &type, std::vector<b2Vec2> const &newData = std::vector<b2Vec2>()) 
@@ -140,6 +120,14 @@ public:
 		else if (StrEquals(name, "polygon"))	shape = std::make_unique<b2PolygonShape>();
 		else if (StrEquals(name, "chain"))		shape = std::make_unique<b2ChainShape>();
 		else LOG("Error in creating Shape (ShapeData). No shape with name %s exists", name);
+	}
+	
+	void Create(std::vector<b2Vec2> const &newData)
+	{
+		data = newData;
+		if(data.size() > b2_maxPolygonVertices) shape = std::make_unique<b2ChainShape>();
+		else if(data.size() > 1) shape = std::make_unique<b2PolygonShape>();
+		else shape = std::make_unique<b2CircleShape>();
 	}
 
 	b2Shape *CreateShape(b2Vec2 fixPos = b2Vec2(0,0))
@@ -240,6 +228,7 @@ public:
 	int height = 0;
 	b2Body *body = nullptr;
 	Entity *listener = nullptr;
+	Projectile *pListener = nullptr;
 	CL::ColliderLayers ctype = CL::ColliderLayers::UNKNOWN;
 	std::vector<std::unique_ptr<b2FixtureDef>> fixtures;
 	std::vector<iPoint> offsets;
@@ -316,6 +305,8 @@ public:
 		bool sensor = false
 	);
 
+	std::unique_ptr<PhysBody> CreateQuickProjectile(iPoint position, CL::ColliderLayers mask, float degree);
+
 	//---------------- Joints
 
 	//---- Mouse
@@ -370,4 +361,4 @@ private:
 	std::unordered_map<b2Body *, std::unordered_set<b2Body *>> collisionMap;
 };
 
-#endif
+#endif // __PHYSICS_H__

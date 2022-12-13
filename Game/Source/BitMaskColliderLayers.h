@@ -13,6 +13,7 @@ namespace CL
 		ITEMS = 0x0008,
 		TRIGGERS = 0x0010,
 		CHECKPOINTS = 0x0020,
+		BULLET = 0x0040,
 		UNKNOWN = 0x8000
 	};
 

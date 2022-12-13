@@ -2,6 +2,9 @@
 #define __PLAYER_H__
 
 #include "Character.h"
+#include "Projectile.h"
+#include <deque>
+#include <vector>
 
 class Player : public Character
 {
@@ -18,6 +21,8 @@ public:
 	void BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB) final;
 
 private:
+	bool LoadProjectileData();
+
 	CharacterJump jump;
 	uint cameraXCorrection = 0;
 	uint cameraYCorrection  = 0;
@@ -26,6 +31,9 @@ private:
 	b2Vec2 velocityToKeep = {0.0f, 0.0f};
 
 	std::string playerCharacter;
+
+	std::unordered_map<std::string, ProjectileData, StringHash, std::equal_to<>> projectileMap;
+	std::vector<std::unique_ptr<Projectile>> projectiles;
 
 	friend class UI;
 };

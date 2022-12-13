@@ -185,7 +185,7 @@ void Render::ResetViewPort() const
 	SDL_RenderSetViewport(renderer.get(), &viewport);
 }
 
-bool Render::DrawCharacterTexture(SDL_Texture *texture, iPoint const &pos, const bool flip, SDL_Point pivot, const iPoint offset, const double angle) const
+bool Render::DrawCharacterTexture(SDL_Texture *texture, iPoint const &pos, const bool flip, SDL_Point pivot, const iPoint offset, const double angle, int flipValue) const
 {
 	SDL_Rect rect{0};
 
@@ -213,7 +213,7 @@ bool Render::DrawCharacterTexture(SDL_Texture *texture, iPoint const &pos, const
 		p = &sdlPivot;
 	}
 		
-	if(SDL_RenderCopyEx(renderer.get(), texture, nullptr, &rect, angle, p, (SDL_RendererFlip)flip) == -1)
+	if(SDL_RenderCopyEx(renderer.get(), texture, nullptr, &rect, angle, p, (SDL_RendererFlip)(flip + flipValue)) == -1)
 	{
 		LOG("Cannot blit to screen. SDL_RenderCopy error: %s", SDL_GetError());
 		return false;

@@ -180,7 +180,9 @@ void Physics::BeginContact(b2Contact *contact)
 			auto fB = contact->GetFixtureB();
 
 			if(pBodyA->listener) pBodyA->listener->BeforeCollisionStart(fA, fB, pBodyA, pBodyB);
+			else if(pBodyA->pListener) pBodyA->pListener->BeforeCollisionStart(fA, fB, pBodyA, pBodyB);
 			if(pBodyB->listener) pBodyB->listener->BeforeCollisionStart(fB, fA, pBodyB, pBodyA);
+			else if(pBodyB->pListener) pBodyB->pListener->BeforeCollisionStart(fB, fA, pBodyB, pBodyA);
 		}
 		else contact->SetEnabled(false);
 	}
@@ -220,6 +222,7 @@ void Physics::EndContact(b2Contact *contact)
 			i->second.erase(pBodyB->body);
 			if(collisionMap.at(pBodyA->body).empty()) collisionMap.erase(i);
 			if(pBodyA->listener) pBodyA->listener->OnCollisionEnd(pBodyA, pBodyB);
+			else if(pBodyA->pListener) pBodyA->pListener->OnCollisionEnd(pBodyA, pBodyB);
 		}
 		
 		if(auto i = collisionMap.find(pBodyB->body); i != collisionMap.end())
@@ -227,6 +230,7 @@ void Physics::EndContact(b2Contact *contact)
 			i->second.erase(pBodyA->body);
 			if(collisionMap.at(pBodyB->body).empty()) collisionMap.erase(i);
 			if(pBodyB->listener) pBodyB->listener->OnCollisionEnd(pBodyB, pBodyA);
+			else if(pBodyB->pListener) pBodyB->pListener->OnCollisionEnd(pBodyB, pBodyA);
 		}
 	}
 }
@@ -245,7 +249,9 @@ void Physics::PreSolve(b2Contact *contact, const b2Manifold *oldManifold)
 		auto fB = contact->GetFixtureB();
 
 		if(pBodyA->listener) pBodyA->listener->OnCollisionStart(fA, fB,pBodyA, pBodyB);
+		else if(pBodyA->pListener) pBodyA->pListener->OnCollisionStart(fA, fB, pBodyA, pBodyB);
 		if(pBodyB->listener) pBodyB->listener->OnCollisionStart(fB, fA, pBodyB, pBodyA);
+		else if(pBodyB->pListener) pBodyB->pListener->OnCollisionStart(fB, fA, pBodyB, pBodyA);
 	}
 	/*
 	auto bodyA = contact->GetFixtureA()->GetBody();
@@ -338,11 +344,12 @@ std::unique_ptr<PhysBody> Physics::CreatePhysBody(b2Body *body, iPoint width_hei
 
 std::unique_ptr<PhysBody> Physics::CreateQuickPlatform(ShapeData &shapeData, iPoint pos, iPoint width_height)
 {
+	using enum CL::ColliderLayers;
 	auto body = CreateBody(pos);
-	auto maskFlag =  static_cast<uint16>(CL::ColliderLayers::PLAYER | CL::ColliderLayers::ENEMIES);
+	auto maskFlag =  static_cast<uint16>(PLAYER | ENEMIES | BULLET | ITEMS);
 	auto fixtureDef = CreateFixtureDef(shapeData, 0x0001, maskFlag);
 	body->CreateFixture(fixtureDef.get());
-	return CreatePhysBody(body, width_height, CL::ColliderLayers::PLATFORMS);
+	return CreatePhysBody(body, width_height, PLATFORMS);
 }
 
 std::unique_ptr<PhysBody> Physics::CreateQuickPhysBody(iPoint position, BodyType bodyType, ShapeData shapeData, uint16 cat, uint16 mask, iPoint width_height, bool sensor)
@@ -353,6 +360,18 @@ std::unique_ptr<PhysBody> Physics::CreateQuickPhysBody(iPoint position, BodyType
 	return CreatePhysBody(body, width_height, static_cast<CL::ColliderLayers>(cat));
 }
 
+std::unique_ptr<PhysBody> Physics::CreateQuickProjectile(iPoint position, CL::ColliderLayers mask, float degree)
+{
+	using enum CL::ColliderLayers;
+	auto body = CreateBody(position + iPoint(30, 8), BodyType::DYNAMIC, degree +90);
+	body->SetGravityScale(0);
+	body->SetBullet(true);
+	auto catFlag = static_cast<uint16>(PLAYER | ENEMIES);
+	ShapeData s("Rectangle", std::vector<b2Vec2>({PIXEL_TO_METERS(iPoint(position.x, position.y))}));
+	auto fixtureDef = CreateFixtureDef(s, catFlag, static_cast<uint16>(mask));
+	body->CreateFixture(fixtureDef.get());
+	return CreatePhysBody(body, iPoint(30, 8), PLAYER);
+}
 
 //--------------- Joints
 

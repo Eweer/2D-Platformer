@@ -1,6 +1,7 @@
 #include "Enemy.h"
 #include "App.h"
-
+#include "Projectile.h"
+#include "BitMaskColliderLayers.h"
 #include "PugiXml/src/pugixml.hpp"
 #include <string>
 
@@ -24,4 +25,13 @@ bool Enemy::Awake()
 	};
 
 	return true;
+}
+void Enemy::OnCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB)
+{
+	using enum CL::ColliderLayers;
+	if(((pBodyB->ctype & BULLET) == BULLET) && (pBodyB->pListener->source == PLAYER))
+	{
+		hp -= 1;
+		if(hp <= 0) Disable();
+	}
 }
