@@ -51,9 +51,10 @@ private:
 	bool bIdle = false;
 	bool bAttack1 = false;
 	bool bLockAnim = false;
-	bool bAttackQueue = false;
 	bool bAbleToMove = true;
 
+	bool bAttackQueue = false;
+	b2Vec2 attackDir = {0, 0};
 	friend class UI;
 };
 

@@ -22,7 +22,7 @@
 	<scene assetpath="Assets/" texturepath="Assets/Animations/" audiopath="Assets/Audio/" fxfolder="Fx/" musicfolder="Music/">
 		<player name="Player" class="Mage" x="44" y="427" maxjumps="2" jumpimpulse="5">
 			<projectile name="fire" speed="250" shape="polygon" x ="1" y="21" width="30" height="8" points="0,3 8,0 26,0 28,3 28,5 26,8 8,8 0,5"/>
-			<projectile name="fire_Extra" speed="250" shape="polygon" x="45" y="54" width="42" height="31" points="0,0 5,0 24,8 24,30 8,39 -1,39 8,30 8,10"/>
+			<projectile name="fire_Extra" speed="250" shape="polygon"  x="0" y="0" width="20" height="32" points="6,0 19,10 19,22 10,32 0,32 8,23 8,9 0,0"/>
 			<physics bodytype="dynamic" gravityscale="1" restitution="0" friction="1" colliderlayers="2" />
 			<animationdata>
 				<properties width="128" height="128" pivotx="42" pivoty="85" animstyle="4" animloop="true" />

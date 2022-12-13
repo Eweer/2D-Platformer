@@ -225,38 +225,40 @@
   <image width="32" height="32" source="../../Animations/Player/Mage/Fire/fire9.png"/>
  </tile>
  <tile id="22">
-  <image width="128" height="128" source="../../Animations/Player/Mage/Fire_Extra/fire_extra1.png"/>
+  <image width="32" height="32" source="../../Animations/Player/Mage/Fire_Extra/fire_extra1.png"/>
   <objectgroup draworder="index" id="2">
-   <object id="2" x="45" y="54">
-    <polygon points="0,0 5,0 24,8 24,30 8,39 -1,39 8,30 8,10"/>
-   </object>
-   <object id="3" x="51" y="72" width="4" height="4">
-    <ellipse/>
+   <object id="1" x="0" y="0" width="20" height="32">
+    <polygon points="6,0 19,10 19,22 10,32 0,32 8,23 8,9 0,0"/>
    </object>
   </objectgroup>
+  <animation>
+   <frame tileid="22" duration="170"/>
+   <frame tileid="23" duration="170"/>
+   <frame tileid="24" duration="170"/>
+  </animation>
  </tile>
  <tile id="23">
-  <image width="128" height="128" source="../../Animations/Player/Mage/Fire_Extra/fire_extra2.png"/>
+  <image width="32" height="32" source="../../Animations/Player/Mage/Fire_Extra/fire_extra2.png"/>
  </tile>
  <tile id="24">
-  <image width="128" height="128" source="../../Animations/Player/Mage/Fire_Extra/fire_extra3.png"/>
+  <image width="32" height="32" source="../../Animations/Player/Mage/Fire_Extra/fire_extra3.png"/>
  </tile>
  <tile id="25">
-  <image width="128" height="128" source="../../Animations/Player/Mage/Fire_Extra/fire_extra4.png"/>
+  <image width="32" height="32" source="../../Animations/Player/Mage/Fire_Extra/fire_extra4.png"/>
  </tile>
  <tile id="26">
-  <image width="128" height="128" source="../../Animations/Player/Mage/Fire_Extra/fire_extra5.png"/>
+  <image width="32" height="32" source="../../Animations/Player/Mage/Fire_Extra/fire_extra5.png"/>
  </tile>
  <tile id="27">
-  <image width="128" height="128" source="../../Animations/Player/Mage/Fire_Extra/fire_extra6.png"/>
+  <image width="32" height="32" source="../../Animations/Player/Mage/Fire_Extra/fire_extra6.png"/>
  </tile>
  <tile id="28">
-  <image width="128" height="128" source="../../Animations/Player/Mage/Fire_Extra/fire_extra7.png"/>
+  <image width="32" height="32" source="../../Animations/Player/Mage/Fire_Extra/fire_extra7.png"/>
  </tile>
  <tile id="29">
-  <image width="128" height="128" source="../../Animations/Player/Mage/Fire_Extra/fire_extra8.png"/>
+  <image width="32" height="32" source="../../Animations/Player/Mage/Fire_Extra/fire_extra8.png"/>
  </tile>
  <tile id="30">
-  <image width="128" height="128" source="../../Animations/Player/Mage/Fire_Extra/fire_extra9.png"/>
+  <image width="32" height="32" source="../../Animations/Player/Mage/Fire_Extra/fire_extra9.png"/>
  </tile>
 </tileset>

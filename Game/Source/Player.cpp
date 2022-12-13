@@ -160,7 +160,6 @@ bool Player::Update()
 		pBody->body->SetLinearVelocity(b2Vec2(velocityToKeep.x, 0));
 		bKeepMomentum = false;
 	}
-
 	
 	// Set movement variables
 	b2Vec2 vel = pBody->body->GetLinearVelocity();
@@ -205,7 +204,8 @@ bool Player::Update()
 				projPtr = std::make_unique<Projectile>(
 					texture->GetAnim("fire"),
 					iPoint(position.x + 30, position.y),
-					projectileMap["fire"]
+					projectileMap["fire"],
+					attackDir
 				);
 			}
 			else if(bAttack2)
@@ -214,7 +214,8 @@ bool Player::Update()
 				projPtr = std::make_unique<Projectile>(
 					texture->GetAnim("fire_Extra"),
 					iPoint(position.x + 30, position.y),
-					projectileMap["fire_Extra"]
+					projectileMap["fire_Extra"],
+					attackDir
 				);
 			}
 			projectiles.push_back(std::move(projPtr));
@@ -268,7 +269,7 @@ bool Player::Update()
 		{
 			// If it's idle, player can't move during the lock.
 			if(impulse.x == 0) bAbleToMove = false;
-
+			attackDir = PIXEL_TO_METERS(app->input->GetMousePosition() - position);
 			bAttack1 = true;
 			bAttackQueue = true;
 			if(pBody->body->GetPosition().x > PIXEL_TO_METERS(app->input->GetMousePosition().x))
@@ -283,7 +284,7 @@ bool Player::Update()
 			// Stop all momentum, player can't move during lock
 			impulse.x = 0;
 			bAbleToMove = false;
-
+			attackDir = PIXEL_TO_METERS(app->input->GetMousePosition() - position);
 			bAttack2 = true;
 			bAttackQueue = true;
 			if(pBody->body->GetPosition().x > PIXEL_TO_METERS(app->input->GetMousePosition().x))

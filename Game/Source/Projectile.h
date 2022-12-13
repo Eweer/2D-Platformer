@@ -43,30 +43,34 @@ class Projectile
 {
 public:
 	Projectile() = default;
-	explicit Projectile(std::vector<SDL_Texture *> const &anim, iPoint origin, ProjectileData &info)
+	explicit Projectile(std::vector<SDL_Texture *> const &anim, iPoint origin, ProjectileData &info, b2Vec2 dir)
 	{
 		if(anim.empty())
 		{
 			LOG("Projectile could not be created. Anim not found.");
 			return;
 		}
+		
 		animation = anim;
 		position = origin;
 
-
-		direction = PIXEL_TO_METERS(app->input->GetMousePosition() - origin);
+		direction = dir;
 		direction.Normalize();
-
-		flipValue = (direction.x < 0) ? 2 : 0;
 
 		animOffset = info.position;
 
 		uint tw = 0;
 		uint th = 0;
 		app->tex->GetSize(anim[0], tw, th);
-
+		
+		flipValue = (direction.x < 0) ? 2 : 0;
 		rotationCenter.x = info.position.x;
 		rotationCenter.y = to_bool(flipValue) ? th - info.position.y : info.position.y;
+		if(info.position.y == 0 && flipValue == 2)
+		{
+			rotationCenter.y = 0;
+			origin.y += th;
+		}
 
 		degree = atan2f(direction.y, direction.x) * 180.0f/std::numbers::pi_v<float>;
 
