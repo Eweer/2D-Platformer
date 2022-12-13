@@ -106,6 +106,7 @@ void Character::AddTexturesAndAnimationFrames()
 
 			//if it's the first frame we set the action animation parameters 
 			// (or default them in case they don't exist)
+			texture->SetCurrentAnimation(action);
 			SetAnimationParameters(animDataNode, action);
 
 			free(nameList[nAnimationContents]);
@@ -287,6 +288,14 @@ void Character::CreatePhysBody()
 
 bool Character::Update()
 {
+	if(iFrames > 0)
+	{
+		iFrames++;
+		if(iFrames >= 60)
+		{
+			iFrames = 0;
+		}
+	}
 	//Update Character position in pixels
 	position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x);
 	position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y);
@@ -305,7 +314,7 @@ bool Character::Update()
 bool Character::Pause() const
 {
 	return app->render->DrawCharacterTexture(
-		texture->GetCurrentFrame(),
+		texture->GetCurrentTexture(),
 		iPoint(position.x - colliderOffset.x, position.y - colliderOffset.y),
 		(bool)dir,
 		texture->GetFlipPivot()

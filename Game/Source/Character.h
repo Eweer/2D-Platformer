@@ -7,12 +7,10 @@
 
 struct CharacterJump
 {
-	bool bJumping = false;
+	bool bOnAir = false;
 	int currentJumps = 0;
 	int maxJumps = 0;
-	int timeSinceLastJump = 0;
 	float jumpImpulse = 0.0f;
-	bool bInAir = false;
 };
 
 class Character : public Entity
@@ -41,8 +39,9 @@ public:
 	void BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB) override;
 
 	uint hp = 3;
-	int dir = 1;
+	int dir = 0;
 	SDL_Point textureOffset = {0,0};
+	int iFrames = 0;
 
 private:
 	//---- Utils

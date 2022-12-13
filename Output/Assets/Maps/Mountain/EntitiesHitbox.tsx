@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.9" tiledversion="1.9.2" name="EntitiesHitbox" class="Characters" tilewidth="128" tileheight="128" tilecount="21" columns="0" objectalignment="topleft">
+<tileset version="1.9" tiledversion="1.9.2" name="EntitiesHitbox" class="Characters" tilewidth="128" tileheight="128" tilecount="30" columns="0" objectalignment="topleft">
  <grid orientation="orthogonal" width="1" height="1"/>
  <properties>
   <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="2"/>
@@ -223,5 +223,40 @@
  </tile>
  <tile id="21">
   <image width="32" height="32" source="../../Animations/Player/Mage/Fire/fire9.png"/>
+ </tile>
+ <tile id="22">
+  <image width="128" height="128" source="../../Animations/Player/Mage/Fire_Extra/fire_extra1.png"/>
+  <objectgroup draworder="index" id="2">
+   <object id="2" x="45" y="54">
+    <polygon points="0,0 5,0 24,8 24,30 8,39 -1,39 8,30 8,10"/>
+   </object>
+   <object id="3" x="51" y="72" width="4" height="4">
+    <ellipse/>
+   </object>
+  </objectgroup>
+ </tile>
+ <tile id="23">
+  <image width="128" height="128" source="../../Animations/Player/Mage/Fire_Extra/fire_extra2.png"/>
+ </tile>
+ <tile id="24">
+  <image width="128" height="128" source="../../Animations/Player/Mage/Fire_Extra/fire_extra3.png"/>
+ </tile>
+ <tile id="25">
+  <image width="128" height="128" source="../../Animations/Player/Mage/Fire_Extra/fire_extra4.png"/>
+ </tile>
+ <tile id="26">
+  <image width="128" height="128" source="../../Animations/Player/Mage/Fire_Extra/fire_extra5.png"/>
+ </tile>
+ <tile id="27">
+  <image width="128" height="128" source="../../Animations/Player/Mage/Fire_Extra/fire_extra6.png"/>
+ </tile>
+ <tile id="28">
+  <image width="128" height="128" source="../../Animations/Player/Mage/Fire_Extra/fire_extra7.png"/>
+ </tile>
+ <tile id="29">
+  <image width="128" height="128" source="../../Animations/Player/Mage/Fire_Extra/fire_extra8.png"/>
+ </tile>
+ <tile id="30">
+  <image width="128" height="128" source="../../Animations/Player/Mage/Fire_Extra/fire_extra9.png"/>
  </tile>
 </tileset>

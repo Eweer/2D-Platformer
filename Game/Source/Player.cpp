@@ -26,79 +26,78 @@ Player::~Player() = default;
 
 bool Player::LoadProjectileData()
 {
-	auto elem = parameters.child("projectile");
-	std::vector<b2Vec2> tempData;
-	std::string shapeType = elem.attribute("shape").as_string();
-
-	if(StrEquals(shapeType, "chain") || StrEquals(shapeType, "polygon"))
+	for(auto const &elem : parameters.children("projectile"))
 	{
-		const std::string xyStr = elem.attribute("points").as_string();
-		static const std::regex r(R"((-?\d{1,3})(?:\.\d+)*,(-?\d{1,3})(?:\.\d+)*)");
-		auto xyStrBegin = std::sregex_iterator(xyStr.begin(), xyStr.end(), r);
-		auto xyStrEnd = std::sregex_iterator();
+		std::vector<b2Vec2> tempData;
+		std::string shapeType = elem.attribute("shape").as_string();
 
-		for(std::sregex_iterator i = xyStrBegin; i != xyStrEnd; ++i)
+		if(StrEquals(shapeType, "chain") || StrEquals(shapeType, "polygon"))
 		{
-			std::smatch match = *i;
+			const std::string xyStr = elem.attribute("points").as_string();
+			static const std::regex r(R"((-?\d{1,3})(?:\.\d+)*,(-?\d{1,3})(?:\.\d+)*)");
+			auto xyStrBegin = std::sregex_iterator(xyStr.begin(), xyStr.end(), r);
+			auto xyStrEnd = std::sregex_iterator();
+
+			for(std::sregex_iterator i = xyStrBegin; i != xyStrEnd; ++i)
+			{
+				std::smatch match = *i;
+				tempData.push_back(
+					{
+						PIXEL_TO_METERS(stoi(match[1].str())),
+						PIXEL_TO_METERS(stoi(match[2].str()))
+					}
+				);
+			}
+		}
+		else if(StrEquals(shapeType, "rectangle"))
+		{
 			tempData.push_back(
 				{
-					PIXEL_TO_METERS(stoi(match[1].str())),
-					PIXEL_TO_METERS(stoi(match[2].str()))
+					PIXEL_TO_METERS(elem.attribute("width").as_int()),
+					PIXEL_TO_METERS(elem.attribute("height").as_int())
 				}
 			);
 		}
-	}
-	else if(StrEquals(shapeType, "rectangle"))
-	{
-		tempData.push_back(
-			{
-				PIXEL_TO_METERS(elem.attribute("width").as_int()),
-				PIXEL_TO_METERS(elem.attribute("height").as_int())
-			}
-		);
-	}
-	else if(StrEquals(shapeType, "circle"))
-	{
-		tempData.push_back(
-			{
-				elem.attribute("radius").as_float(),
-				0
-			}
-		);
-	}
+		else if(StrEquals(shapeType, "circle"))
+		{
+			tempData.push_back(
+				{
+					elem.attribute("radius").as_float(),
+					0
+				}
+			);
+		}
 
-	using enum CL::ColliderLayers;
-	CL::ColliderLayers maskAux = (ENEMIES | PLATFORMS);
-	ProjectileData projAux(
-		shapeType,
-		tempData,
-		iPoint(
-			elem.attribute("x").as_int(),
-			elem.attribute("y").as_int()
-		),
-		iPoint(
-			elem.attribute("width").as_int(),
-			elem.attribute("height").as_int()
-		),
-		maskAux,
-		elem.attribute("speed").as_int()
-	);
+		using enum CL::ColliderLayers;
+		CL::ColliderLayers maskAux = (ENEMIES | PLATFORMS);
+		ProjectileData projAux(
+			shapeType,
+			tempData,
+			iPoint(
+				elem.attribute("x").as_int(),
+				elem.attribute("y").as_int()
+			),
+			iPoint(
+				elem.attribute("width").as_int(),
+				elem.attribute("height").as_int()
+			),
+			maskAux,
+			elem.attribute("speed").as_int()
+		);
 
-	std::string pName = elem.attribute("name").as_string();
-	projectileMap[pName] = projAux;
-	
+		std::string pName = elem.attribute("name").as_string();
+		projectileMap[pName] = projAux;
+	}
 	return true;
 }
 
 bool Player::Awake()
 {
 	jump = {
-		.bJumping = false,
+		.bOnAir = true,
 		.currentJumps = 0,
 		.maxJumps = parameters.attribute("maxjumps").as_int(),
-		.timeSinceLastJump = 0,
 		.jumpImpulse = parameters.attribute("jumpimpulse").as_float(),
-		.bInAir = false
 	};
 
 	startingPosition = {
@@ -111,84 +110,224 @@ bool Player::Awake()
 	return true;
 }
 
-bool Player::Update()
+std::string Player::ChooseAnim()
 {
-	if(bKeepMomentum)
-	{
-		pBody->body->SetLinearVelocity(b2Vec2(velocityToKeep.x, 0));
-		bKeepMomentum = false;
-	}
-	
-	if(jump.bJumping)
-	{
-		if(app->input->GetKey(SDL_SCANCODE_SPACE) == KEY_UP) jump.bJumping = false;
-		jump.timeSinceLastJump++;
-	}
+	if(bAttack1 || bAttack2 || bHighJump || bHurt || bDead)
+		bLockAnim = true;
 
-	if(app->input->GetMouseButtonDown(1) == KEY_DOWN)
+	if(bDead) return "dead";
+	if(bHurt) return "hurt";
+	if(bClimbing) return "climb";
+	if(bPushing) return "push";
+	if(bNormalJump) return "jump";
+	if(bHighJump) return "high_jump";
+	if(bRunning)
 	{
-		using enum CL::ColliderLayers;
-		auto projPtr = std::make_unique<Projectile>(
-			texture->GetAnim("fire"),
-			position,
-			projectileMap["fire"]
-		);
-		projectiles.push_back(std::move(projPtr));
+		if(bAttack1) return "run_Attack";
+		return "run";
 	}
+	if(bWalking)
+	{
+		if(bAttack1)
+			return "walk_Attack";
+		return "walk";
+	}
+	if(bAttack2)
+		return "attack_Extra";
+	if(bAttack1)
+		return "attack";
+	if(bIdle) return "idle";
+	return "unknown";
+}
 
-	
+bool Player::StopProjectiles()
+{
+	// Update Projectiles
 	for(auto it = projectiles.begin(); it < projectiles.end(); ++it)
 	{
 		if(!it->get()) continue;
 		if(it->get()->Update()) continue;
 		projectiles.erase(it);
 	}
+	return true;
+}
+
+bool Player::Update()
+{
+	// If landing
+	if(bKeepMomentum)
+	{
+		pBody->body->SetLinearVelocity(b2Vec2(velocityToKeep.x, 0));
+		bKeepMomentum = false;
+	}
+
 	
+	// Set movement variables
 	b2Vec2 vel = pBody->body->GetLinearVelocity();
-	b2Vec2 impulse = b2Vec2_zero;
-	float maxVel = 5.0f;
+	b2Vec2 impulse = {0, 0};
+	float maxVel = app->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT ? 10.0f : 5.0f;
 	bool moveCamera = false;
 
-	if(app->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN && !jump.bJumping && jump.currentJumps < jump.maxJumps)
+	// If it's able to move
+	if(bAbleToMove)
 	{
-		jump.bJumping = true;
-		jump.timeSinceLastJump = 0;
-		jump.currentJumps++;
-		jump.bInAir = true;
-		impulse.y = jump.jumpImpulse * -1;
+		// Move player if pressing A/D
+		if(app->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
+		{
+			if(vel.y != 0) impulse.x = b2Max(vel.x - 0.15f, maxVel * -1);
+			else impulse.x = b2Max(vel.x - 0.25f, maxVel * -1);
+			moveCamera = true;
+			dir = 1;
+		}
 
-		pBody->body->SetLinearVelocity(b2Vec2(vel.x, 0));
-		pBody->body->ApplyLinearImpulse(b2Vec2(0, impulse.y), pBody->body->GetWorldCenter(), true);
+		if(app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
+		{
+			if(vel.y != 0) impulse.x = b2Min(vel.x + 0.15f, maxVel);
+			else impulse.x = b2Min(vel.x + 0.25f, maxVel);
+			moveCamera = true;
+			dir = 0;
+		}
+		if(impulse.x == 0) impulse.x = vel.x * 0.98f;
 	}
 
-	if(app->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
+	// If it's playing an animation lock
+	if(bLockAnim)
 	{
-		if(vel.y != 0) impulse.x = b2Max(vel.x - 0.15f, maxVel * -1);
-		else impulse.x = b2Max(vel.x - 0.25f, maxVel * -1);
-		moveCamera = true;
-		if(texture->GetCurrentAnimName() != "walk")
-			texture->SetCurrentAnimation("walk");
-		dir = 1;
-	}
-	if(app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
-	{
-		if(vel.y != 0) impulse.x = b2Min(vel.x + 0.15f, maxVel);
-		else impulse.x = b2Min(vel.x + 0.25f, maxVel);
-		moveCamera = true;
-		if(texture->GetCurrentAnimName() != "walk")
-			texture->SetCurrentAnimation("walk");
-		dir = 0;
-	}
-	if(impulse.x == 0) impulse.x = vel.x * 0.98f;
+		// If it's attacking, wait for fifth texture before creating the projectile
+		if(bAttackQueue && texture->GetCurrentFrame() >= 5)
+		{
+			using enum CL::ColliderLayers;
+			bAttackQueue = false;
+			std::unique_ptr<Projectile>projPtr;
+			if(bAttack1)
+			{
+				bAttack1 = false;
+				projPtr = std::make_unique<Projectile>(
+					texture->GetAnim("fire"),
+					iPoint(position.x + 30, position.y),
+					projectileMap["fire"]
+				);
+			}
+			else if(bAttack2)
+			{
+				bAttack2 = false;
+				projPtr = std::make_unique<Projectile>(
+					texture->GetAnim("fire_Extra"),
+					iPoint(position.x + 30, position.y),
+					projectileMap["fire_Extra"]
+				);
+			}
+			projectiles.push_back(std::move(projPtr));
+		}
+		if(bHighJump) bHighJump = false;
+		if(bHurt) bHurt = false;
+		if(bDead) bDead = false;
 
+		// If the texture finished playing, we give the control back to the player
+		if(texture->GetAnimFinished())
+		{
+			bLockAnim = false;
+			bAbleToMove = true;
+		}
+	}
+	else // If it's not animation locked
+	{
+		// Check if player is able and wants to jump
+		if(jump.currentJumps < jump.maxJumps && app->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN)
+		{
+			// Check if it is currently jumping, if it is restart the animation
+			if(bNormalJump) texture->SetCurrentFrame(0);
+			else bNormalJump = true;
+
+			jump.bOnAir = true;
+			jump.currentJumps++;
+			impulse.y = jump.jumpImpulse * -1;
+
+			pBody->body->SetLinearVelocity(b2Vec2(vel.x, 0));
+			pBody->body->ApplyLinearImpulse(b2Vec2(0, impulse.y), pBody->body->GetWorldCenter(), true);
+		}
+
+		// Move camera if player is moving
+		SDL_Rect camera = app->render->GetCamera();
+
+		if(moveCamera && camera.x <= 0 && position.x >= startingPosition.x)
+		{
+			if(abs(camera.x) + cameraXCorrection <= app->map->GetWidth() * app->map->GetTileWidth())
+			{
+				camera.x -= (int)(vel.x * 0.98);
+				if(camera.x > 0) camera.x = 0;
+			}
+			else if(vel.x < 0)
+			{
+				camera.x -= (int)(vel.x * 0.98);
+			}
+		}
+
+		// Left click attack, only able to do it if on the floor
+		if(!jump.bOnAir && app->input->GetMouseButtonDown(SDL_BUTTON_LEFT) == KEY_DOWN)
+		{
+			// If it's idle, player can't move during the lock.
+			if(impulse.x == 0) bAbleToMove = false;
+
+			bAttack1 = true;
+			bAttackQueue = true;
+			if(pBody->body->GetPosition().x > PIXEL_TO_METERS(app->input->GetMousePosition().x))
+				dir = 1;
+			else
+				dir = 0;
+		}
+
+		// Right click attack, only able to do it if on the floor
+		if(!jump.bOnAir && app->input->GetMouseButtonDown(SDL_BUTTON_RIGHT) == KEY_DOWN)
+		{
+			// Stop all momentum, player can't move during lock
+			impulse.x = 0;
+			bAbleToMove = false;
+
+			bAttack2 = true;
+			bAttackQueue = true;
+			if(pBody->body->GetPosition().x > PIXEL_TO_METERS(app->input->GetMousePosition().x))
+				dir = 1;
+			else
+				dir = 0;
+		}		
+	}
+
+	// Set player speed
 	pBody->body->SetLinearVelocity(b2Vec2(impulse.x, pBody->body->GetLinearVelocity().y));
 
-
-	if(app->input->GetKey(SDL_SCANCODE_A) == KEY_IDLE && app->input->GetKey(SDL_SCANCODE_D) == KEY_IDLE && texture->GetCurrentAnimName() != "idle")
+	// Set booleans based on current movement
+	if(pBody->body->GetLinearVelocity().y == 0)
 	{
-		 texture->SetCurrentAnimation("idle");
+		bNormalJump = false;
+		bHighJump = false;
+		bFalling = false;
 	}
-	
+	else if(pBody->body->GetLinearVelocity().y > 0)
+	{
+		bFalling = true;
+	}
+
+	if(pBody->body->GetLinearVelocity().x == 0)
+	{
+		bWalking = false;
+		bRunning = false;
+		bIdle = true;
+	}
+	else
+	{
+		bIdle = false;
+		bWalking = true;
+		if(app->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT)
+			bRunning = true;
+		else
+			bRunning = false;
+	}
+
+	// If it's not locked, we set the texture based on priority
+	if(!bLockAnim) texture->SetCurrentAnimation(ChooseAnim());
+
+	// Set image position and draw character
 	position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x);
 	position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y);
 	app->render->DrawCharacterTexture(
@@ -198,20 +337,6 @@ bool Player::Update()
 		texture->GetFlipPivot()
 	);
 
-	SDL_Rect camera = app->render->GetCamera();
-
-	if(moveCamera && camera.x <= 0 && position.x >= startingPosition.x)
-	{
-		if(abs(camera.x) + cameraXCorrection <= app->map->GetWidth() * app->map->GetTileWidth())
-		{
-			camera.x -= (int)(vel.x * 0.98);
-			if(camera.x > 0) camera.x = 0;
-		}
-		else if(vel.x < 0)
-		{
-			camera.x -= (int)(vel.x * 0.98);
-		}
-	}
 	return true;
 }
 
@@ -226,21 +351,23 @@ void Player::BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, Phys
 		case PLATFORMS:
 		{
 			LOG("Collision PLATFORMS");
- 			if(jump.bInAir
-			   && pBody->ground->ptr == fixtureA
-			   && pBody->body->GetPosition().y < pBodyB->body->GetPosition().y)
+			if(pBody->ground->ptr == fixtureA)
 			{
-				bKeepMomentum = true;
-				velocityToKeep = pBody->body->GetLinearVelocity();
+				bNormalJump = false;
+				bHighJump = false;
+				if(jump.bOnAir)
+				{
+					bKeepMomentum = true;
+					velocityToKeep = pBody->body->GetLinearVelocity();
+				}
 				jump = {
-					.bJumping = false,
+					.bOnAir = false,
 					.currentJumps = 0,
 					.maxJumps = jump.maxJumps,
-					.timeSinceLastJump = 0,
 					.jumpImpulse = jump.jumpImpulse,
-					.bInAir = false
 				};
 			}
+ 			
 			break;
 		}
 		case PLAYER:

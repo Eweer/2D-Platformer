@@ -26,12 +26,18 @@ bool Enemy::Awake()
 
 	return true;
 }
+
 void Enemy::OnCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB)
 {
 	using enum CL::ColliderLayers;
-	if(((pBodyB->ctype & BULLET) == BULLET) && (pBodyB->pListener->source == PLAYER))
+	if(iFrames == 0)
 	{
-		hp -= 1;
-		if(hp <= 0) Disable();
+		if(((pBodyB->ctype & BULLET) == BULLET) && (pBodyB->pListener->source == PLAYER))
+		{
+			hp -= 1;
+			iFrames = 1;
+			if(hp <= 0) Disable();
+		}
 	}
+	
 }

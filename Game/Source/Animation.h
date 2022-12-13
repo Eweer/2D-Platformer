@@ -44,10 +44,11 @@ public:
 		if(!bActive) return frames[currentAnimName][(uint)currentFrame];
 
 		//if it's active and finished, it's no longer finished
-		if(bFinished) bFinished = !bFinished;
+		if(bFinished)
+			bFinished = !bFinished;
 
 		//if it's active we increase the frame
-		currentFrame += speed;
+		currentFrame += frameSpeed.at(currentAnimName);
 
 		//if no more animations in frames[current + 1]
 		if((uint)currentFrame >= frames.at(currentAnimName).size()|| (int)currentFrame < 0)
@@ -63,10 +64,10 @@ public:
 				}
 				case FORWARD_BACKWARD:
 				{
-					if(speed > 0) currentFrame = (float)frames.at(currentAnimName).size() - 1;
+					if(frameSpeed.at(currentAnimName) > 0) currentFrame = (float)frames.at(currentAnimName).size() - 1;
 					else Stop();
 
-					speed *= -1;
+					frameSpeed.at(currentAnimName) *= -1;
 					break;
 				}
 				case LOOP_FROM_START:
@@ -76,8 +77,8 @@ public:
 				}
 				case LOOP_FORWARD_BACKWARD:
 				{
-					currentFrame = (speed < 0) ? 0 : (float)frames.at(currentAnimName).size() - 1;
-					speed *= -1;
+					currentFrame = (frameSpeed.at(currentAnimName) < 0) ? 0 : (float)frames.at(currentAnimName).size() - 1;
+					frameSpeed.at(currentAnimName) *= -1;
 					break;
 				}
 				default:
@@ -102,6 +103,7 @@ public:
 
 	void SetCurrentAnimation(std::string const &name)
 	{
+		if(currentAnimName == name) return;
 		if(frames.contains(name))
 		{
 			currentAnimName = name;
@@ -109,7 +111,7 @@ public:
 		}
 	}
 
-	SDL_Texture *GetCurrentFrame() const
+	SDL_Texture *GetCurrentTexture() const
 	{
 		if(frames.empty() || frames.at(currentAnimName).empty()) return nullptr;
 
@@ -117,6 +119,11 @@ public:
 			return frames.at(currentAnimName).at(frames.at(currentAnimName).size() - 1);
 		else
 			return frames.at(currentAnimName).at((uint)currentFrame);
+	}
+
+	int GetCurrentFrame() const
+	{
+		return static_cast<int>(currentFrame);
 	}
 
 	Animation *AddStaticImage(const char *pathToPNG)
@@ -185,17 +192,25 @@ public:
 
 	void SetSpeed(float const &animSpeed)
 	{
-		speed = animSpeed;
+		frameSpeed[currentAnimName] = animSpeed;
 	}
 
 	float GetSpeed() const
 	{
-		return speed;
+		return frameSpeed.at(currentAnimName);
 	}
 
 	void SetAnimStyle(int i)
 	{
 		currentStyle = static_cast<AnimIteration>(i);
+	}
+
+	void SetCurrentFrame(int i)
+	{
+		if(in_range(i, 0, frames[currentAnimName].size()))
+		{
+			currentFrame = floor(static_cast<float>(i));
+		}
 	}
 
 	void SetAnimStyle(AnimIteration i)
@@ -293,7 +308,6 @@ public:
 private:
 	float FunctionCooldown = 1.1f;
 	float TimeSinceLastFunctionCall = 0;
-	float speed = 0;
 	float currentFrame = 0;
 	std::string currentAnimName = "unknown";
 	AnimIteration currentStyle = AnimIteration::NEVER;
@@ -305,6 +319,7 @@ private:
 	uint width = 0;
 	uint height = 0;
 	std::unordered_map<std::string, std::vector<SDL_Texture *>, StringHash, std::equal_to<>> frames;
+	std::unordered_map<std::string, float, StringHash, std::equal_to<>> frameSpeed;
 	SDL_Texture *staticImage = nullptr;
 };
 #endif	// __ANIMATION_H__

@@ -41,6 +41,8 @@ private:
 
 	void DrawPlayerJumps(iPoint &position) const;
 
+	void DrawPlayerAnimation(iPoint &position) const;
+
 	bool bDrawPause = false;
 	int fCleanCraters = 0;
 	iPoint pTopLeft = {10, 10};

@@ -38,6 +38,7 @@ public:
 	// Called every frame
 	bool PreUpdate() final;
 	bool Update(float dt) final;
+	bool PostUpdate() final;
 
 	bool Pause(int phase) final;
 

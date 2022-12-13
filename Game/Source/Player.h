@@ -16,6 +16,9 @@ public:
 
 	bool Awake() final;
 
+	std::string ChooseAnim();
+	bool StopProjectiles() override;
+
 	bool Update() final;
 
 	void BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB) final;
@@ -34,6 +37,22 @@ private:
 
 	std::unordered_map<std::string, ProjectileData, StringHash, std::equal_to<>> projectileMap;
 	std::vector<std::unique_ptr<Projectile>> projectiles;
+
+	bool bFalling = false;
+	bool bDead = false;
+	bool bHurt = false;
+	bool bAttack2 = false;
+	bool bClimbing = false;
+	bool bPushing = false;
+	bool bHighJump = false;
+	bool bNormalJump = false;
+	bool bRunning = false;
+	bool bWalking = false;
+	bool bIdle = false;
+	bool bAttack1 = false;
+	bool bLockAnim = false;
+	bool bAttackQueue = false;
+	bool bAbleToMove = true;
 
 	friend class UI;
 };

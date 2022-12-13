@@ -51,6 +51,7 @@ bool UI::PostUpdate()
 	DrawMousePosition(pTopLeft);
 	DrawPlayerPosition(pTopLeft);
 	DrawPlayerJumps(pTopLeft);
+	DrawPlayerAnimation(pTopLeft);
 	if(bDrawPause) DrawPause(pMiddle);
 	return true;
 }
@@ -130,14 +131,23 @@ void UI::DrawPlayerJumps(iPoint &position) const
 {
 	app->fonts->Draw(std::format("Max Jumps: {}", player->jump.maxJumps), position, fCleanCraters);
 	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
-	app->fonts->Draw(std::format("Is Jumping: {}", player->jump.bJumping ? "Yes." : "No."), position, fCleanCraters);
+	app->fonts->Draw(std::format("Is on air: {}", player->jump.bOnAir ? "Yes." : "No."), position, fCleanCraters);
 	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
 	app->fonts->Draw(std::format("Current Jumps: {}", player->jump.currentJumps), position, fCleanCraters);
 	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
 	app->fonts->Draw(std::format("Jump Impulse: {}", player->jump.jumpImpulse), position, fCleanCraters);
 	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
-	app->fonts->Draw(std::format("Time since last jump: {}", player->jump.timeSinceLastJump), position, fCleanCraters);
+}
+
+void UI::DrawPlayerAnimation(iPoint &position) const
+{
+	app->fonts->Draw(std::format("Able to move: {}", player->bAbleToMove ? "Yes." : "No."), position, fCleanCraters);
 	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
+	app->fonts->Draw(std::format("Locked Animation: {}", player->bLockAnim ? "Yes." : "No."), position, fCleanCraters);
+	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
+	app->fonts->Draw(std::format("Current Veloicty: {:.1f}, {:.1f}", player->pBody->body->GetLinearVelocity().x, player->pBody->body->GetLinearVelocity().y), position, fCleanCraters);
+	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
+	
 }
 
 bool UI::Pause(int phase)

@@ -118,13 +118,13 @@ bool Item::Update()
 	//position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x) - 16
 	//position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y) - 16
 
-	if(anim) app->render->DrawTexture(anim->GetCurrentFrame(), position.x, position.y);
+	if(anim) app->render->DrawTexture(anim->GetCurrentTexture(), position.x, position.y);
 	return true;
 }
 
 bool Item::Pause() const
 {
-	if(anim) app->render->DrawTexture(anim->GetCurrentFrame(), position.x, position.y);
+	if(anim) app->render->DrawTexture(anim->GetCurrentTexture(), position.x, position.y);
 	return true;
 }
 

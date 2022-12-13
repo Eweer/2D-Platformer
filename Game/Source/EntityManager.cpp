@@ -301,6 +301,17 @@ bool EntityManager::PreUpdate()
 	return true;
 };
 
+bool EntityManager::PostUpdate()
+{
+	for(auto const &[entityType, entityInfo] : allEntities)
+	{
+		for(auto const &entity : entityInfo.entities)
+		{
+			entity->StopProjectiles();
+		}
+	}
+	return true;
+}
 bool EntityManager::Update(float dt)
 {
 	for(auto const &[entityType, entityInfo] : allEntities)

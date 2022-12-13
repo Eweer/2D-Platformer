@@ -53,6 +53,11 @@ bool Entity::Stop()
 	return true;
 }
 
+bool Entity::StopProjectiles()
+{
+	return false;
+}
+
 // Sets starting Position and creates PhysBody
 void Entity::SpawnEntity()
 {

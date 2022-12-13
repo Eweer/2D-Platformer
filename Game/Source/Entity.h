@@ -36,6 +36,7 @@ public:
 
 	void Disable();
 	virtual bool Stop();
+	virtual bool StopProjectiles();
 
 	virtual bool Update();
 	virtual bool Pause() const;
