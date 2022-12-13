@@ -4,16 +4,45 @@
 #include "Physics.h"
 #include "Render.h"
 #include "Input.h"
-
+#include "Physics.h"
 #include "Animation.h"
+#include "Point.h"
 #include "BitMaskColliderLayers.h"
+
+class ProjectileData
+{
+public:
+	ProjectileData() = default;
+	explicit ProjectileData(std::string const &s, std::vector<b2Vec2> const &p, iPoint pos, iPoint wh, CL::ColliderLayers cl)
+		: shape(ShapeData(s, p)), position(pos), width_height(wh), bitmask(cl)
+	{
+	};
+	ProjectileData(const ProjectileData &other) = default;
+	ProjectileData &operator=(const ProjectileData &other)
+	{
+		shape.Create("polygon", other.shape.data);
+		position = other.position;
+		width_height = other.width_height;
+		return *this;
+	}
+	~ProjectileData() = default;
+
+	ShapeData shape;
+	iPoint position = {0,0};
+	iPoint width_height = {0,0};
+	CL::ColliderLayers bitmask;
+};
 
 class Projectile
 {
 public:
 	Projectile() = default;
-	Projectile(std::vector<SDL_Texture *> const &anim, iPoint origin, CL::ColliderLayers bitmask, int speed)
-	{
+	explicit Projectile(
+		std::vector<SDL_Texture *> const &anim,
+		iPoint origin,
+		ProjectileData &info,
+		int speed
+	) {
 		if(anim.empty())
 		{
 			LOG("Projectile could not be created. Anim not found.");
@@ -21,26 +50,64 @@ public:
 		}
 		animation = anim;
 		position = origin;
-		iPoint direction = app->input->GetMousePosition() - origin;
-		velocity = {
-			PIXEL_TO_METERS(25),
-			PIXEL_TO_METERS(0)
-		};
-		pBody = app->physics->CreateQuickProjectile(origin, bitmask);
-		pBody->body->SetLinearVelocity(b2Vec2(velocity.x, velocity.y));
+
+		animOffset = info.position;
+
+		// Create Body
+		auto bodyPtr = app->physics->CreateBody(
+			origin,
+			BodyType::DYNAMIC
+		);
+		bodyPtr->SetGravityScale(0);
+		bodyPtr->SetBullet(true);
+
+		// Create Fixture
+		using enum CL::ColliderLayers;
+		uint16 cat = 0x0001;
+		if((info.bitmask & PLAYER) == PLAYER) cat = static_cast<uint16>(PLAYER);
+		else if((info.bitmask & ENEMIES) == ENEMIES) cat = static_cast<uint16>(ENEMIES);
+		auto fixPtr = app->physics->CreateFixtureDef(
+			info.shape,
+			cat,
+			static_cast<uint16>(info.bitmask)
+		);
+		bodyPtr->CreateFixture(fixPtr.get());
+		
+		// Create PhysBody
+		auto pbodyPtr = app->physics->CreatePhysBody(
+			bodyPtr,
+			info.width_height,
+			static_cast<CL::ColliderLayers>(cat)
+		);
+
+		pBody = std::move(pbodyPtr);
+		
+		direction = PIXEL_TO_METERS(app->input->GetMousePosition() - origin);
+		direction.Normalize();
+		auto s = PIXEL_TO_METERS(speed);
+		pBody->body->SetLinearVelocity({direction.x * s, direction.y * s});
 	}
+	Projectile(const Projectile &) = default;
+	Projectile(Projectile &&) = default;
+	~Projectile() = default;
+
+	Projectile &operator =(const Projectile &) = default;
 
 	bool Update()
 	{
 		position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x);
 		position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y);
-		app->render->DrawCharacterTexture(animation[0], position);
+		app->render->DrawCharacterTexture(
+			animation[0],
+			iPoint(position.x - animOffset.x, position.y - animOffset.y)
+		);
 		return true;
 	}
 
 	iPoint position = {0,0};
+	iPoint animOffset = {0,0};
 	std::vector<SDL_Texture *>animation;
-	b2Vec2 velocity = {0,0};
+	b2Vec2 direction = {0,0};
 	std::unique_ptr<PhysBody> pBody;
 };
 

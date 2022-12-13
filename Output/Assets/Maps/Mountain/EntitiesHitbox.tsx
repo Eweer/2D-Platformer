@@ -187,7 +187,9 @@
  <tile id="13">
   <image width="32" height="32" source="../../Animations/Player/Mage/Fire/fire1.png"/>
   <objectgroup draworder="index" id="2">
-   <object id="1" x="1" y="21" width="30" height="8"/>
+   <object id="1" x="1" y="21" width="30" height="8">
+    <polygon points="0,3 8,0 26,0 30,3 30,5 26,8 8,8 0,5"/>
+   </object>
   </objectgroup>
   <animation>
    <frame tileid="13" duration="170"/>

@@ -97,32 +97,10 @@ public:
 	{
 		this->Create(type, newData);
 	}
-	explicit ShapeData(b2Shape const *newShape, std::vector<b2Vec2> const &newData = std::vector<b2Vec2>()) : data(newData)
-	{
-		if (!newShape) LOG("Error in creating Shape (ShapeData). Shape constructor is nullptr");
-		else
-		{
-			switch (newShape->GetType())
-			{
-				case b2Shape::Type::e_circle:
-					shape = std::make_unique<b2CircleShape>();
-					break;
-				case b2Shape::Type::e_edge:
-					shape = std::make_unique<b2EdgeShape>();
-					break;
-				case b2Shape::Type::e_polygon:
-					shape = std::make_unique<b2PolygonShape>();
-					break;
-				case b2Shape::Type::e_chain:
-					shape = std::make_unique<b2ChainShape>();
-					break;
-				default:
-					break;
-			}
-		}
-	}
 	explicit ShapeData(ShapeData &&other) noexcept : shape(std::move(other.shape)), data(std::move(other.data))
 	{};
+	explicit ShapeData(const ShapeData &other) : shape(other.shape.get()), data(other.data) {};
+	ShapeData &operator=(const ShapeData &) = default;
 	~ShapeData() = default;
 	
 	void Create(std::string const &type, std::vector<b2Vec2> const &newData = std::vector<b2Vec2>()) 
@@ -140,6 +118,14 @@ public:
 		else if (StrEquals(name, "polygon"))	shape = std::make_unique<b2PolygonShape>();
 		else if (StrEquals(name, "chain"))		shape = std::make_unique<b2ChainShape>();
 		else LOG("Error in creating Shape (ShapeData). No shape with name %s exists", name);
+	}
+	
+	void Create(std::vector<b2Vec2> const &newData)
+	{
+		data = newData;
+		if(data.size() > b2_maxPolygonVertices) shape = std::make_unique<b2ChainShape>();
+		else if(data.size() > 1) shape = std::make_unique<b2PolygonShape>();
+		else shape = std::make_unique<b2CircleShape>();
 	}
 
 	b2Shape *CreateShape(b2Vec2 fixPos = b2Vec2(0,0))
@@ -316,7 +302,7 @@ public:
 		bool sensor = false
 	);
 
-	std::unique_ptr<PhysBody> CreateQuickProjectile(iPoint position, CL::ColliderLayers mask);
+	std::unique_ptr<PhysBody> CreateQuickProjectile(iPoint position, CL::ColliderLayers mask, float degree);
 
 	//---------------- Joints
 

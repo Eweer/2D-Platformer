@@ -19,6 +19,8 @@ public:
 	void BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB) final;
 
 private:
+	bool LoadProjectileData();
+
 	CharacterJump jump;
 	uint cameraXCorrection = 0;
 	uint cameraYCorrection  = 0;
@@ -28,6 +30,7 @@ private:
 
 	std::string playerCharacter;
 
+	std::unordered_map<std::string, ProjectileData, StringHash, std::equal_to<>> projectileMap;
 	std::vector<std::unique_ptr<Projectile>> projectiles;
 
 	friend class UI;

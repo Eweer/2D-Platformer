@@ -354,15 +354,17 @@ std::unique_ptr<PhysBody> Physics::CreateQuickPhysBody(iPoint position, BodyType
 	return CreatePhysBody(body, width_height, static_cast<CL::ColliderLayers>(cat));
 }
 
-std::unique_ptr<PhysBody> Physics::CreateQuickProjectile(iPoint position, CL::ColliderLayers mask)
+std::unique_ptr<PhysBody> Physics::CreateQuickProjectile(iPoint position, CL::ColliderLayers mask, float degree)
 {
 	using enum CL::ColliderLayers;
-	auto body = CreateBody(position);
+	auto body = CreateBody(position + iPoint(30, 8), BodyType::DYNAMIC, degree +90);
+	body->SetGravityScale(0);
+	body->SetBullet(true);
 	auto catFlag = static_cast<uint16>(PLAYER | ENEMIES);
-	ShapeData s("Rectangle", std::vector<b2Vec2>({PIXEL_TO_METERS(position)}));
+	ShapeData s("Rectangle", std::vector<b2Vec2>({PIXEL_TO_METERS(iPoint(position.x, position.y))}));
 	auto fixtureDef = CreateFixtureDef(s, catFlag, static_cast<uint16>(mask));
 	body->CreateFixture(fixtureDef.get());
-	return CreatePhysBody(body, iPoint(8, 30), PLAYER);
+	return CreatePhysBody(body, iPoint(30, 8), PLAYER);
 }
 
 //--------------- Joints

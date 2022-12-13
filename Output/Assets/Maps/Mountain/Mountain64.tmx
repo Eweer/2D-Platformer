@@ -127,7 +127,9 @@
     <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
    </properties>
    <objectgroup draworder="index" id="2">
-    <object id="1" x="0" y="0" width="64" height="64"/>
+    <object id="1" x="0" y="0" width="64" height="64">
+     <polygon points="0,0 64,0 64,64 0,64"/>
+    </object>
    </objectgroup>
   </tile>
   <tile id="25">
