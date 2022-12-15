@@ -251,10 +251,14 @@ bool Player::Update()
 		{
 			// If it's idle, player can't move during the lock.
 			if(impulse.x == 0) bAbleToMove = false;
-			attackDir = PIXEL_TO_METERS(app->input->GetMousePosition() - position);
+			iPoint currentMousePos = {
+				app->input->GetMousePosition().x - app->render->GetCamera().x,
+				app->input->GetMousePosition().y - app->render->GetCamera().y
+			};
+			attackDir = PIXEL_TO_METERS(currentMousePos - position);
 			bAttack1 = true;
 			bAttackQueue = true;
-			if(pBody->body->GetPosition().x > PIXEL_TO_METERS(app->input->GetMousePosition().x))
+			if(pBody->body->GetPosition().x > PIXEL_TO_METERS(currentMousePos.x))
 				dir = 1;
 			else
 				dir = 0;
@@ -266,10 +270,14 @@ bool Player::Update()
 			// Stop all momentum, player can't move during lock
 			impulse.x = 0;
 			bAbleToMove = false;
-			attackDir = PIXEL_TO_METERS(app->input->GetMousePosition() - position);
+			iPoint currentMousePos = {
+				app->input->GetMousePosition().x - app->render->GetCamera().x,
+				app->input->GetMousePosition().y - app->render->GetCamera().y
+			};
+			attackDir = PIXEL_TO_METERS(currentMousePos - position);
 			bAttack2 = true;
 			bAttackQueue = true;
-			if(pBody->body->GetPosition().x > PIXEL_TO_METERS(app->input->GetMousePosition().x))
+			if(pBody->body->GetPosition().x > PIXEL_TO_METERS(currentMousePos.x))
 				dir = 1;
 			else
 				dir = 0;

@@ -392,15 +392,6 @@ SDL_Rect Render::GetCamera() const
 
 void Render::AdjustCamera(iPoint position)
 {
-	/*if(abs(camera.x) <= app->map->GetWidth() * app->map->GetTileWidth())
-	{f(camera.x < 0) camera.x = 0;
-		camera.x -= (lastPlayerPosition.x - position.x)*-1;
-		if(camera.x > 0) camera.x = 0;
-	}	if(camera.x < (app->map->GetWidth() * app->map->GetTileWidth()))
-	elsei
-		camera.x = (-1 * position.x);
-*/
-
 	if(position.x > 4 * app->map->GetTileWidth())
 		camera.x = -position.x + 4 * app->map->GetTileWidth();
 	else
@@ -415,6 +406,4 @@ void Render::AdjustCamera(iPoint position)
 		camera.y = -position.y + app->win->GetHeight() - 4 * app->map->GetTileHeight();
 
 	if(camera.y > 0) camera.y = 0;
-		
-	lastPlayerPosition = position;
 }

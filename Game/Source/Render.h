@@ -105,8 +105,6 @@ private:
 	std::unique_ptr<SDL_Renderer, std::function<void(SDL_Renderer *)>> renderer;
 	SDL_Rect viewport;
 	SDL_Color background;
-
-	iPoint lastPlayerPosition = {0,0};
 	SDL_Rect camera;
 
 	// -------- Vsync
