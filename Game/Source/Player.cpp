@@ -112,15 +112,17 @@ bool Player::Awake()
 
 std::string Player::ChooseAnim()
 {
-	if(bAttack1 || bAttack2 || bHighJump || bHurt || bDead)
+	if(bAttack1 || bAttack2 || bHurt || bDead || bFalling >= 100)
 		bLockAnim = true;
 
 	if(bDead) return "dead";
 	if(bHurt) return "hurt";
+	if(bFalling >= 100) return "falling";
+	if(bFalling >= 10) return "jump";
 	if(bClimbing) return "climb";
 	if(bPushing) return "push";
 	if(bNormalJump) return "jump";
-	if(bHighJump) return "high_jump";
+	if(bHighJump) return "high_Jump";
 	if(bRunning)
 	{
 		if(bAttack1) return "run_Attack";
@@ -161,7 +163,7 @@ bool Player::Update()
 	// Set movement variables
 	b2Vec2 vel = pBody->body->GetLinearVelocity();
 	b2Vec2 impulse = {0, 0};
-	float maxVel = app->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT ? 10.0f : 5.0f;
+	float maxVel = app->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT ? 7.5f : 5.0f;
 	bool moveCamera = false;
 
 	
@@ -186,6 +188,7 @@ bool Player::Update()
 		}
 		if(impulse.x == 0) impulse.x = vel.x * 0.98f;
 	}
+
 
 	// If it's playing an animation lock
 	if(bLockAnim)
@@ -235,12 +238,26 @@ bool Player::Update()
 		if(jump.currentJumps < jump.maxJumps && app->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN)
 		{
 			// Check if it is currently jumping, if it is restart the animation
-			if(bNormalJump) texture->SetCurrentFrame(0);
-			else bNormalJump = true;
+			if(bNormalJump || bHighJump)
+			{
+				texture->SetCurrentFrame(0);
+				bLockAnim = true;
+			}
+
+			if(app->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT)
+			{
+				impulse.y = jump.jumpImpulse * -1.5f;
+				impulse.x /= 1.5f;
+				bHighJump = true;
+			}
+			else
+			{
+				impulse.y = jump.jumpImpulse * -1.0f;
+				bNormalJump = true;
+			}
 
 			jump.bOnAir = true;
 			jump.currentJumps++;
-			impulse.y = jump.jumpImpulse * -1;
 
 			pBody->body->SetLinearVelocity(b2Vec2(vel.x, 0));
 			pBody->body->ApplyLinearImpulse(b2Vec2(0, impulse.y), pBody->body->GetWorldCenter(), true);
@@ -288,16 +305,8 @@ bool Player::Update()
 	pBody->body->SetLinearVelocity(b2Vec2(impulse.x, pBody->body->GetLinearVelocity().y));
 
 	// Set booleans based on current movement
-	if(pBody->body->GetLinearVelocity().y == 0)
-	{
-		bNormalJump = false;
-		bHighJump = false;
-		bFalling = false;
-	}
-	else if(pBody->body->GetLinearVelocity().y > 0)
-	{
-		bFalling = true;
-	}
+	if(pBody->body->GetLinearVelocity().y <= 0)	bFalling = 0;
+	else if(pBody->body->GetLinearVelocity().y > 1.0f) bFalling++;
 
 	if(pBody->body->GetLinearVelocity().x == 0)
 	{
@@ -318,11 +327,8 @@ bool Player::Update()
 	// If it's not locked, we set the texture based on priority
 	if(!bLockAnim) texture->SetCurrentAnimation(ChooseAnim());
 
-	// Move camera if player is moving
-	if(position.x >= startingPosition.x)
-	{
-		app->render->AdjustCamera(position);
-	}
+	// Move camera
+	app->render->AdjustCamera(position);
 
 	// Set image position and draw character
 	position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x);
@@ -350,6 +356,10 @@ void Player::BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, Phys
 			LOG("Collision PLATFORMS");
 			if(pBody->ground->ptr == fixtureA)
 			{
+				if(bNormalJump)
+				{
+					bLockAnim = false;
+				}
 				bNormalJump = false;
 				bHighJump = false;
 				if(jump.bOnAir)

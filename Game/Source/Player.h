@@ -36,7 +36,7 @@ private:
 	std::unordered_map<std::string, ProjectileData, StringHash, std::equal_to<>> projectileMap;
 	std::vector<std::unique_ptr<Projectile>> projectiles;
 
-	bool bFalling = false;
+	int bFalling = 0;
 	bool bDead = false;
 	bool bHurt = false;
 	bool bAttack2 = false;
