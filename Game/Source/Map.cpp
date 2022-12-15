@@ -566,8 +566,17 @@ int Map::GetTileSetSize() const
 	return mapData.tilesets.size();
 }
 
+enum class NavType
+
+struct navPoint
+{
+	int platformIndex = 0;
+	NavType type = NavType::NONE;
+};
+
 bool Map::CreateWalkabilityMap(int &width, int &height)
 {
+	std::vector<std::vector<navPoint>> map;
 	for(auto const &layer : mapData.mapLayers)
 	{
 		for(int x = 0; x < layer->width; x++)
