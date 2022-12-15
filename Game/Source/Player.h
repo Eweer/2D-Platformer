@@ -27,8 +27,6 @@ private:
 	bool LoadProjectileData();
 
 	CharacterJump jump;
-	uint cameraXCorrection = 0;
-	uint cameraYCorrection  = 0;
 
 	bool bKeepMomentum = false;
 	b2Vec2 velocityToKeep = {0.0f, 0.0f};

@@ -94,15 +94,20 @@ public:
 
 	SDL_Rect GetCamera() const;
 
+	void AdjustCamera(iPoint position);
+
 private:
 
 	void SetViewPort(const SDL_Rect &rect) const;
 	void ResetViewPort() const;
 
+
 	std::unique_ptr<SDL_Renderer, std::function<void(SDL_Renderer *)>> renderer;
-	SDL_Rect camera;
 	SDL_Rect viewport;
 	SDL_Color background;
+
+	iPoint lastPlayerPosition = {0,0};
+	SDL_Rect camera;
 
 	// -------- Vsync
 	bool vSyncActive = true;

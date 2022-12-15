@@ -38,7 +38,8 @@ bool UI::Start()
 bool UI::PreUpdate()
 {
 	// Return all coordinates to their original values
-	pTopLeft = {10, 10};
+	pTopLeft = {10, -1 * app->render->camera.y + 10};
+	if(pTopLeft.x < 10) pTopLeft.x = 10;
 	pMiddle = {app->render->camera.w / 2, app->render->camera.h / 2};
 	return true;
 }
@@ -49,6 +50,8 @@ bool UI::PostUpdate()
 	DrawFPS(pTopLeft);
 	DrawGravity(pTopLeft);
 	DrawMousePosition(pTopLeft);
+	DrawCameraPosition(pTopLeft);
+	DrawUIPosition(pTopLeft);
 	DrawPlayerPosition(pTopLeft);
 	DrawPlayerJumps(pTopLeft);
 	DrawPlayerAnimation(pTopLeft);
@@ -106,6 +109,34 @@ void UI::DrawPlayerPosition(iPoint &position) const
 			"Player position: \"{},{}\"",
 			player->position.x,
 			player->position.y
+		),
+		position,
+		fCleanCraters
+	);
+	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
+}
+
+void UI::DrawUIPosition(iPoint &position) const
+{
+	app->fonts->Draw(
+		std::format(
+			"UI position: \"{},{}\"",
+			position.x,
+			position.y
+		),
+		position,
+		fCleanCraters
+	);
+	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
+}
+
+void UI::DrawCameraPosition(iPoint &position) const
+{
+	app->fonts->Draw(
+		std::format(
+			"Camera position: \"{},{}\"",
+			app->render->camera.x,
+			app->render->camera.y
 		),
 		position,
 		fCleanCraters

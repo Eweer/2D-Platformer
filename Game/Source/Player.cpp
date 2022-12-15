@@ -164,6 +164,7 @@ bool Player::Update()
 	float maxVel = app->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT ? 10.0f : 5.0f;
 	bool moveCamera = false;
 
+	
 	// If it's able to move
 	if(bAbleToMove)
 	{
@@ -245,22 +246,6 @@ bool Player::Update()
 			pBody->body->ApplyLinearImpulse(b2Vec2(0, impulse.y), pBody->body->GetWorldCenter(), true);
 		}
 
-		// Move camera if player is moving
-		SDL_Rect camera = app->render->GetCamera();
-
-		if(moveCamera && camera.x <= 0 && position.x >= startingPosition.x)
-		{
-			if(abs(camera.x) + cameraXCorrection <= app->map->GetWidth() * app->map->GetTileWidth())
-			{
-				camera.x -= (int)(vel.x * 0.98);
-				if(camera.x > 0) camera.x = 0;
-			}
-			else if(vel.x < 0)
-			{
-				camera.x -= (int)(vel.x * 0.98);
-			}
-		}
-
 		// Left click attack, only able to do it if on the floor
 		if(!jump.bOnAir && app->input->GetMouseButtonDown(SDL_BUTTON_LEFT) == KEY_DOWN)
 		{
@@ -324,6 +309,12 @@ bool Player::Update()
 
 	// If it's not locked, we set the texture based on priority
 	if(!bLockAnim) texture->SetCurrentAnimation(ChooseAnim());
+
+	// Move camera if player is moving
+	if(position.x >= startingPosition.x)
+	{
+		app->render->AdjustCamera(position);
+	}
 
 	// Set image position and draw character
 	position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x);

@@ -37,6 +37,8 @@ public:
 
 	// Retrieve window scale
 	uint GetScale() const;
+	int GetHeight() const; 
+	int GetWidth() const; 
 
 private:
 	// The window we'll be rendering to

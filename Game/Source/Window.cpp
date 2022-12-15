@@ -115,3 +115,13 @@ uint Window::GetScale() const
 {
 	return scale;
 }
+
+int Window::GetHeight() const
+{
+	return height;
+}
+
+int Window::GetWidth() const
+{
+	return width;
+}

@@ -3,6 +3,7 @@
 #include "Render.h"
 #include "EntityManager.h"
 #include "Input.h"
+#include "Map.h"
 
 #include "Defs.h"
 #include "Log.h"
@@ -387,4 +388,33 @@ std::unique_ptr<SDL_Texture, std::function<void(SDL_Texture *)>> Render::LoadTex
 SDL_Rect Render::GetCamera() const
 {
 	return camera;
+}
+
+void Render::AdjustCamera(iPoint position)
+{
+	/*if(abs(camera.x) <= app->map->GetWidth() * app->map->GetTileWidth())
+	{f(camera.x < 0) camera.x = 0;
+		camera.x -= (lastPlayerPosition.x - position.x)*-1;
+		if(camera.x > 0) camera.x = 0;
+	}	if(camera.x < (app->map->GetWidth() * app->map->GetTileWidth()))
+	elsei
+		camera.x = (-1 * position.x);
+*/
+
+	if(position.x > 4 * app->map->GetTileWidth())
+		camera.x = -position.x + 4 * app->map->GetTileWidth();
+	else
+		camera.x = 0;
+
+	if(-1 * camera.x > app->map->GetWidth() * app->map->GetTileWidth() - camera.w)
+		camera.x = -1 * (app->map->GetWidth() * app->map->GetTileWidth()) + camera.w;
+
+	if(position.y > (app->map->GetHeight() - 4) * app->map->GetTileHeight())
+		camera.y = -1 * (app->map->GetHeight() * app->map->GetTileHeight() - camera.h);
+	else
+		camera.y = -position.y + app->win->GetHeight() - 4 * app->map->GetTileHeight();
+
+	if(camera.y > 0) camera.y = 0;
+		
+	lastPlayerPosition = position;
 }

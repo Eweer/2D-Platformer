@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.9" tiledversion="1.9.2" name="EntitiesHitbox" class="Characters" tilewidth="128" tileheight="128" tilecount="30" columns="0" objectalignment="topleft">
+<tileset version="1.9" tiledversion="1.9.2" name="EntitiesHitbox" class="Characters" tilewidth="128" tileheight="128" tilecount="31" columns="0" objectalignment="topleft">
  <grid orientation="orthogonal" width="1" height="1"/>
  <properties>
   <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="2"/>
@@ -260,5 +260,21 @@
  </tile>
  <tile id="30">
   <image width="32" height="32" source="../../Animations/Player/Mage/Fire_Extra/fire_extra9.png"/>
+ </tile>
+ <tile id="31">
+  <image width="128" height="128" source="../../Animations/Player/Knight/Idle/idle1.png"/>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="32" y="70" width="12" height="31"/>
+   <object id="2" x="44" y="70" width="12" height="31"/>
+   <object id="4" x="32" y="88" width="24" height="22">
+    <ellipse/>
+   </object>
+   <object id="5" x="44" y="60">
+    <polyline points="0,0 0,50"/>
+   </object>
+   <object id="6" x="32" y="60" width="24" height="22">
+    <ellipse/>
+   </object>
+  </objectgroup>
  </tile>
 </tileset>

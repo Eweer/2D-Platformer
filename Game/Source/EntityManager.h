@@ -62,10 +62,10 @@ public:
 
 	bool DoesEntityExist(Entity const *entity = nullptr) const;
 
+	Player *GetPlayerCharacter() const;
 
 private:
 	void CreateAllColliders();
-	Player *GetPlayerCharacter() const;
 
 	using EntityMap = std::unordered_map<std::string, EntityInfo, StringHash, std::equal_to<>>;
 	// key1 = ColliderLayer

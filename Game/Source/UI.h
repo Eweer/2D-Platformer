@@ -37,6 +37,8 @@ private:
 	void DrawFPS(iPoint &position) const;
 	void DrawGravity(iPoint &position) const;
 	void DrawPlayerPosition(iPoint &position) const;
+	void DrawUIPosition(iPoint &position) const;
+	void DrawCameraPosition(iPoint &position) const;
 	void DrawMousePosition(iPoint &position) const;
 
 	void DrawPlayerJumps(iPoint &position) const;

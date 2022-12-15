@@ -312,6 +312,7 @@ bool EntityManager::PostUpdate()
 	}
 	return true;
 }
+
 bool EntityManager::Update(float dt)
 {
 	for(auto const &[entityType, entityInfo] : allEntities)
