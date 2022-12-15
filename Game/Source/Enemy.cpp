@@ -27,17 +27,61 @@ bool Enemy::Awake()
 	return true;
 }
 
+bool Enemy::Update()
+{
+	if(iFrames > 0)
+	{
+		iFrames++;
+		if(hp == 0)
+		{
+			if(texture->IsLastFrame()) texture->Pause();
+			if(iFrames >= 100)
+			{
+				iFrames = 0;
+				active = false;
+			}
+		}
+		else
+		{
+			if(iFrames >= 20)
+			{
+				texture->SetCurrentAnimation("idle");
+				iFrames = 0;
+			}
+		}
+	}
+	else
+	{
+		//Update Character position in pixels
+		position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x);
+		position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y);
+	}
+
+	app->render->DrawCharacterTexture(
+		texture->UpdateAndGetFrame(),
+		iPoint(position.x - colliderOffset.x, position.y - colliderOffset.y),
+		(bool)dir,
+		texture->GetFlipPivot()
+	);
+	return true;
+}
+
 void Enemy::OnCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB)
 {
 	using enum CL::ColliderLayers;
 	if(iFrames == 0)
 	{
-		if(((pBodyB->ctype & BULLET) == BULLET) && (pBodyB->pListener->source == PLAYER))
+		if(((pBodyB->ctype & BULLET) == BULLET) && ((pBodyB->pListener->source & PLAYER) == PLAYER))
 		{
 			hp -= 1;
 			iFrames = 1;
-			if(hp <= 0) Disable();
+			if(hp <= 0)
+			{
+				texture->SetCurrentAnimation("death");
+				Disable();
+				active = true;
+			}
+			else texture->SetCurrentAnimation("hurt");
 		}
 	}
-	
 }

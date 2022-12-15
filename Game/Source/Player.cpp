@@ -128,14 +128,11 @@ std::string Player::ChooseAnim()
 	}
 	if(bWalking)
 	{
-		if(bAttack1)
-			return "walk_Attack";
+		if(bAttack1) return "walk_Attack";
 		return "walk";
 	}
-	if(bAttack2)
-		return "attack_Extra";
-	if(bAttack1)
-		return "attack";
+	if(bAttack2) return "attack_Extra";
+	if(bAttack1) return "attack";
 	if(bIdle) return "idle";
 	return "unknown";
 }

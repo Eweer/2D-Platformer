@@ -25,6 +25,7 @@ class Map;
 class Physics;
 class Fonts;
 class UI;
+class Pathfinding;
 
 class App
 {
@@ -87,6 +88,7 @@ public:
 	std::unique_ptr<Physics> physics;
 	std::unique_ptr<Fonts> fonts;
 	std::unique_ptr<UI> ui;
+	std::unique_ptr<Pathfinding> pathfinding;
 
 private:
 

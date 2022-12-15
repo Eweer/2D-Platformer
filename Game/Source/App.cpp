@@ -10,6 +10,7 @@
 #include "Physics.h"
 #include "Fonts.h"
 #include "UI.h"
+#include "Pathfinding.h"
 
 #include "Defs.h"
 #include "Log.h"
@@ -25,6 +26,7 @@ App::App(int argc, char* args[]) : argc(argc), args(args)
 	tex = std::make_unique<Textures>();
 	audio = std::make_unique<Audio>();
 	physics = std::make_unique<Physics>();
+	pathfinding = std::make_unique<Pathfinding>();
 	scene = std::make_unique<Scene>();
 	entityManager = std::make_unique<EntityManager>();
 	map = std::make_unique<Map>();
@@ -38,6 +40,7 @@ App::App(int argc, char* args[]) : argc(argc), args(args)
 	AddModule(tex.get());
 	AddModule(audio.get());
 	AddModule(physics.get());
+	AddModule(pathfinding.get());
 	AddModule(scene.get());
 	AddModule(entityManager.get());
 	AddModule(map.get());

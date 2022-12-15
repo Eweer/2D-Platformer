@@ -167,7 +167,7 @@ public:
 	int animTimer = 0;
 	int flipValue = 0;
 	float degree = 0.0f;
-	CL::ColliderLayers source;
+	CL::ColliderLayers source = CL::ColliderLayers::UNKNOWN;
 	iPoint position = {0,0};
 	SDL_Point rotationCenter = {0,0};
 	iPoint animOffset = {0,0};

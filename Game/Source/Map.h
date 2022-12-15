@@ -182,6 +182,8 @@ public:
 
 	int GetTileSetSize() const;
 
+	bool CreateWalkabilityMap(int &width, int &height);
+
 private:
 
 	bool LoadMap(pugi::xml_node const &mapFile);
@@ -205,6 +207,7 @@ private:
 	std::string mapFolder;
 	bool mapLoaded = false;
 	std::vector<std::unique_ptr<PhysBody>> collidersOnMap;
+	std::vector<bool> walkability;
 };
 
 #endif // __MAP_H__

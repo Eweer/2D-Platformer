@@ -45,7 +45,12 @@ bool Scene::Awake(pugi::xml_node& config)
 bool Scene::Start()
 {	
 	// Load map
-	app->map->Load();
+	if(app->map->Load())
+	{
+		int w = 0;
+		int h = 0;
+		app->map->CreateWalkabilityMap(w, h);
+	}
 
 	// Set the window title with map/tileset info
 	std::string title = std::format(
@@ -58,6 +63,7 @@ bool Scene::Start()
 	); 
 
 	app->win->SetTitle(title.c_str());
+
 
 	return true;
 }

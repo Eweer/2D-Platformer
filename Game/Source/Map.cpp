@@ -408,7 +408,8 @@ std::unique_ptr<MapLayer> Map::LoadLayer(pugi::xml_node const &node)
 
 inline std::unique_ptr<PhysBody> Map::CreateCollider(int gid, int i, int j, TileSet const *tileset) const
 {
-	if(auto colliderInfo = tileset->tileInfo.find(gid-1); colliderInfo != tileset->tileInfo.end())
+	if(auto colliderInfo = tileset->tileInfo.find(gid-1);
+	   colliderInfo != tileset->tileInfo.end())
 	{
 		if(colliderInfo->second->collider.empty()) return nullptr;
 		
@@ -563,4 +564,24 @@ int Map::GetTileHeight() const
 int Map::GetTileSetSize() const
 {
 	return mapData.tilesets.size();
+}
+
+bool Map::CreateWalkabilityMap(int &width, int &height)
+{
+	for(auto const &layer : mapData.mapLayers)
+	{
+		for(int x = 0; x < layer->width; x++)
+		{
+			for(int y = 0; y < layer->height; y++)
+			{
+				uint gid = layer->GetGidValue(x, y);
+
+				if(gid <= 0) continue;
+
+				TileSet *tileset = GetTilesetFromTileId(gid);
+				
+			}
+		}
+	}	
+	return true;
 }
