@@ -568,14 +568,14 @@ int Map::GetTileSetSize() const
 	return mapData.tilesets.size();
 }
 
-bool Map::CreateWalkabilityMap()
+navPointMatrix *Map::CreateWalkabilityMap()
 {
 	for(int i = 0; i < mapData.width; i++)
 	{
-		std::vector<navPoint> aux;
+		std::vector<NavPoint> aux;
 		for(int j = 0; j < mapData.height; j++)
 			aux.emplace_back();
-		map.push_back(aux);
+		groundWalkabilityMap->emplace_back(aux);
 	}
 
 	for(auto const &layer : mapData.mapLayers)
@@ -583,16 +583,20 @@ bool Map::CreateWalkabilityMap()
 		for(int y = 0; y < layer->height - 1; y++)
 		{
 			bool platformStarted = false;
-			std::vector<navPoint> row;
+			std::vector<NavPoint> row;
 			for(int x = 0; x < layer->width - 1; x++)
 			{
 				using enum NavType;
-				// If we already have a navPoint of another layer we don't want to overwrite it
-				if(map[x][y].type != NONE) continue;
+				// If we already have a NavPoint of another layer we don't want to overwrite it
+				if(groundWalkabilityMap->at(x).at(y).type != NONE) continue;
 				
 				// Check if current tile is a free node
 				uint currentTileGid = layer->GetGidValue(x, y);
-				if(IsWalkable(currentTileGid) || IsTerrain(currentTileGid)) continue;
+				if(IsWalkable(currentTileGid) || IsTerrain(currentTileGid))
+				{
+					groundWalkabilityMap->at(x).at(y).type = TERRAIN;
+					continue;
+				}
 
 				// Check if bottom tile is walkable terrain
 				uint lowerGid = layer->GetGidValue(x, y + 1);
@@ -602,7 +606,7 @@ bool Map::CreateWalkabilityMap()
 				if(!platformStarted)
 				{
 					platformStarted = true;
-					map[x][y].type = LEFT;
+					groundWalkabilityMap->at(x).at(y).type = LEFT;
 				}
 
 				// Check lower right tile
@@ -610,30 +614,31 @@ bool Map::CreateWalkabilityMap()
 				// If there's no tile
 				if(lowerRightGid <= 0)
 				{
-					if(map[x][y].type == LEFT) map[x][y].type = SOLO;
-					else map[x][y].type = RIGHT;
+					if(groundWalkabilityMap->at(x).at(y).type == LEFT) groundWalkabilityMap->at(x).at(y).type = SOLO;
+					else groundWalkabilityMap->at(x).at(y).type = RIGHT;
 					platformStarted = false;
 				}
 
-				if((IsTerrain(lowerRightGid) || IsWalkable(lowerRightGid)) && map[x][y].type != LEFT)
-					map[x][y].type = PLATFORM;
+				if((IsTerrain(lowerRightGid) || IsWalkable(lowerRightGid)) && groundWalkabilityMap->at(x).at(y).type != LEFT)
+					groundWalkabilityMap->at(x).at(y).type = PLATFORM;
 
 				// Check right tile
 				uint rightGid = layer->GetGidValue(x + 1, y);
 				// If there's no tile
-				if(rightGid <= 0 && map[x][y].type != LEFT) continue;
+				if(rightGid <= 0 && groundWalkabilityMap->at(x).at(y).type != LEFT) continue;
 
 				// If there's info about the tile
 				if(IsTerrain(rightGid) || IsWalkable(rightGid))
 				{
-					if(map[x][y].type == LEFT) map[x][y].type = SOLO;
-					else map[x][y].type = RIGHT;
+					if(groundWalkabilityMap->at(x).at(y).type == LEFT) groundWalkabilityMap->at(x).at(y).type = SOLO;
+					else groundWalkabilityMap->at(x).at(y).type = RIGHT;
 					platformStarted = false;
 				}
 			}
 		}
-	}	
-	return true;
+	}
+	groundWalkabilityMap = std::move(groundWalkabilityMap);
+	return groundWalkabilityMap.get();
 }
 
 bool Map::IsWalkable(uint gid) const
@@ -672,23 +677,23 @@ bool Map::IsTerrain(uint gid) const
 
 void Map::DrawNodeDebug() const
 {
-	for(int i = 0; i < map.size(); i++)
+	for(int i = 0; i < groundWalkabilityMap->size(); i++)
 	{
-		for(int j = 0; j < map[0].size(); j++)
+		for(int j = 0; j < groundWalkabilityMap->at(0).size(); j++)
 		{
 			using enum NavType;
-			if(map[i][j].type != NONE)
-			{
-				SDL_Color rgba = {0, 0, 0, 255};
-				if(map[i][j].type == LEFT || map[i][j].type == RIGHT) rgba.r = 255;
-				else if(map[i][j].type == PLATFORM) rgba.b = 255;
-				else if(map[i][j].type != NavType::NONE) rgba.g = 255;
+			if(groundWalkabilityMap->at(i).at(j).type == NONE || groundWalkabilityMap->at(i).at(j).type == TERRAIN)
+				continue;
+			
+			SDL_Color rgba = {0, 0, 0, 255};
+			if(groundWalkabilityMap->at(i).at(j).type == LEFT || groundWalkabilityMap->at(i).at(j).type == RIGHT) rgba.r = 255;
+			else if(groundWalkabilityMap->at(i).at(j).type == PLATFORM) rgba.b = 255;
+			else if(groundWalkabilityMap->at(i).at(j).type == SOLO) rgba.g = 255;
 
-				iPoint pos = MapToWorld(i, j);
-				pos.x += mapData.tileWidth/2;
-				pos.y += mapData.tileHeight;
-				app->render->DrawCircle(pos, 10, rgba);
-			}
+			iPoint pos = MapToWorld(i, j);
+			pos.x += mapData.tileWidth/2;
+			pos.y += mapData.tileHeight;
+			app->render->DrawCircle(pos, 10, rgba);
 		}
 	}
 }

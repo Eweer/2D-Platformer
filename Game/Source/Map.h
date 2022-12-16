@@ -22,21 +22,26 @@ enum class NavType
 	PLATFORM,
 	LEFT,
 	RIGHT,
-	SOLO
+	SOLO,
+	TERRAIN
 };
 
 struct NavLink
 {
+	NavLink() = default;
+	explicit NavLink(iPoint p, int g) : destination(p), score(g) {};
 	iPoint destination = {0,0};
-	int score = 0;
-	int jumpValue = 0;
+	int score = 10;
 };
 
-struct navPoint
+struct NavPoint
 {
+	NavPoint() = default;
 	NavType type = NavType::NONE;
-	NavLink link;
+	std::vector<NavLink> links;
 };
+
+using navPointMatrix = std::vector<std::vector<NavPoint>>;
 
 enum class MapTypes
 {
@@ -204,7 +209,7 @@ public:
 
 	int GetTileSetSize() const;
 
-	bool CreateWalkabilityMap();
+	navPointMatrix *CreateWalkabilityMap();
 
 	bool IsWalkable(uint gid) const;
 
@@ -236,8 +241,7 @@ private:
 	std::string mapFolder;
 	bool mapLoaded = false;
 	std::vector<std::unique_ptr<PhysBody>> collidersOnMap;
-	std::vector<std::vector<navPoint>> map;
-	std::vector<bool> walkability;
+	std::unique_ptr<navPointMatrix> groundWalkabilityMap = std::make_unique<navPointMatrix>();
 };
 
 #endif // __MAP_H__

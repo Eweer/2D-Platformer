@@ -9,6 +9,7 @@
 #include "Map.h"
 #include "BitMaskColliderLayers.h"
 #include "Player.h"
+#include "Pathfinding.h"
 
 #include "Defs.h"
 #include "Log.h"
@@ -45,7 +46,7 @@ bool Scene::Awake(pugi::xml_node& config)
 bool Scene::Start()
 {	
 	// Load map
-	if(app->map->Load()) app->map->CreateWalkabilityMap();
+	if(app->map->Load()) app->pathfinding->SetWalkabilityMap();
 
 	// Set the window title with map/tileset info
 	std::string title = std::format(

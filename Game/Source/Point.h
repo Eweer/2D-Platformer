@@ -95,6 +95,26 @@ public:
 		return(*this);
 	}
 
+	Point Left()
+	{
+		return Point(x - 1, y);
+	}
+
+	Point Right()
+	{
+		return Point(x + 1, y);
+	}
+
+	Point Up()
+	{
+		return Point(x, y - 1);
+	}
+
+	Point Down()
+	{
+		return Point(x, y + 1);
+	}
+
 	// Distances ---------------------------------------------
 	T DistanceTo(const Point& v) const
 	{

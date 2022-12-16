@@ -362,13 +362,13 @@ void Player::BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, Phys
 				{
 					bKeepMomentum = true;
 					velocityToKeep = pBody->body->GetLinearVelocity();
+					jump = {
+						.bOnAir = false,
+						.currentJumps = 0,
+						.maxJumps = jump.maxJumps,
+						.jumpImpulse = jump.jumpImpulse,
+					};
 				}
-				jump = {
-					.bOnAir = false,
-					.currentJumps = 0,
-					.maxJumps = jump.maxJumps,
-					.jumpImpulse = jump.jumpImpulse,
-				};
 			}
  			
 			break;
