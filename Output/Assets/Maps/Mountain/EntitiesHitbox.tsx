@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.9" tiledversion="1.9.2" name="EntitiesHitbox" class="Characters" tilewidth="128" tileheight="128" tilecount="31" columns="0" objectalignment="topleft">
+<tileset version="1.9" tiledversion="1.9.2" name="EntitiesHitbox" class="Characters" tilewidth="1600" tileheight="800" tilecount="31" columns="0" objectalignment="topleft">
  <grid orientation="orthogonal" width="1" height="1"/>
  <properties>
   <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="2"/>
@@ -136,7 +136,7 @@
   <image width="128" height="128" source="../../Animations/Enemies/Mountain/Dwarf/Walk/walk1.png"/>
   <objectgroup draworder="index" id="2">
    <object id="1" name="Sensor" class="Dynamic" x="24" y="44" width="57" height="48">
-    <polygon points="12,2 28,2 40,11 40,26 42,35 41.2453,39 35,45 10,45 7,42 -1,39 2,24 6,17"/>
+    <polygon points="11,-1 30,-1 41,11 40,26 42,35 41.2453,39 35,45 10,45 7,42 -1,39 2,24 2,16"/>
    </object>
    <object id="2" name="Ground" class="Dynamic" x="41" y="84" width="7" height="7">
     <ellipse/>
