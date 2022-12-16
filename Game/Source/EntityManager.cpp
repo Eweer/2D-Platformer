@@ -51,6 +51,9 @@ bool EntityManager::Start()
 			if(!entity->Start()) return false;
 		}
 	}
+
+	player = GetPlayerCharacter();
+
 	return true;
 }
 
@@ -71,9 +74,7 @@ bool EntityManager::CleanUp()
 void EntityManager::CreateEntity(std::string const &entityClass, pugi::xml_node const &parameters)
 {
 	// Get correct ID (check if queue is empty or not)
-	int id = (allEntities[entityClass].emptyElements.empty())
-		? allEntities[entityClass].entities.size()
-		: allEntities[entityClass].emptyElements.front();
+	int id = allEntities[entityClass].entities.size();
 
 	// Initialize pointer if node is a character, nullptr otherwise
 	std::unique_ptr<Character>characterPtr = nullptr;
@@ -95,43 +96,22 @@ void EntityManager::CreateEntity(std::string const &entityClass, pugi::xml_node 
 	}
 
 	// Move the pointer to its place
-	if(allEntities[entityClass].emptyElements.empty()) [[likely]]
-		allEntities[entityClass].entities.push_back(std::move(characterPtr));
-	else [[unlikely]]
-	{
-		allEntities[entityClass].entities[id].reset(characterPtr.release());
-		allEntities[entityClass].emptyElements.pop_front();
-	}
-}
+	allEntities[entityClass].entities.push_back(std::move(characterPtr));
 
-bool EntityManager::DestroyEntity(Entity const *entity, std::string_view type)
-{
-	if(auto vec = allEntities.find(type); vec != allEntities.end())
-	{
-		for(auto &item : vec->second.entities)
-		{
-			if(item.get() == entity)
-			{
-				item->CleanUp();
-				item.reset();
-				return true;
-			}
-		}
-	}
-	return false;
 }
 
 bool EntityManager::DestroyEntity(std::string const &type, int id)
 {
-	if(id < 0) return false;
+	if(id < 0 || !allEntities.contains(type)) return false;
 
-	allEntities[type].entities.at(id)->CleanUp();
-	allEntities[type].emptyElements.push_back(id);
+	allEntities[type].entities.at(id)->Stop();
+	allEntities[type].entities.at(id).reset();
+	allEntities[type].entities.erase(allEntities[type].entities.begin() + id);
 
-	return false;
+	return true;
 }
 
-bool EntityManager::LoadAllTextures()
+bool EntityManager::LoadAllTextures() const
 {
 	using enum CL::ColliderLayers;
 	auto excludedFlag = PLATFORMS | ITEMS;
@@ -283,6 +263,20 @@ bool EntityManager::IsEntityActive(Entity const *entity) const
 	return true;
 }
 
+void EntityManager::CreateAllColliders() const
+{
+	for(auto const &[entityType, entityInfo] : allEntities)
+	{
+		if(StrEquals(entityType, "player")) continue;
+
+		for(auto const &entity : entityInfo.entities)
+		{
+			if(!IsEntityActive(entity.get()) || StrEquals(entity->name, "item"))
+				continue;
+		}
+	}
+}
+
 bool EntityManager::DoesEntityExist(Entity const *entity) const
 {
 	if(entity) return true;
@@ -295,7 +289,13 @@ bool EntityManager::PreUpdate()
 	{
 		for(auto const &entity : entityInfo.entities)
 		{
+			if(!IsEntityActive(entity.get())) continue;
 			if(entity->disableOnNextUpdate) entity->Stop();
+			if((entity->type & CL::ColliderLayers::ENEMIES) == CL::ColliderLayers::ENEMIES)
+			{
+				auto enemy = dynamic_cast<Enemy *>(entity.get());
+				//enemy->SetPath(player->position);
+			}
 		}
 	}
 	return true;
@@ -307,6 +307,7 @@ bool EntityManager::PostUpdate()
 	{
 		for(auto const &entity : entityInfo.entities)
 		{
+			if(!IsEntityActive(entity.get())) continue;
 			entity->StopProjectiles();
 		}
 	}
@@ -352,18 +353,4 @@ Player *EntityManager::GetPlayerCharacter() const
 	   it != allEntities.end())
 		return dynamic_cast<Player *>(it->second.entities.front().get());
 	return nullptr;
-}
-
-void EntityManager::CreateAllColliders()
-{
-	for(auto const &[entityType, entityInfo] : allEntities)
-	{
-		if(StrEquals(entityType, "player")) continue;
-
-		for(auto const &entity : entityInfo.entities)
-		{
-			if(!IsEntityActive(entity.get()) || StrEquals(entity->name, "item")) 
-				continue;
-		}
-	}
 }
