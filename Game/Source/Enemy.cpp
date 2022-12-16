@@ -29,9 +29,12 @@ bool Enemy::Awake()
 
 bool Enemy::Update()
 {
+	// While doing hurt/dead animation, we don't move the character
 	if(iFrames > 0)
-	{
+	{		
 		iFrames++;
+
+		// If enemy is dead
 		if(hp == 0)
 		{
 			if(texture->IsLastFrame()) texture->Pause();
@@ -41,22 +44,50 @@ bool Enemy::Update()
 				active = false;
 			}
 		}
-		else
+		// If it's not dead and iFrame timer expired
+		else if(iFrames >= 20)
 		{
-			if(iFrames >= 20)
-			{
-				texture->SetCurrentAnimation("idle");
-				iFrames = 0;
-			}
+			iFrames = 0;
 		}
 	}
-	else
+	// If there's a valid path and we haven't finished it, we have to move
+	else if(!path.empty() && currentPathIndex < path.size() - 1)
 	{
-		//Update Character position in pixels
+		b2Vec2 vel = pBody->body->GetLinearVelocity();
+		auto currentCoords = app->map->WorldToCoordinates(position);
+
+		// If we got to the tile, we need to go to the next one
+		if(currentCoords == path[currentPathIndex]) currentPathIndex++;
+
+		// Set speed and direction depending on quadrant
+		if(currentCoords.x > path[currentPathIndex].x)
+		{
+			vel.x = -2.0f;
+			dir = 1;
+			texture->SetCurrentAnimation("walk");
+		}
+		else if(currentCoords.x < path[currentPathIndex].x)
+		{
+			vel.x = 2.0f;
+			dir = 0;
+			texture->SetCurrentAnimation("walk");
+		}
+		else
+		{
+			vel.x = 0;
+			texture->SetCurrentAnimation("idle");
+		}
+
+		pBody->body->SetLinearVelocity(vel);
+	}
+	else texture->SetCurrentAnimation("idle");
+
+	//Update Character position in pixels
+	if(pBody)
+	{
 		position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x);
 		position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y);
 	}
-
 	app->render->DrawCharacterTexture(
 		texture->UpdateAndGetFrame(),
 		iPoint(position.x - colliderOffset.x, position.y - colliderOffset.y),
@@ -72,31 +103,37 @@ bool Enemy::SetPath(iPoint destination)
 	auto positionTile = app->map->WorldToCoordinates(position);
 	auto destinationTile = app->map->WorldToCoordinates(destination);
 
-	// Set the path
-	path = app->pathfinding->AStarSearch(positionTile, destinationTile);
+	// If the new path is valid and not empty, it's the new path
+	if(std::vector<iPoint> retPath = app->pathfinding->AStarSearch(positionTile, destinationTile);
+	   !retPath.empty())
+	{
+		path = retPath;
+		return true;
+	}
 
-	// If is empty, no path could be formed
-	if(path.empty()) return false;
-
-	return true;
+	return false;
 }
 
 void Enemy::OnCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB)
 {
 	using enum CL::ColliderLayers;
-	if(iFrames == 0)
+
+	if(iFrames == 0 // iFrames are not enabled
+	   && ((pBodyB->ctype & BULLET) == BULLET) // got hit by a bullet
+	   && ((pBodyB->pListener->source & PLAYER) == PLAYER)) // the source of the bullet was the player
 	{
-		if(((pBodyB->ctype & BULLET) == BULLET) && ((pBodyB->pListener->source & PLAYER) == PLAYER))
+		hp -= 1;
+		iFrames = 1;
+		if(hp <= 0)
 		{
-			hp -= 1;
-			iFrames = 1;
-			if(hp <= 0)
-			{
-				texture->SetCurrentAnimation("death");
-				Disable();
-				active = true;
-			}
-			else texture->SetCurrentAnimation("hurt");
+			texture->SetCurrentAnimation("death");
+
+			// We stop all X momentum
+			pBody->body->SetLinearVelocity(b2Vec2(0, pBody->body->GetLinearVelocity().y));
+
+			Disable();
+			active = true;
 		}
+		else texture->SetCurrentAnimation("hurt");
 	}
 }

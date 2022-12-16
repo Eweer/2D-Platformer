@@ -64,8 +64,8 @@ std::vector<NavLink> SearchNode::GetAdjacentAirNodes(std::shared_ptr<SearchNode>
 
 bool SearchNode::IsWalkable(iPoint p) const
 {
-	return (!app->pathfinding->IsValidPosition(p)
-		&& app->pathfinding->GetNavPoint(p).type != NavType::NONE);
+	return app->pathfinding->IsValidPosition(p)
+		&& app->pathfinding->GetNavPoint(p).type != NavType::NONE;
 }
 
 // ---------- PathFinding ---------

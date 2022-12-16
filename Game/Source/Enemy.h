@@ -16,6 +16,7 @@ public:
 	void OnCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB) override;
 	bool SetPath(iPoint destination);
 
+	int currentPathIndex = 0;
 	std::vector<iPoint> path;
 
 	bool bAttack = false;
