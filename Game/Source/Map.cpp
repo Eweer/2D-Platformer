@@ -50,7 +50,7 @@ void Map::Draw() const
 			elem.AdvanceTimer();
 		}
 	}
-	DrawNodeDebug();
+	if(app->physics->IsDebugActive()) DrawNodeDebug();
 }
 
 void Map::DrawLayer(const MapLayer *layer) const
@@ -568,7 +568,7 @@ int Map::GetTileSetSize() const
 	return mapData.tilesets.size();
 }
 
-bool Map::CreateWalkabilityMap(int &width, int &height)
+bool Map::CreateWalkabilityMap()
 {
 	for(int i = 0; i < mapData.width; i++)
 	{
@@ -577,6 +577,7 @@ bool Map::CreateWalkabilityMap(int &width, int &height)
 			aux.emplace_back();
 		map.push_back(aux);
 	}
+
 	for(auto const &layer : mapData.mapLayers)
 	{
 		for(int y = 0; y < layer->height - 1; y++)
@@ -614,10 +615,8 @@ bool Map::CreateWalkabilityMap(int &width, int &height)
 					platformStarted = false;
 				}
 
-				if(IsTerrain(lowerRightGid) || IsWalkable(lowerRightGid))
-				{
-					if(map[x][y].type != LEFT) map[x][y].type = PLATFORM;
-				}
+				if((IsTerrain(lowerRightGid) || IsWalkable(lowerRightGid)) && map[x][y].type != LEFT)
+					map[x][y].type = PLATFORM;
 
 				// Check right tile
 				uint rightGid = layer->GetGidValue(x + 1, y);

@@ -204,7 +204,7 @@ public:
 
 	int GetTileSetSize() const;
 
-	bool CreateWalkabilityMap(int &width, int &height);
+	bool CreateWalkabilityMap();
 
 	bool IsWalkable(uint gid) const;
 
