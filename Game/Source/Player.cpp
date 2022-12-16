@@ -164,9 +164,7 @@ bool Player::Update()
 	b2Vec2 vel = pBody->body->GetLinearVelocity();
 	b2Vec2 impulse = {0, 0};
 	float maxVel = app->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT ? 7.5f : 5.0f;
-	bool moveCamera = false;
 
-	
 	// If it's able to move
 	if(bAbleToMove)
 	{
@@ -175,7 +173,6 @@ bool Player::Update()
 		{
 			if(vel.y != 0) impulse.x = b2Max(vel.x - 0.15f, maxVel * -1);
 			else impulse.x = b2Max(vel.x - 0.25f, maxVel * -1);
-			moveCamera = true;
 			dir = 1;
 		}
 
@@ -183,7 +180,6 @@ bool Player::Update()
 		{
 			if(vel.y != 0) impulse.x = b2Min(vel.x + 0.15f, maxVel);
 			else impulse.x = b2Min(vel.x + 0.25f, maxVel);
-			moveCamera = true;
 			dir = 0;
 		}
 		if(impulse.x == 0) impulse.x = vel.x * 0.98f;
