@@ -289,12 +289,21 @@ bool EntityManager::PreUpdate()
 	{
 		for(auto const &entity : entityInfo.entities)
 		{
-			if(!IsEntityActive(entity.get())) continue;
 			if(entity->disableOnNextUpdate) entity->Stop();
 			if((entity->type & CL::ColliderLayers::ENEMIES) == CL::ColliderLayers::ENEMIES)
 			{
 				auto enemy = dynamic_cast<Enemy *>(entity.get());
-				auto destinationCoords = app->pathfinding->GetTerrainUnder(player->position);
+
+				// Adjust Y position to floor under player
+				auto destinationCoords = app->pathfinding->GetTerrainUnder(player->position - player->colliderOffset);
+
+				// Adjust X position to nearest tile to enemy that is next to the player
+				auto originCoords = app->map->WorldToCoordinates(enemy->position - enemy->colliderOffset/2);
+
+				if(destinationCoords.x - originCoords.x > 0) destinationCoords.x--;
+				else destinationCoords.x++;
+
+				// Set the path
 				enemy->SetPath(destinationCoords);
 			}
 		}

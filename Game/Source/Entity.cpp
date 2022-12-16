@@ -49,7 +49,7 @@ bool Entity::Stop()
 {
 	if(pBody)
 	{
-		if(pBody->body) app->physics->DestroyBody(pBody->body);
+ 		if(pBody->body) app->physics->DestroyBody(pBody->body);
 		pBody.reset();
 	}
 	disableOnNextUpdate = false;

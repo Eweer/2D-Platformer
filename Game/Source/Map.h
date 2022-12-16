@@ -200,6 +200,10 @@ public:
 	iPoint MapToWorld(int x, int y) const;
 
 	iPoint WorldToCoordinates(iPoint position) const;
+
+	int WorldXToCoordinates(int n) const;
+
+	int WorldYToCoordinates(int n) const;
 	
 	int GetWidth() const;
 
