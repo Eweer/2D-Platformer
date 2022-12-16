@@ -242,7 +242,7 @@ private:
 	std::string mapFileName;
 	std::string mapFolder;
 	bool mapLoaded = false;
-	std::vector<std::unique_ptr<PhysBody>> collidersOnMap;
+	std::vector<std::unique_ptr<PhysBody>> terrainColliders;
 	std::unique_ptr<navPointMatrix> groundWalkabilityMap = std::make_unique<navPointMatrix>();
 };
 

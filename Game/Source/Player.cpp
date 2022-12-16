@@ -394,3 +394,8 @@ void Player::BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, Phys
 			break;
 	}
 }
+
+bool Player::IsOnAir() const
+{
+	return jump.bOnAir;
+}

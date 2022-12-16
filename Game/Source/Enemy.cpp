@@ -51,22 +51,22 @@ bool Enemy::Update()
 		}
 	}
 	// If there's a valid path and we haven't finished it, we have to move
-	else if(!path.empty() && currentPathIndex < path.size() - 1)
+	else if(path && !path->empty() && currentPathIndex < path->size() - 1)
 	{
 		b2Vec2 vel = pBody->body->GetLinearVelocity();
 		auto currentCoords = app->map->WorldToCoordinates(position);
 
 		// If we got to the tile, we need to go to the next one
-		if(currentCoords == path[currentPathIndex]) currentPathIndex++;
+		if(currentCoords == path->at(currentPathIndex)) currentPathIndex++;
 
 		// Set speed and direction depending on quadrant
-		if(currentCoords.x > path[currentPathIndex].x)
+		if(currentCoords.x > path->at(currentPathIndex).x)
 		{
 			vel.x = -2.0f;
 			dir = 1;
 			texture->SetCurrentAnimation("walk");
 		}
-		else if(currentCoords.x < path[currentPathIndex].x)
+		else if(currentCoords.x < path->at(currentPathIndex).x)
 		{
 			vel.x = 2.0f;
 			dir = 0;
@@ -97,21 +97,20 @@ bool Enemy::Update()
 	return true;
 }
 
-bool Enemy::SetPath(iPoint destination)
+bool Enemy::SetPath(iPoint destinationCoords)
 {
 	// Get the coordinates of origin and destination
 	auto positionTile = app->map->WorldToCoordinates(position);
-	auto destinationTile = app->map->WorldToCoordinates(destination);
 
+	auto pathPtr = app->pathfinding->AStarSearch(positionTile, destinationCoords);
+
+	// If it's nullptr we don't update the path
+	if(!pathPtr.get()) return false;
+	
 	// If the new path is valid and not empty, it's the new path
-	if(std::vector<iPoint> retPath = app->pathfinding->AStarSearch(positionTile, destinationTile);
-	   !retPath.empty())
-	{
-		path = retPath;
-		return true;
-	}
-
-	return false;
+	path = std::move(pathPtr);
+	currentPathIndex = 0;
+	return true;
 }
 
 void Enemy::OnCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB)

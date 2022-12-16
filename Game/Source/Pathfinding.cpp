@@ -93,13 +93,13 @@ int Pathfinding::HeuristicCost(iPoint origin, iPoint destination) const
 	return origin.DistanceManhattan(destination);
 }
 
-std::vector<iPoint> Pathfinding::AStarSearch(iPoint origin, iPoint destination) const
+std::unique_ptr<std::vector<iPoint>> Pathfinding::AStarSearch(iPoint origin, iPoint destination) const
 {
 	// Check if path is valid. If it isn't log it and return an empty path
 	if(!IsValidPosition(origin) || !IsValidPosition(destination))
 	{
 		LOG("Path from %s, %s to %s, %s is not valid", origin.x, origin.y, destination.x, destination.y);
-		return std::vector<iPoint>();
+		return nullptr;
 	}
 
 	// Counter of iterations so we can log it
@@ -125,18 +125,18 @@ std::vector<iPoint> Pathfinding::AStarSearch(iPoint origin, iPoint destination) 
 		if(currentNode.position == destination)
 		{
 			// Build the path
-			std::vector<iPoint> path;
+			auto path = std::make_unique<std::vector<iPoint>>();
 			auto node = std::make_shared<SearchNode>(currentNode);
 			while(node)
 			{
-				path.emplace_back(node->position);
+				path->emplace_back(node->position);
 				node = node->parent;
 			}
 			// Reverse the path, as it's ordered from destination to origin
-			std::ranges::reverse(path);
+			std::ranges::reverse(path->begin(), path->end());
 
 			// Log information and return the path
-			LOG("Created path of %d steps in %d iterations", path.size(), iterations);
+			LOG("Created path of %d steps in %d iterations", path->size(), iterations);
 			return path;
 		}
 
@@ -221,5 +221,21 @@ std::vector<iPoint> Pathfinding::AStarSearch(iPoint origin, iPoint destination) 
 
 	// If we ended last while, it means there is no path available.
 	// We return an empty vector
-	return std::vector<iPoint>();
+	return nullptr;
+}
+
+iPoint Pathfinding::GetTerrainUnder(iPoint position) const
+{
+	position = app->map->WorldToCoordinates(position);
+	if(!IsValidPosition(position))
+	{
+		position.x = in_range(position.x, 0, groundMap->size());
+		position.y = in_range(position.y, 0, groundMap[0].size());
+	}
+
+	for(int y = position.y; y < groundMap[position.x].size(); y++)
+		if(GetNavPoint({position.x, y}).type != NavType::NONE)
+			return {position.x, y};
+
+	return position;
 }

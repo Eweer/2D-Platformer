@@ -23,6 +23,8 @@ public:
 
 	void BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB) final;
 
+	bool IsOnAir() const;
+
 private:
 	bool LoadProjectileData();
 

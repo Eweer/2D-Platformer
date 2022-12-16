@@ -48,7 +48,9 @@ class Pathfinding : public Module
 {
 public:
 	// ------ Algorithms
-	std::vector<iPoint> AStarSearch(iPoint origin, iPoint destination) const;
+	std::unique_ptr<std::vector<iPoint>> AStarSearch(iPoint origin, iPoint destination) const;
+
+	iPoint GetTerrainUnder(iPoint position) const;
 	
 	// ------ Utils
 	// --- Set maps
@@ -59,7 +61,6 @@ public:
 
 private:
 	int HeuristicCost(iPoint origin, iPoint destination) const;
-
 
 	int maxJump = 1;
 	int minJump = 1;

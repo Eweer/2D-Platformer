@@ -378,7 +378,7 @@ std::unique_ptr<MapLayer> Map::LoadLayer(pugi::xml_node const &node)
 			if(auto colliderCreated = CreateCollider(gid, pos.x, pos.y, tileset);
 			   colliderCreated != nullptr)
 			{
-				collidersOnMap.emplace_back(std::move(colliderCreated));
+				terrainColliders.emplace_back(std::move(colliderCreated));
 			}
 
 			retTileAnim.gid = gid;

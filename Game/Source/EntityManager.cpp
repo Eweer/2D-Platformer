@@ -294,7 +294,8 @@ bool EntityManager::PreUpdate()
 			if((entity->type & CL::ColliderLayers::ENEMIES) == CL::ColliderLayers::ENEMIES)
 			{
 				auto enemy = dynamic_cast<Enemy *>(entity.get());
-				enemy->SetPath(player->position);
+				auto destinationCoords = app->pathfinding->GetTerrainUnder(player->position);
+				enemy->SetPath(destinationCoords);
 			}
 		}
 	}

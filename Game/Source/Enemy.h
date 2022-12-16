@@ -17,7 +17,7 @@ public:
 	bool SetPath(iPoint destination);
 
 	int currentPathIndex = 0;
-	std::vector<iPoint> path;
+	std::unique_ptr<std::vector<iPoint>> path;
 
 	bool bAttack = false;
 	bool bDeath = false;
