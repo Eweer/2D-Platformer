@@ -622,7 +622,7 @@ bool Map::CreateWalkabilityMap(int &width, int &height)
 					if(rightGid <= 0 && map[x][y].type != LEFT) map[x][y].type = PLATFORM;
 
 					// If there's info about the tile
-					if(IsWalkable(rightGid))
+					if(!IsWalkable(rightGid))
 					{
 						if(map[x][y].type == LEFT) map[x][y].type = SOLO;
 						else map[x][y].type = RIGHT;
