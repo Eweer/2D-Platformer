@@ -16,6 +16,28 @@
 using XML_Property_t = std::variant<int, bool, float, std::string>;
 using XML_Properties_Map_t = std::unordered_map<std::string, XML_Property_t, StringHash, std::equal_to<>>;
 
+enum class NavType
+{
+	NONE = 0,
+	PLATFORM,
+	LEFT,
+	RIGHT,
+	SOLO
+};
+
+struct NavLink
+{
+	iPoint destination = {0,0};
+	int score = 0;
+	int jumpValue = 0;
+};
+
+struct navPoint
+{
+	NavType type = NavType::NONE;
+	NavLink link;
+};
+
 enum class MapTypes
 {
 	MAPTYPE_UNKNOWN = 0,
@@ -184,6 +206,11 @@ public:
 
 	bool CreateWalkabilityMap(int &width, int &height);
 
+	bool IsWalkable(uint gid) const;
+
+	void DrawNodeDebug() const;
+
+
 private:
 
 	bool LoadMap(pugi::xml_node const &mapFile);
@@ -207,6 +234,7 @@ private:
 	std::string mapFolder;
 	bool mapLoaded = false;
 	std::vector<std::unique_ptr<PhysBody>> collidersOnMap;
+	std::vector<std::vector<navPoint>> map;
 	std::vector<bool> walkability;
 };
 

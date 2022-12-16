@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <utility>
 #include <regex>
+#include <variant>
 
 #include "SDL_image/include/SDL_image.h"
 
@@ -49,6 +50,7 @@ void Map::Draw() const
 			elem.AdvanceTimer();
 		}
 	}
+	DrawNodeDebug();
 }
 
 void Map::DrawLayer(const MapLayer *layer) const
@@ -566,31 +568,110 @@ int Map::GetTileSetSize() const
 	return mapData.tilesets.size();
 }
 
-enum class NavType
-
-struct navPoint
-{
-	int platformIndex = 0;
-	NavType type = NavType::NONE;
-};
-
 bool Map::CreateWalkabilityMap(int &width, int &height)
 {
-	std::vector<std::vector<navPoint>> map;
+	for(int i = 0; i < mapData.width; i++)
+	{
+		std::vector<navPoint> aux;
+		for(int j = 0; j < mapData.height; j++)
+			aux.emplace_back();
+		map.push_back(aux);
+	}
 	for(auto const &layer : mapData.mapLayers)
 	{
-		for(int x = 0; x < layer->width; x++)
+		for(int y = 0; y < layer->height - 1; y++)
 		{
-			for(int y = 0; y < layer->height; y++)
+			bool platformStarted = false;
+			std::vector<navPoint> row;
+			for(int x = 0; x < layer->width - 1; x++)
 			{
-				uint gid = layer->GetGidValue(x, y);
-
-				if(gid <= 0) continue;
-
-				TileSet *tileset = GetTilesetFromTileId(gid);
+				using enum NavType;
+				// If we already have a navPoint of another layer we don't want to overwrite it
+				if(map[x][y].type != NONE) continue;
 				
+				// Check if current tile is a free node
+				uint currentTileGid = layer->GetGidValue(x, y);
+				if(IsWalkable(currentTileGid)) continue;
+
+				// Check if bottom tile is walkable terrain
+				uint lowerGid = layer->GetGidValue(x, y + 1);
+				if(lowerGid <= 0 || !IsWalkable(lowerGid)) continue;
+
+				// If platform is not started, we assign it as left edge and start a new platform
+				if(!platformStarted)
+				{
+					platformStarted = true;
+					map[x][y].type = LEFT;
+				}
+
+				// Check lower right tile
+				uint lowerRightGid = layer->GetGidValue(x + 1, y + 1);
+				// If there's no tile
+				if(lowerRightGid <= 0)
+				{
+					if(map[x][y].type == LEFT) map[x][y].type = SOLO;
+					else map[x][y].type = RIGHT;
+					platformStarted = false;
+				}
+
+				if(IsWalkable(lowerRightGid))
+				{
+					// Check right tile
+					uint rightGid = layer->GetGidValue(x + 1, y);
+					// If there's no tile
+					if(rightGid <= 0 && map[x][y].type != LEFT) map[x][y].type = PLATFORM;
+
+					// If there's info about the tile
+					if(IsWalkable(rightGid))
+					{
+						if(map[x][y].type == LEFT) map[x][y].type = SOLO;
+						else map[x][y].type = RIGHT;
+						platformStarted = false;
+					}
+				}
 			}
 		}
 	}	
 	return true;
+}
+
+bool Map::IsWalkable(uint gid) const
+{
+	
+	TileSet *tileset = GetTilesetFromTileId(gid);
+	// If there's info about the tile
+	if(auto tileInfo = tileset->tileInfo.find(gid-1);
+	tileInfo != tileset->tileInfo.end())
+	{
+		// If it's a collisionable tile
+		auto walkProperty = (*std::get_if<bool>(&tileInfo->second->properties.find("Walkability")->second));
+		if(walkProperty)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+void Map::DrawNodeDebug() const
+{
+	for(int i = 0; i < map.size(); i++)
+	{
+		for(int j = 0; j < map[0].size(); j++)
+		{
+			using enum NavType;
+			if(map[i][j].type != NONE)
+			{
+				SDL_Color rgba = {0, 0, 0, 255};
+				if(map[i][j].type == LEFT || map[i][j].type == RIGHT) rgba.r = 255;
+				else if(map[i][j].type == PLATFORM) rgba.b = 255;
+				else if(map[i][j].type != NavType::NONE) rgba.g = 255;
+
+				iPoint pos = MapToWorld(i, j);
+				pos.x += mapData.tileWidth/2;
+				pos.y += mapData.tileHeight;
+				app->render->DrawCircle(pos, 10, rgba);
+			}
+		}
+	}
 }
