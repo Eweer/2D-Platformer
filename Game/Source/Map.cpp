@@ -591,7 +591,7 @@ bool Map::CreateWalkabilityMap(int &width, int &height)
 				
 				// Check if current tile is a free node
 				uint currentTileGid = layer->GetGidValue(x, y);
-				if(IsWalkable(currentTileGid)) continue;
+				if(IsWalkable(currentTileGid) || IsTerrain(currentTileGid)) continue;
 
 				// Check if bottom tile is walkable terrain
 				uint lowerGid = layer->GetGidValue(x, y + 1);
@@ -614,20 +614,22 @@ bool Map::CreateWalkabilityMap(int &width, int &height)
 					platformStarted = false;
 				}
 
-				if(IsWalkable(lowerRightGid))
+				if(IsTerrain(lowerRightGid) || IsWalkable(lowerRightGid))
 				{
-					// Check right tile
-					uint rightGid = layer->GetGidValue(x + 1, y);
-					// If there's no tile
-					if(rightGid <= 0 && map[x][y].type != LEFT) map[x][y].type = PLATFORM;
+					if(map[x][y].type != LEFT) map[x][y].type = PLATFORM;
+				}
 
-					// If there's info about the tile
-					if(!IsWalkable(rightGid))
-					{
-						if(map[x][y].type == LEFT) map[x][y].type = SOLO;
-						else map[x][y].type = RIGHT;
-						platformStarted = false;
-					}
+				// Check right tile
+				uint rightGid = layer->GetGidValue(x + 1, y);
+				// If there's no tile
+				if(rightGid <= 0 && map[x][y].type != LEFT) continue;
+
+				// If there's info about the tile
+				if(IsTerrain(rightGid) || IsWalkable(rightGid))
+				{
+					if(map[x][y].type == LEFT) map[x][y].type = SOLO;
+					else map[x][y].type = RIGHT;
+					platformStarted = false;
 				}
 			}
 		}
@@ -637,7 +639,6 @@ bool Map::CreateWalkabilityMap(int &width, int &height)
 
 bool Map::IsWalkable(uint gid) const
 {
-	
 	TileSet *tileset = GetTilesetFromTileId(gid);
 	// If there's info about the tile
 	if(auto tileInfo = tileset->tileInfo.find(gid-1);
@@ -645,6 +646,23 @@ bool Map::IsWalkable(uint gid) const
 	{
 		// If it's a collisionable tile
 		auto walkProperty = (*std::get_if<bool>(&tileInfo->second->properties.find("Walkability")->second));
+		if(walkProperty)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Map::IsTerrain(uint gid) const
+{
+	TileSet *tileset = GetTilesetFromTileId(gid);
+	// If there's info about the tile
+	if(auto tileInfo = tileset->tileInfo.find(gid-1);
+	tileInfo != tileset->tileInfo.end())
+	{
+		// If it's a collisionable tile
+		auto walkProperty = (*std::get_if<bool>(&tileInfo->second->properties.find("Terrain")->second));
 		if(walkProperty)
 		{
 			return true;

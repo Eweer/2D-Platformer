@@ -208,6 +208,8 @@ public:
 
 	bool IsWalkable(uint gid) const;
 
+	bool IsTerrain(uint gid) const;
+
 	void DrawNodeDebug() const;
 
 
