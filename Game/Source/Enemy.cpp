@@ -66,6 +66,18 @@ bool Enemy::Update()
 	return true;
 }
 
+bool Enemy::SetPath(iPoint destination)
+{
+	// Get the coordinates of origin and destination
+	auto positionTile = app->map->WorldToCoordinates(position);
+	auto destinationTile = app->map->WorldToCoordinates(destination);
+	// Set the path
+	path = app->pathfinding->AStarSearch(positionTile, destinationTile);
+	// If it's empty, no path could be formed
+	if(path.empty()) return false;
+	return true;
+}
+
 void Enemy::OnCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB)
 {
 	using enum CL::ColliderLayers;

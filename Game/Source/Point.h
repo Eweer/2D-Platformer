@@ -57,6 +57,11 @@ public:
 		return r;
 	}
 
+	Point operator /(const Point &v) const
+	{
+		return {x / v.x, y / v.y};
+	}
+
 	const Point& operator -=(const Point &v)
 	{
 		x -= v.x;

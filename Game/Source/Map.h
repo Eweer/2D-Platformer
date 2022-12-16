@@ -198,6 +198,8 @@ public:
 
 	// Translates x,y coordinates from map positions to world positions
 	iPoint MapToWorld(int x, int y) const;
+
+	iPoint WorldToCoordinates(iPoint position) const;
 	
 	int GetWidth() const;
 

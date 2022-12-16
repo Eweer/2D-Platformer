@@ -95,13 +95,15 @@ bool Map::Pause(int phase)
 // Translates x,y coordinates from map positions to world positions
 iPoint Map::MapToWorld(int x, int y) const
 {
-	iPoint ret;
-
-	ret.x = x * mapData.tileWidth;
-	ret.y = y * mapData.tileHeight;
-
-	return ret;
+	return {x * mapData.tileWidth, y * mapData.tileHeight};
 }
+
+// Translates world positions to x,y coordinates
+iPoint Map::WorldToCoordinates(iPoint position) const
+{
+	return position / iPoint(mapData.tileWidth, mapData.tileHeight);
+}
+
 
 // Get relative Tile rectangle
 SDL_Rect TileSet::GetTileRect(int gid) const
