@@ -86,8 +86,6 @@ bool Player::LoadProjectileData()
 			elem.attribute("speed").as_int(),
 			static_cast<ProjectileFreedom>(elem.attribute("freedom").as_uint())
 		);
-		projectileMap.at(pName)->test();
-
 	}
 	return true;
 }

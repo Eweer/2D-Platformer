@@ -23,28 +23,6 @@ enum class ProjectileFreedom : uint16
 	ALL = 0x0020
 };
 
-enum class ProjectileDirection : uint16
-{
-	STATIC = 0x0000,
-	NORTH = 0x0001,
-	WEST = 0x0002,
-	EAST = 0x0004,
-	SOUTH = 0x0008,
-	ANY = 0x0010
-};
-
-inline ProjectileDirection operator|(ProjectileDirection a, ProjectileDirection b)
-{
-	using PDType = std::underlying_type_t<ProjectileDirection>;
-	return static_cast<ProjectileDirection>(static_cast<PDType>(a) | static_cast<PDType>(b));
-}
-
-inline ProjectileDirection &operator|=(ProjectileDirection &a, ProjectileDirection b)
-{
-	a = a | b;
-	return a;
-}
-
 class ProjectileData
 {
 public:
@@ -66,11 +44,6 @@ public:
 
 	~ProjectileData() = default;
 
-	void test()
-	{
-		LOG("Potato");
-	}
-
 	ShapeData shape;
 	std::unique_ptr<b2FixtureDef>fixPtr;
 	iPoint position = {0,0};
@@ -89,24 +62,6 @@ public:
 		{
 			LOG("Projectile could not be created. Anim not found.");
 			return;
-		}
-
-		using enum ProjectileFreedom;
-		using enum ProjectileDirection;
-
-		ProjectileDirection directionLimit = STATIC;
-		switch(info->freedom)
-		{
-			case ANYDIR:
-				directionLimit |= ANY;
-			case EIGHTDIR:
-			case FOURDIR:
-				directionLimit |= NORTH | SOUTH;
-			case TWODIR:
-				directionLimit |= EAST | WEST;
-				break;
-			default:
-				directionLimit = STATIC;
 		}
 		
 		animation = anim;
@@ -127,7 +82,7 @@ public:
 		{
 			flipValue = 2;
 
-			if(info->freedom == TWODIR)
+			if(info->freedom == ProjectileFreedom::TWODIR)
 			{
 				direction.x = -0.5f;
 				direction.y = 0;
@@ -147,7 +102,7 @@ public:
 		{
 			flipValue = 0;
 
-			if(info->freedom == TWODIR)
+			if(info->freedom == ProjectileFreedom::TWODIR)
 			{
 				direction.x = 0.5f;
 				direction.y = 0;
@@ -231,7 +186,15 @@ public:
 		return true;
 	}
 
-	void OnCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fixtureB, PhysBody const *pBodyA, PhysBody const *pBodyB)
+	void BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fixtureB, PhysBody const *pBodyA, PhysBody const *pBodyB)
+	{
+		if((pBodyB->ctype & CL::ColliderLayers::PLATFORMS) == CL::ColliderLayers::PLATFORMS)
+		{
+			OnCollisionStart(fixtureA, fixtureB, pBodyA, pBodyB);
+		}
+	}
+
+	void OnCollisionStart([[maybe_unused]] b2Fixture const *fixtureA, [[maybe_unused]] b2Fixture const *fixtureB, [[maybe_unused]] PhysBody const *pBodyA, [[maybe_unused]] PhysBody const *pBodyB)
 	{
 		bExploding = true;
 		bDestroyPBody= true;
@@ -239,7 +202,6 @@ public:
 	}
 	
 	virtual void OnCollisionEnd(PhysBody *physA, PhysBody *physB) { /* Method to Override */ };
-	virtual void BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB) { /* Method to Override */ };
 
 	bool bDestroyPBody = false;
 	bool bExploding = false;
