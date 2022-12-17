@@ -16,8 +16,13 @@ public:
 	void OnCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB) override;
 	bool SetPath(iPoint destination);
 
+	float SetPathMovementParameters(iPoint currentCords);
+	void DrawDebug() const final;
+	void DrawDebugPath() const;
+
 	int currentPathIndex = 0;
 	std::unique_ptr<std::vector<iPoint>> path;
+	bool bRequestPath = true;
 
 	bool bAttack = false;
 	bool bDeath = false;

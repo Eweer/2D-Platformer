@@ -2,8 +2,11 @@
 #include "App.h"
 
 #include "Map.h"
+#include "Render.h"
 
 #include "Log.h"
+
+#include "BitMaskNavType.h"
 
 #include <queue>
 
@@ -19,15 +22,15 @@ std::vector<NavLink> SearchNode::GetAdjacentGroundNodes(std::shared_ptr<SearchNo
 	// want to risk pathfinding malfunctioning and crashing the game.
 	if(!app->pathfinding->IsValidPosition(currentPosition)) return list;
 	
-	using enum NavType;
+	using enum CL::NavType;
 	NavPoint currentNavPoint = app->pathfinding->GetNavPoint(searchNode.get()->position);
-	NavType currentType = currentNavPoint.type;
+	CL::NavType currentType = currentNavPoint.type;
 	
 	if(IsWalkable(currentPosition.Right()) && (currentType == LEFT || currentType == PLATFORM))
-		list.emplace_back(currentPosition.Right(), 1);
+		list.emplace_back(currentPosition.Right(), 10, NavLinkType::WALK);
 
 	if(IsWalkable(currentPosition.Left()) && (currentType == RIGHT || currentType == PLATFORM))
-		list.emplace_back(currentPosition.Left(), 1);
+		list.emplace_back(currentPosition.Left(), 10, NavLinkType::WALK);
 
 	for(auto const &elem : currentNavPoint.links)
 	{
@@ -52,11 +55,11 @@ std::vector<NavLink> SearchNode::GetAdjacentAirNodes(std::shared_ptr<SearchNode>
 			   || (x == 0 && y == 0))
 				continue;
 
-			if(app->pathfinding->GetNavPoint(iPoint(x, y)).type != NavType::NONE) continue;
+			if(app->pathfinding->GetNavPoint(iPoint(x, y)).type != CL::NavType::NONE) continue;
 
 			// Diagonal cost is 14 (if x == (1 or -1) and y == (1 or -1))
 			// Can also be checked as (x && y), and another option would be ((x & y) == 1)
-			list.emplace_back(iPoint(x, y), abs(x) == abs(y) ? 14 : 10);
+			list.emplace_back(iPoint(x, y), abs(x) == abs(y) ? 14 : 10, NavLinkType::WALK);
 		}
 	}
 	return list;
@@ -65,14 +68,23 @@ std::vector<NavLink> SearchNode::GetAdjacentAirNodes(std::shared_ptr<SearchNode>
 bool SearchNode::IsWalkable(iPoint p) const
 {
 	return app->pathfinding->IsValidPosition(p)
-		&& app->pathfinding->GetNavPoint(p).type != NavType::NONE;
+		&& app->pathfinding->GetNavPoint(p).type != CL::NavType::NONE;
 }
 
 // ---------- PathFinding ---------
 bool Pathfinding::SetWalkabilityMap()
 {
-	groundMap = app->map->CreateWalkabilityMap();
+	auto mapPtr = app->map->CreateWalkabilityMap();
+
+	// Overwrite if there is already a groundMap
+	if(groundMap) groundMap.reset(mapPtr.release());
+	// Otherwise create a new groundMap
+	else groundMap = std::move(mapPtr);
+
 	if(!groundMap) return false;
+
+	CreateWalkabilityLinks();
+
 	return true;
 }
 
@@ -230,12 +242,121 @@ iPoint Pathfinding::GetTerrainUnder(iPoint position) const
 	if(!IsValidPosition(position))
 	{
 		position.x = in_range(position.x, 0, groundMap->size());
-		position.y = in_range(position.y, 0, groundMap[0].size());
+		position.y = in_range(position.y, 0, groundMap->at(0).size());
 	}
 
-	for(int y = position.y; y < groundMap[position.x].size(); y++)
-		if(GetNavPoint({position.x, y}).type != NavType::NONE)
+	for(int y = position.y; y < groundMap->at(position.x).size(); y++)
+		if(GetNavPoint({position.x, y}).type !=  CL::NavType::NONE)
 			return {position.x, y};
 
 	return position;
+}
+
+bool Pathfinding::Update(float dt)
+{
+	if(app->physics->IsDebugActive()) DrawNodeDebug();
+	return true;
+}
+
+void Pathfinding::DrawNodeDebug() const
+{
+	for(int i = 0; i < groundMap->size(); i++)
+	{
+		for(int j = 0; j < groundMap->at(0).size(); j++)
+		{
+			using enum CL::NavType;
+			auto const &tile = groundMap->at(i).at(j);
+			if(tile.type == NONE || tile.type == TERRAIN)
+				continue;
+
+			SDL_Color rgba = {0, 0, 0, 255};
+			if(tile.type == LEFT) { rgba.r = 255; rgba.g = 218; }
+			else if(tile.type == RIGHT) { rgba.r = 255; rgba.g = 143; }
+			else if(tile.type == PLATFORM) rgba.b = 255;
+			else if(tile.type == SOLO) rgba.g = 255;
+
+			iPoint pos = app->map->MapToWorld(i, j);
+			pos.x += app->map->GetTileWidth()/2;
+			pos.y += app->map->GetTileHeight();
+			app->render->DrawCircle(pos, 10, rgba);
+
+			for(auto const &elem : tile.links)
+			{
+				using enum NavLinkType;
+				iPoint elemPos = app->map->MapToWorld(elem.destination.x, elem.destination.y);
+				elemPos.x += app->map->GetTileWidth()/2;
+				elemPos.y += app->map->GetTileHeight();
+				rgba = {0, 0, 0, 255};
+				if(elem.movement == WALK) { rgba.r = 122; rgba.b = 122; }
+				if(elem.movement == FALL) { rgba.b = 122; rgba.g = 122; }
+				if(elem.movement == JUMP) { rgba.g = 122; rgba.r = 122; }
+				app->render->DrawLine(pos, elemPos, rgba);
+			}
+		}
+	}
+}
+
+bool Pathfinding::CreateWalkabilityLinks()
+{
+	for(int x = 0; x < app->map->GetWidth(); x++)
+	{
+		for(int y = 0; y < app->map->GetHeight(); y++)
+		{
+			using enum CL::NavType;
+			CL::NavType maskFlag = NONE;
+			maskFlag = RIGHT | LEFT | SOLO;
+			if((groundMap->at(x).at(y).type & maskFlag) == NONE) continue;
+
+			int leftFrontier = -1;
+			int rightFrontier = 1;
+			// Tile type is not right, left or solo 
+			switch(groundMap->at(x).at(y).type)
+			{
+				case RIGHT:
+					leftFrontier = 1;
+					break;
+				case LEFT:
+					rightFrontier = -1;
+					break;
+				default:
+					break;
+			}
+
+			AddFallLinks({x, y}, {leftFrontier, rightFrontier});
+			
+		}
+	}
+	return true;
+}
+
+void Pathfinding::AddFallLinks(iPoint position, iPoint limit)
+{
+	for(int xToCheck = position.x + limit.x; xToCheck <= position.x + limit.y; xToCheck++)
+	{
+		if(xToCheck == position.x) continue;
+		bool found = false;
+		for(int yToCheck = position.y; !found && yToCheck < app->map->GetHeight(); yToCheck++)
+		{
+			using enum CL::NavType;
+			CL::NavType nodeFlag = RIGHT | PLATFORM | SOLO | LEFT;
+
+			// If it's a terrain tile without a linkable node or the cell is not valid.
+			// As it is not walkable, we go to next X as there will be no link in this column
+			if(!IsValidPosition({xToCheck, yToCheck}) ||
+			   (groundMap->at(xToCheck).at(yToCheck).type & TERRAIN) == TERRAIN) break;
+
+			// If it's not a flag we are looking for we go to next tile in column
+			if((groundMap->at(xToCheck).at(yToCheck).type & nodeFlag) == NONE) continue;
+
+			// Create and push the new link
+			NavLink tempNav = {
+				iPoint(xToCheck, yToCheck),
+				HeuristicCost(position, {xToCheck, yToCheck}) * 10,
+				NavLinkType::FALL
+			};
+			groundMap->at(position.x).at(position.y).links.push_back(tempNav);
+
+			found = true;
+		}
+	}
 }

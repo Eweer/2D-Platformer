@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <save_state>
 	<renderer>
-		<camera x="0" y="0" />
-		<graphics vsync="true" targetfps="60" />
+		<camera x="-2496" y="-469" />
+		<graphics vsync="false" targetfps="60" />
 	</renderer>
 </save_state>

@@ -7,6 +7,8 @@
 #include "Point.h"
 #include <memory>
 #include <vector>
+#include <queue>
+
 
 enum class PathfindTerrain
 {
@@ -36,10 +38,10 @@ struct SearchNode
 	std::vector<NavLink> GetAdjacentAirNodes(std::shared_ptr<SearchNode> searchNode) const;
 
 	bool IsWalkable(iPoint p) const;
-
-	std::strong_ordering operator<=>(const SearchNode &right) const
+	
+	bool operator<(const SearchNode &right) const
 	{
-		return (g + h) <=> (right.g + right.h);
+		return (g + h) > (right.g + right.h);
 	}
 
 };
@@ -51,6 +53,8 @@ public:
 	std::unique_ptr<std::vector<iPoint>> AStarSearch(iPoint origin, iPoint destination) const;
 
 	iPoint GetTerrainUnder(iPoint position) const;
+
+	bool Update(float dt) override;
 	
 	// ------ Utils
 	// --- Set maps
@@ -60,11 +64,14 @@ public:
 	NavPoint &GetNavPoint(iPoint position) const;
 
 private:
+	void DrawNodeDebug() const;
+	bool CreateWalkabilityLinks();
+	void AddFallLinks(iPoint position, iPoint limit);
 	int HeuristicCost(iPoint origin, iPoint destination) const;
 
 	int maxJump = 1;
 	int minJump = 1;
-	navPointMatrix *groundMap;
+	std::unique_ptr<navPointMatrix> groundMap;
 };
 
 #endif //__PATHFINDING_H_

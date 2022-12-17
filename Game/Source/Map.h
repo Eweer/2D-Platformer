@@ -6,6 +6,8 @@
 
 #include "Defs.h"
 #include "Point.h"
+#include "BitMaskNavType.h"
+
 
 #include <functional>
 #include <vector>
@@ -16,28 +18,29 @@
 using XML_Property_t = std::variant<int, bool, float, std::string>;
 using XML_Properties_Map_t = std::unordered_map<std::string, XML_Property_t, StringHash, std::equal_to<>>;
 
-enum class NavType
+enum class NavLinkType
 {
-	NONE = 0,
-	PLATFORM,
-	LEFT,
-	RIGHT,
-	SOLO,
-	TERRAIN
+	UNKNOWN = 0x0000,
+	WALK = 0x0001,
+	FALL = 0x0002,
+	JUMP = 0x0004
 };
 
 struct NavLink
 {
 	NavLink() = default;
-	explicit NavLink(iPoint p, int g) : destination(p), score(g) {};
+	NavLink(iPoint p, int g, NavLinkType n)
+		: destination(p), score(g), movement(n) {};
+	
 	iPoint destination = {0,0};
 	int score = 10;
+	NavLinkType movement = NavLinkType::UNKNOWN;
 };
 
 struct NavPoint
 {
 	NavPoint() = default;
-	NavType type = NavType::NONE;
+	CL::NavType type = CL::NavType::NONE;
 	std::vector<NavLink> links;
 };
 
@@ -215,14 +218,11 @@ public:
 
 	int GetTileSetSize() const;
 
-	navPointMatrix *CreateWalkabilityMap();
+	std::unique_ptr<navPointMatrix> CreateWalkabilityMap();
 
 	bool IsWalkable(uint gid) const;
 
 	bool IsTerrain(uint gid) const;
-
-	void DrawNodeDebug() const;
-
 
 private:
 
@@ -242,14 +242,14 @@ private:
 
 	void LogLoadedData() const;
 
+	std::unique_ptr<navPointMatrix> CreateWalkabilityNodes() const;
+
 	MapData mapData;
 	std::string mapFileName;
 	std::string mapFolder;
 	bool mapLoaded = false;
 	std::vector<std::unique_ptr<PhysBody>> terrainColliders;
-	std::unique_ptr<navPointMatrix> groundWalkabilityMap = std::make_unique<navPointMatrix>();
+	
 };
 
 #endif // __MAP_H__
-
-

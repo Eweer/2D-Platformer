@@ -51,32 +51,24 @@ bool Enemy::Update()
 		}
 	}
 	// If there's a valid path and we haven't finished it, we have to move
-	else if(path && !path->empty() && currentPathIndex < path->size() - 1)
+	else if(path && !path->empty())
 	{
 		b2Vec2 vel = pBody->body->GetLinearVelocity();
 		auto currentCoords = app->map->WorldToCoordinates(position);
 
-		// If we got to the tile, we need to go to the next one
-		if(currentCoords == path->at(currentPathIndex)) currentPathIndex++;
+		// and the currentCoords are the same as the ones on the path[currentPathIndex]
+		// and we are not falling nor jumping
+		if(currentCoords == path->at(currentPathIndex) && vel.y == 0)
+		{
+			// We request a new path in case destination has moved
+			bRequestPath = true;
+			// We update our index unless it's the last tile, as that is our destination
+			if(currentPathIndex < path->size() - 1) currentPathIndex++;
+		}
 
-		// Set speed and direction depending on quadrant
-		if(currentCoords.x > path->at(currentPathIndex).x)
-		{
-			vel.x = -2.0f;
-			dir = 1;
-			texture->SetCurrentAnimation("walk");
-		}
-		else if(currentCoords.x < path->at(currentPathIndex).x)
-		{
-			vel.x = 2.0f;
-			dir = 0;
-			texture->SetCurrentAnimation("walk");
-		}
-		else
-		{
-			vel.x = 0;
-			texture->SetCurrentAnimation("idle");
-		}
+		// Set direction and animation
+		// This function returns the velocity as float32
+		vel.x = SetPathMovementParameters(currentCoords);
 
 		pBody->body->SetLinearVelocity(vel);
 	}
@@ -99,6 +91,8 @@ bool Enemy::Update()
 
 bool Enemy::SetPath(iPoint destinationCoords)
 {
+	bRequestPath = false;
+
 	// Get the coordinates of origin and destination
 	auto positionTile = app->map->WorldToCoordinates(position);
 
@@ -109,8 +103,31 @@ bool Enemy::SetPath(iPoint destinationCoords)
 	
 	// If the new path is valid and not empty, it's the new path
 	path = std::move(pathPtr);
-	currentPathIndex = 0;
+	currentPathIndex = path->size() > 1 ? 1 : 0;
 	return true;
+}
+
+void Enemy::DrawDebugPath() const
+{
+	iPoint origin = path->at(currentPathIndex);
+	origin = app->map->MapToWorld(origin.x, origin.y);
+	origin.x += app->map->GetTileWidth()/2;
+	origin.y += app->map->GetTileHeight();
+
+	for(int i = currentPathIndex; i < path->size() - 1; i++)
+	{
+		iPoint destination = path->at(i + 1);
+		destination = app->map->MapToWorld(destination.x, destination.y);
+		destination.x += app->map->GetTileWidth()/2;
+		destination.y += app->map->GetTileHeight();
+		app->render->DrawLine(origin, destination, SDL_Color(255, 0, 0, 255));
+		origin = destination;
+	}
+}
+
+void Enemy::DrawDebug() const
+{
+	if(path && currentPathIndex < path->size() - 1) DrawDebugPath();
 }
 
 void Enemy::OnCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB)
@@ -135,4 +152,35 @@ void Enemy::OnCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody 
 		}
 		else texture->SetCurrentAnimation("hurt");
 	}
+}
+
+float Enemy::SetPathMovementParameters(iPoint currentCoords)
+{
+	float vel = 2.0f;
+	float sign = 0;
+
+	if(currentCoords.y == path->at(currentPathIndex).y)
+	{
+		if(currentCoords.x < path->at(currentPathIndex).x)
+			sign = 1;
+		else if(currentCoords.x > path->at(currentPathIndex).x)
+			sign = -1;
+	}
+	else
+	{
+		if(path->at(currentPathIndex - 1).x < path->at(currentPathIndex).x)
+			sign = 1;
+		if(path->at(currentPathIndex - 1).x > path->at(currentPathIndex).x)
+			sign = -1;
+	}
+	vel *= sign;
+	
+	if(sign == 0) texture->SetCurrentAnimation("idle");
+	else
+	{
+		dir = (sign == -1) ? 1 : 0;
+		texture->SetCurrentAnimation("walk");
+	}
+
+	return vel;
 }

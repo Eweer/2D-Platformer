@@ -294,8 +294,11 @@ bool EntityManager::PreUpdate()
 			{
 				auto enemy = dynamic_cast<Enemy *>(entity.get());
 
+				// if either enemy or enemy->path is nullptr or enemy is not requesting a path
+				if(!enemy) continue;
+
 				// Adjust Y position to floor under player
-				auto destinationCoords = app->pathfinding->GetTerrainUnder(player->position - player->colliderOffset);
+				auto destinationCoords = app->pathfinding->GetTerrainUnder(player->position);
 
 				// Adjust X position to nearest tile to enemy that is next to the player
 				auto originCoords = app->map->WorldToCoordinates(enemy->position - enemy->colliderOffset/2);
@@ -303,8 +306,9 @@ bool EntityManager::PreUpdate()
 				if(destinationCoords.x - originCoords.x > 0) destinationCoords.x--;
 				else destinationCoords.x++;
 
-				// Set the path
-				enemy->SetPath(destinationCoords);
+				int s = 0;
+				if(enemy->path) s = enemy->path->size();
+				if(s <= 1 || (s > 1 && enemy->bRequestPath)) enemy->SetPath(destinationCoords);
 			}
 		}
 	}
@@ -318,6 +322,7 @@ bool EntityManager::PostUpdate()
 		for(auto const &entity : entityInfo.entities)
 		{
 			if(!IsEntityActive(entity.get())) continue;
+			if(app->physics->IsDebugActive()) entity->DrawDebug();
 			entity->StopProjectiles();
 		}
 	}

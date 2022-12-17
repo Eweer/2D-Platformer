@@ -50,7 +50,6 @@ void Map::Draw() const
 			elem.AdvanceTimer();
 		}
 	}
-	if(app->physics->IsDebugActive()) DrawNodeDebug();
 }
 
 void Map::DrawLayer(const MapLayer *layer) const
@@ -107,12 +106,12 @@ iPoint Map::WorldToCoordinates(iPoint position) const
 // Translates world positions to x coordinates
 int Map::WorldXToCoordinates(int n) const
 {
-	return n /mapData.tileWidth;
+	return n / mapData.tileWidth;
 }
 
 int Map::WorldYToCoordinates(int n) const
 {
-	return n /mapData.tileHeight;
+	return n / mapData.tileHeight;
 }
 
 
@@ -581,8 +580,15 @@ int Map::GetTileSetSize() const
 	return mapData.tilesets.size();
 }
 
-navPointMatrix *Map::CreateWalkabilityMap()
+std::unique_ptr<navPointMatrix> Map::CreateWalkabilityMap()
 {
+	return CreateWalkabilityNodes();
+}
+
+
+std::unique_ptr<navPointMatrix> Map::CreateWalkabilityNodes() const
+{
+	auto groundWalkabilityMap = std::make_unique<navPointMatrix>();
 	for(int i = 0; i < mapData.width; i++)
 	{
 		std::vector<NavPoint> aux;
@@ -599,10 +605,10 @@ navPointMatrix *Map::CreateWalkabilityMap()
 			std::vector<NavPoint> row;
 			for(int x = 0; x < layer->width - 1; x++)
 			{
-				using enum NavType;
+				using enum CL::NavType;
 				// If we already have a NavPoint of another layer we don't want to overwrite it
 				if(groundWalkabilityMap->at(x).at(y).type != NONE) continue;
-				
+
 				// Check if current tile is a free node
 				uint currentTileGid = layer->GetGidValue(x, y);
 				if(IsWalkable(currentTileGid) || IsTerrain(currentTileGid))
@@ -650,8 +656,8 @@ navPointMatrix *Map::CreateWalkabilityMap()
 			}
 		}
 	}
-	groundWalkabilityMap = std::move(groundWalkabilityMap);
-	return groundWalkabilityMap.get();
+
+	return groundWalkabilityMap;
 }
 
 bool Map::IsWalkable(uint gid) const
@@ -686,27 +692,4 @@ bool Map::IsTerrain(uint gid) const
 		}
 	}
 	return false;
-}
-
-void Map::DrawNodeDebug() const
-{
-	for(int i = 0; i < groundWalkabilityMap->size(); i++)
-	{
-		for(int j = 0; j < groundWalkabilityMap->at(0).size(); j++)
-		{
-			using enum NavType;
-			if(groundWalkabilityMap->at(i).at(j).type == NONE || groundWalkabilityMap->at(i).at(j).type == TERRAIN)
-				continue;
-			
-			SDL_Color rgba = {0, 0, 0, 255};
-			if(groundWalkabilityMap->at(i).at(j).type == LEFT || groundWalkabilityMap->at(i).at(j).type == RIGHT) rgba.r = 255;
-			else if(groundWalkabilityMap->at(i).at(j).type == PLATFORM) rgba.b = 255;
-			else if(groundWalkabilityMap->at(i).at(j).type == SOLO) rgba.g = 255;
-
-			iPoint pos = MapToWorld(i, j);
-			pos.x += mapData.tileWidth/2;
-			pos.y += mapData.tileHeight;
-			app->render->DrawCircle(pos, 10, rgba);
-		}
-	}
 }

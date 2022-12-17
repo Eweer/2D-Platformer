@@ -170,6 +170,12 @@ void Physics::BeginContact(b2Contact *contact)
 	auto pBodyA = static_cast<PhysBody *>(contact->GetFixtureA()->GetBody()->GetUserData());
 	auto pBodyB = static_cast<PhysBody *>(contact->GetFixtureB()->GetBody()->GetUserData());
 
+	if((pBodyA->ctype & pBodyB->ctype) == CL::ColliderLayers::PLATFORMS)
+	{
+		contact->SetEnabled(false);
+		return;
+	}
+
 	if(pBodyA && pBodyB)
 	{	
 		if(auto [i, success] = collisionMap[pBodyA->body].insert(pBodyB->body);
