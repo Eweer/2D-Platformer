@@ -115,9 +115,6 @@ bool Item::Start()
 
 bool Item::Update()
 {  
-	//position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x) - 16
-	//position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y) - 16
-
 	if(anim) app->render->DrawTexture(anim->GetCurrentTexture(), position.x, position.y);
 	return true;
 }
@@ -128,9 +125,9 @@ bool Item::Pause() const
 	return true;
 }
 
-void Item::BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB)
+void Item::BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fixtureB, PhysBody const *pBodyA, PhysBody const *pBodyB)
 {
-	if(pBodyB->ctype == CL::ColliderLayers::PLAYER)
+	if((pBodyB->ctype & CL::ColliderLayers::PLAYER) == CL::ColliderLayers::PLAYER)
 	{
  		PickUpEffect();
 		Disable();

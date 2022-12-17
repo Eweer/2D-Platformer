@@ -101,7 +101,10 @@ public:
 	}
 	explicit ShapeData(ShapeData &&other) noexcept : shape(std::move(other.shape)), data(std::move(other.data))
 	{};
-	explicit ShapeData(const ShapeData &other) : shape(other.shape.get()), data(other.data) {};
+	explicit ShapeData(const ShapeData &other)
+	{
+		this->Create(other.data);
+	};
 	ShapeData &operator=(const ShapeData &) = default;
 	~ShapeData() = default;
 	
@@ -121,7 +124,7 @@ public:
 		else if (StrEquals(name, "chain"))		shape = std::make_unique<b2ChainShape>();
 		else LOG("Error in creating Shape (ShapeData). No shape with name %s exists", name);
 	}
-	
+
 	void Create(std::vector<b2Vec2> const &newData)
 	{
 		data = newData;
@@ -272,8 +275,8 @@ public:
 
 	std::unique_ptr<b2FixtureDef> CreateFixtureDef(
 		ShapeData &shapeData,
-		uint16 cat = (uint16)CL::ColliderLayers::PLATFORMS,
-		uint16 mask = (uint16)CL::ColliderLayers::PLAYER,
+		uint16 cat = static_cast<uint16>(CL::ColliderLayers::PLATFORMS),
+		uint16 mask = static_cast<uint16>(CL::ColliderLayers::PLAYER),
 		bool isSensor = false,
 		float density = 1.0f,
 		float friction = 1.0f,

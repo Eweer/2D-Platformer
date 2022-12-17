@@ -10,66 +10,151 @@
 #include "BitMaskColliderLayers.h"
 #include "Textures.h"
 #include "Physics.h"
+#include "Box2D/Box2D/Box2D.h"
 
+enum class ProjectileFreedom : uint16
+{
+	NONE = 0x0000,
+	ONEDIR = 0x0001,
+	TWODIR = 0x0002,
+	FOURDIR = 0x0004,
+	EIGHTDIR = 0x0008,
+	ANYDIR = 0x0010,
+	ALL = 0x0020
+};
+
+enum class ProjectileDirection : uint16
+{
+	STATIC = 0x0000,
+	NORTH = 0x0001,
+	WEST = 0x0002,
+	EAST = 0x0004,
+	SOUTH = 0x0008,
+	ANY = 0x0010
+};
+
+inline ProjectileDirection operator|(ProjectileDirection a, ProjectileDirection b)
+{
+	using PDType = std::underlying_type_t<ProjectileDirection>;
+	return static_cast<ProjectileDirection>(static_cast<PDType>(a) | static_cast<PDType>(b));
+}
+
+inline ProjectileDirection &operator|=(ProjectileDirection &a, ProjectileDirection b)
+{
+	a = a | b;
+	return a;
+}
 
 class ProjectileData
 {
 public:
 	ProjectileData() = default;
-	explicit ProjectileData(std::string const &s, std::vector<b2Vec2> const &p, iPoint pos, iPoint wh, CL::ColliderLayers cl, int sp)
-		: shape(ShapeData(s, p)), position(pos), width_height(wh), bitmask(cl), speed(sp)
+	explicit ProjectileData(ShapeData const &s, bool sensor, iPoint pos, iPoint wh, int sp, ProjectileFreedom dir)
+		: position(pos), width_height(wh), speed(sp), freedom(dir)
 	{
+		shape.Create(s.data);
+		using enum CL::ColliderLayers;
+		auto fixture = app->physics->CreateFixtureDef(
+			shape,
+			static_cast<uint16>(BULLET),
+			static_cast<uint16>(ENEMIES | PLATFORMS),
+			sensor
+		);
+		fixPtr = std::move(fixture);
 	};
 	ProjectileData(const ProjectileData &other) = default;
-	ProjectileData &operator=(const ProjectileData &other)
-	{
-		shape.Create(other.shape.data);
-		position = other.position;
-		width_height = other.width_height;
-		bitmask = other.bitmask;
-		speed = other.speed;
-		return *this;
-	}
+
 	~ProjectileData() = default;
 
+	void test()
+	{
+		LOG("Potato");
+	}
+
 	ShapeData shape;
+	std::unique_ptr<b2FixtureDef>fixPtr;
 	iPoint position = {0,0};
 	iPoint width_height = {0,0};
-	CL::ColliderLayers bitmask = CL::ColliderLayers::UNKNOWN;
 	int speed = 0;
+	ProjectileFreedom freedom = ProjectileFreedom::ANYDIR;
 };
 
 class Projectile
 {
 public:
 	Projectile() = default;
-	explicit Projectile(std::vector<SDL_Texture *> const &anim, iPoint origin, ProjectileData &info, b2Vec2 dir)
+	explicit Projectile(std::vector<SDL_Texture *> const &anim, iPoint origin, std::unique_ptr<ProjectileData> const &info, b2Vec2 dir)
 	{
 		if(anim.empty())
 		{
 			LOG("Projectile could not be created. Anim not found.");
 			return;
 		}
+
+		using enum ProjectileFreedom;
+		using enum ProjectileDirection;
+
+		ProjectileDirection directionLimit = STATIC;
+		switch(info->freedom)
+		{
+			case ANYDIR:
+				directionLimit |= ANY;
+			case EIGHTDIR:
+			case FOURDIR:
+				directionLimit |= NORTH | SOUTH;
+			case TWODIR:
+				directionLimit |= EAST | WEST;
+				break;
+			default:
+				directionLimit = STATIC;
+		}
 		
 		animation = anim;
 		position = origin;
 
-		direction = dir;
-		direction.Normalize();
-
-		animOffset = info.position;
+		animOffset = info->position;
 
 		uint tw = 0;
 		uint th = 0;
 		app->tex->GetSize(anim[0], tw, th);
-		
-		flipValue = (direction.x < 0) ? 2 : 0;
-		rotationCenter.x = info.position.x;
-		rotationCenter.y = to_bool(flipValue) ? th - info.position.y : info.position.y;
-		if(info.position.y == 0 && flipValue == 2)
+
+		direction = dir;
+		direction.Normalize();
+
+		rotationCenter = {info->position.x, info->position.y};
+
+		if(direction.x < 0)
 		{
-			rotationCenter.y = 0;
-			origin.y += th;
+			flipValue = 2;
+
+			if(info->freedom == TWODIR)
+			{
+				direction.x = -0.5f;
+				direction.y = 0;
+				origin.x -= 20;
+				origin.y += 16;
+			}
+
+			if(info->position.y == 0)
+			{
+				rotationCenter.y = 0;
+				origin.y += th;
+			}
+			else
+				rotationCenter.y = th - rotationCenter.y;
+		}
+		else
+		{
+			flipValue = 0;
+
+			if(info->freedom == TWODIR)
+			{
+				direction.x = 0.5f;
+				direction.y = 0;
+				origin.x += 40;
+				origin.y += 16;
+			}
+
 		}
 
 		degree = atan2f(direction.y, direction.x) * 180.0f/std::numbers::pi_v<float>;
@@ -82,29 +167,24 @@ public:
 		);
 		bodyPtr->SetGravityScale(0);
 		bodyPtr->SetBullet(true);
+		bodyPtr->CreateFixture(info->fixPtr.get());
 
-		// Create Fixture
 		using enum CL::ColliderLayers;
-		auto fixPtr = app->physics->CreateFixtureDef(
-			info.shape,
-			static_cast<uint16>(BULLET),
-			static_cast<uint16>(info.bitmask)
-		);
-		bodyPtr->CreateFixture(fixPtr.get());
-		
+		auto bitmask = info->fixPtr->filter.maskBits;
+
 		// Create PhysBody
-		if((info.bitmask & PLAYER) != PLAYER) source = PLAYER;
-		else if((info.bitmask & ENEMIES) != ENEMIES) source = ENEMIES;
+		if((bitmask & PLAYER) != PLAYER) source = PLAYER;
+		else if((bitmask & ENEMIES) != ENEMIES) source = ENEMIES;
 
 		auto pbodyPtr = app->physics->CreatePhysBody(
 			bodyPtr,
-			info.width_height,
+			info->width_height,
 			BULLET
 		);
 
 		pBody = std::move(pbodyPtr);
 
-		auto s = PIXEL_TO_METERS(info.speed);
+		auto s = PIXEL_TO_METERS(info->speed);
 		pBody->body->SetLinearVelocity({direction.x * s, direction.y * s});
 		pBody->pListener = this;
 	}
@@ -151,7 +231,7 @@ public:
 		return true;
 	}
 
-	void OnCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB)
+	void OnCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fixtureB, PhysBody const *pBodyA, PhysBody const *pBodyB)
 	{
 		bExploding = true;
 		bDestroyPBody= true;

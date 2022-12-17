@@ -13,7 +13,7 @@ public:
 
 	bool Awake() override;
 	bool Update() override;
-	void OnCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB) override;
+	void BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fixtureB, PhysBody const *pBodyA, PhysBody const *pBodyB) final;
 	bool SetPath(iPoint destination);
 
 	b2Vec2 SetPathMovementParameters(iPoint currentCords);

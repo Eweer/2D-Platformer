@@ -21,7 +21,7 @@ public:
 
 	bool Update() final;
 
-	void BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB) final;
+	void BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fixtureB, PhysBody const *pBodyA, PhysBody const *pBodyB) final;
 
 	bool IsOnAir() const;
 
@@ -35,8 +35,11 @@ private:
 
 	std::string playerCharacter;
 
-	std::unordered_map<std::string, ProjectileData, StringHash, std::equal_to<>> projectileMap;
+	std::unordered_map<std::string, std::unique_ptr<ProjectileData>, StringHash, std::equal_to<>> projectileMap;
 	std::vector<std::unique_ptr<Projectile>> projectiles;
+
+	int skillCDTimer = 0;
+	int skillCD = 0;
 
 	int bFalling = 0;
 	bool bDead = false;

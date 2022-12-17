@@ -91,6 +91,30 @@ bool Enemy::Update()
 	return true;
 }
 
+void Enemy::BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fixtureB, PhysBody const *pBodyA, PhysBody const *pBodyB)
+{
+	using enum CL::ColliderLayers;
+
+	if(iFrames == 0 // iFrames are not enabled
+	   && ((pBodyB->ctype & BULLET) == BULLET) // got hit by a bullet
+	   && ((pBodyB->pListener->source & PLAYER) == PLAYER)) // the source of the bullet was the player
+	{
+		hp -= 1;
+		iFrames = 1;
+		if(hp <= 0)
+		{
+			texture->SetCurrentAnimation("death");
+
+			// We stop all X momentum
+			pBody->body->SetLinearVelocity(b2Vec2(0, pBody->body->GetLinearVelocity().y));
+			tileYOnDeath = app->map->GetTileHeight()/2 + app->map->MapToWorld(app->pathfinding->GetDestinationCoordinates(position, PathfindTerrain::GROUND)).y;
+			Disable();
+			active = true;
+		}
+		else texture->SetCurrentAnimation("hurt");
+	}
+}
+
 bool Enemy::SetPath(iPoint destinationCoords)
 {
 	bRequestPath = false;
@@ -133,29 +157,7 @@ void Enemy::DrawDebug() const
 	if(path && currentPathIndex < path->size() - 1) DrawDebugPath();
 }
 
-void Enemy::OnCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB)
-{
-	using enum CL::ColliderLayers;
 
-	if(iFrames == 0 // iFrames are not enabled
-	   && ((pBodyB->ctype & BULLET) == BULLET) // got hit by a bullet
-	   && ((pBodyB->pListener->source & PLAYER) == PLAYER)) // the source of the bullet was the player
-	{
-		hp -= 1;
-		iFrames = 1;
-		if(hp <= 0)
-		{
-			texture->SetCurrentAnimation("death");
-
-			// We stop all X momentum
-			pBody->body->SetLinearVelocity(b2Vec2(0, pBody->body->GetLinearVelocity().y));
-			tileYOnDeath = app->map->GetTileHeight()/2 + app->map->MapToWorld(app->pathfinding->GetDestinationCoordinates(position, PathfindTerrain::GROUND)).y;
-			Disable();
-			active = true;
-		}
-		else texture->SetCurrentAnimation("hurt");
-	}
-}
 
 b2Vec2 Enemy::SetGroundPathMovement(iPoint currentCoords)
 {

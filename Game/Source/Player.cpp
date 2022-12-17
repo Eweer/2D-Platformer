@@ -6,7 +6,9 @@
 #include "Map.h"
 #include "Projectile.h"
 #include "Log.h"
+#include "Physics.h"
 
+#include "Box2D/Box2D/Box2D.h"
 #include <string>
 #include <unordered_map>
 #include <regex>
@@ -69,10 +71,10 @@ bool Player::LoadProjectileData()
 		}
 
 		using enum CL::ColliderLayers;
-		CL::ColliderLayers maskAux = (ENEMIES | PLATFORMS);
-		ProjectileData projAux(
-			shapeType,
-			tempData,
+		std::string pName = elem.attribute("name").as_string();
+		projectileMap[pName] = std::make_unique<ProjectileData>(
+			ShapeData(shapeType, tempData),
+			elem.attribute("gothrough").as_bool(),
 			iPoint(
 				elem.attribute("x").as_int(),
 				elem.attribute("y").as_int()
@@ -81,12 +83,11 @@ bool Player::LoadProjectileData()
 				elem.attribute("width").as_int(),
 				elem.attribute("height").as_int()
 			),
-			maskAux,
-			elem.attribute("speed").as_int()
+			elem.attribute("speed").as_int(),
+			static_cast<ProjectileFreedom>(elem.attribute("freedom").as_uint())
 		);
+		projectileMap.at(pName)->test();
 
-		std::string pName = elem.attribute("name").as_string();
-		projectileMap[pName] = projAux;
 	}
 	return true;
 }
@@ -104,6 +105,8 @@ bool Player::Awake()
 		parameters.attribute("x").as_int(),
 		parameters.attribute("y").as_int()
 	};
+
+	skillCD = parameters.attribute("skillcd").as_int() * 60;
 
 	LoadProjectileData();
 
@@ -153,6 +156,9 @@ bool Player::StopProjectiles()
 
 bool Player::Update()
 {
+	if(skillCDTimer >= skillCD) skillCDTimer = 0;
+	if(skillCDTimer > 0) skillCDTimer++;
+	
 	// If landing
 	if(bKeepMomentum)
 	{
@@ -207,6 +213,7 @@ bool Player::Update()
 			}
 			else if(bAttack2)
 			{
+				skillCDTimer++;
 				bAttack2 = false;
 				projPtr = std::make_unique<Projectile>(
 					texture->GetAnim("fire_Extra"),
@@ -278,7 +285,7 @@ bool Player::Update()
 		}
 
 		// Right click attack, only able to do it if on the floor
-		if(!jump.bOnAir && app->input->GetMouseButtonDown(SDL_BUTTON_RIGHT) == KEY_DOWN)
+		if(skillCDTimer == 0 && !jump.bOnAir && app->input->GetMouseButtonDown(SDL_BUTTON_RIGHT) == KEY_DOWN)
 		{
 			// Stop all momentum, player can't move during lock
 			impulse.x = 0;
@@ -339,7 +346,7 @@ bool Player::Update()
 	return true;
 }
 
-void Player::BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB)
+void Player::BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fixtureB, PhysBody const *pBodyA, PhysBody const *pBodyB)
 {
 	switch (pBodyB->ctype)
 	{

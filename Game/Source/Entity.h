@@ -46,9 +46,9 @@ public:
 	virtual bool LoadState(pugi::xml_node const &);
 	virtual pugi::xml_node SaveState(pugi::xml_node const &);
 
-	virtual void OnCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB) { /* Method to Override */ };
-	virtual void OnCollisionEnd(PhysBody *physA, PhysBody *physB) { /* Method to Override */ };
-	virtual void BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB) { /* Method to Override */ };
+	virtual void OnCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fixtureB, PhysBody const *pBodyA, PhysBody const *pBodyB) { /* Method to Override */ };
+	virtual void OnCollisionEnd(PhysBody const *physA, PhysBody const *physB) { /* Method to Override */ };
+	virtual void BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fixtureB, PhysBody const *pBodyA, PhysBody const *pBodyB) { /* Method to Override */ };
 
 	virtual void DrawDebug() const { /* Method to Override */ };
 

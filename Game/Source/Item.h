@@ -19,7 +19,7 @@ public:
 	bool Update() override;
 	bool Pause() const override;
 
-	void BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB) final;
+	void BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fixtureB, PhysBody const *pBodyA, PhysBody const *pBodyB) final;
 
 	void PickUpEffect() const;
 

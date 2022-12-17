@@ -27,6 +27,11 @@ namespace CL
 		return static_cast<ColliderLayers>(static_cast<uint16>(a) & static_cast<uint16>(b));
 	}
 
+	inline ColliderLayers operator&(uint16 a, ColliderLayers b)
+	{
+		return static_cast<ColliderLayers>(a & static_cast<uint16>(b));
+	}
+
 	inline ColliderLayers operator^(ColliderLayers a, ColliderLayers b)
 	{
 		return static_cast<ColliderLayers>(static_cast<uint16>(a) ^ static_cast<uint16>(b));
@@ -39,20 +44,23 @@ namespace CL
 
 	inline ColliderLayers &operator|=(ColliderLayers &a, ColliderLayers b)
 	{
-		return a = a | b;
+		a = a | b;
+		return a;
 	}
 
 	inline ColliderLayers  operator&=(ColliderLayers  a, ColliderLayers b)
 	{
-		return a = a & b;
+		a = a & b; 
+		return a;
 	}
 
 	inline ColliderLayers  operator^=(ColliderLayers  a, ColliderLayers b)
 	{
-		return a = a ^ b;
+		a = a ^ b;
+		return a;
 	}
 
-	inline bool operator !=(const ColliderLayers &a, const uint &b)
+	inline bool operator !=(const ColliderLayers &a, const uint16 &b)
 	{
 		return static_cast<uint16>(a) != b;
 	}
