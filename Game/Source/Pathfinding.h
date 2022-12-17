@@ -35,7 +35,7 @@ struct SearchNode
 	std::shared_ptr<SearchNode> parent;
 
 	std::vector<NavLink> GetAdjacentGroundNodes(std::shared_ptr<SearchNode> searchNode) const;
-	std::vector<NavLink> GetAdjacentAirNodes(std::shared_ptr<SearchNode> searchNode) const;
+	std::vector<NavLink> GetAdjacentAirNodes(std::shared_ptr<SearchNode> searchNode, iPoint destination) const;
 
 	bool IsWalkable(iPoint p) const;
 	
@@ -50,9 +50,10 @@ class Pathfinding : public Module
 {
 public:
 	// ------ Algorithms
-	std::unique_ptr<std::vector<iPoint>> AStarSearch(iPoint origin, iPoint destination) const;
+	std::unique_ptr<std::vector<iPoint>> AStarSearch(iPoint origin, iPoint destination, PathfindTerrain pTerrain = PathfindTerrain::GROUND) const;
 
-	iPoint GetTerrainUnder(iPoint position) const;
+	iPoint GetDestinationCoordinates(iPoint position, PathfindTerrain pTerrain) const;
+
 
 	bool Update(float dt) override;
 	
@@ -64,6 +65,7 @@ public:
 	NavPoint &GetNavPoint(iPoint position) const;
 
 private:
+	iPoint GetTerrainUnder(iPoint position) const;
 	void DrawNodeDebug() const;
 	bool CreateWalkabilityLinks();
 	void AddFallLinks(iPoint position, iPoint limit);

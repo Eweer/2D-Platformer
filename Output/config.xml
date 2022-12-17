@@ -20,7 +20,7 @@
 	</audio>
 	<entitymanager items="Assets/Animations/Items/" />
 	<scene assetpath="Assets/" texturepath="Assets/Animations/" audiopath="Assets/Audio/" fxfolder="Fx/" musicfolder="Music/">
-		<player name="Player" class="Mage" x="3124" y="1082" maxjumps="2" jumpimpulse="5">
+		<player name="Player" class="Mage" x="3500" y="750" maxjumps="2" jumpimpulse="5">
 			<projectile name="fire" speed="250" shape="polygon" x="1" y="21" width="30" height="8" points="0,3 8,0 26,0 28,3 28,5 26,8 8,8 0,5" />
 			<projectile name="fire_Extra" speed="250" shape="polygon" x="0" y="0" width="20" height="32" points="6,0 19,10 19,22 10,32 0,32 8,23 8,9 0,0" />
 			<physics bodytype="dynamic" gravityscale="1" restitution="0" friction="1" colliderlayers="2" />
@@ -64,7 +64,20 @@
 					</collidergroup>
 				</animation>
 			</animationdata>
-			<spawn id="0" x="3124" y="840" />
+			<spawn id="0" x="2124" y="840" />
+		</enemy>
+		<enemy name="Enemies" level="Mountain" class="Mosquito" type="Air">
+			<physics bodytype="dynamic" gravityscale="0" restitution="0" friction="1" colliderlayers="4" />
+			<animationdata>
+				<properties width="128" height="128" pivotx="42" pivoty="85" animstyle="4" animloop="true" />
+				<animation name="idle" style="4" speed="0.06" />
+				<animation name="walk" style="1" speed="0.2">
+					<collidergroup name="CharacterSensor" class="Dynamic" density="1" sensor="false" width="72" height="58">
+						<chain x="28" y="35" friction="0" points="-1,39 -1,13 15,-1 42,4 73,46 48,46 30,58 10,58" />
+					</collidergroup>
+				</animation>
+			</animationdata>
+			<spawn id="1" x="3124" y="540" />
 		</enemy>
 	</scene>
 	<fonts>

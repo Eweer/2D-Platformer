@@ -40,26 +40,28 @@ std::vector<NavLink> SearchNode::GetAdjacentGroundNodes(std::shared_ptr<SearchNo
 	return list;
 }
 
-std::vector<NavLink> SearchNode::GetAdjacentAirNodes(std::shared_ptr<SearchNode> searchNode) const
+std::vector<NavLink> SearchNode::GetAdjacentAirNodes(std::shared_ptr<SearchNode> searchNode, iPoint destination) const
 {
 	std::vector<NavLink> list;
 	// Check all directions, including diagonals
 	iPoint pos = searchNode.get()->position;
-	for(int x = pos.x - 1; x < pos.x + 1; x++)
+	for(int x = pos.x - 1; x <= pos.x + 1; x++)
 	{
-		for(int y = pos.y - 1; y < pos.y + 1; y++)
+		for(int y = pos.y - 1; y <= pos.y + 1; y++)
 		{
 			// If it's the tile we are at or if it's out of bounds
 			// we continue the loop
 			if(!app->pathfinding->IsValidPosition(iPoint(x, y))
-			   || (x == 0 && y == 0))
+			   || (x == pos.x && y == pos.y))
 				continue;
 
-			if(app->pathfinding->GetNavPoint(iPoint(x, y)).type != CL::NavType::NONE) continue;
+			if(app->pathfinding->GetNavPoint(iPoint(x, y)).type != CL::NavType::NONE
+			   && destination != iPoint(x, y)) continue;
 
 			// Diagonal cost is 14 (if x == (1 or -1) and y == (1 or -1))
 			// Can also be checked as (x && y), and another option would be ((x & y) == 1)
-			list.emplace_back(iPoint(x, y), abs(x) == abs(y) ? 14 : 10, NavLinkType::WALK);
+			int score = abs(x) == abs(y) ? 14 : 10;
+			list.emplace_back(iPoint(x, y), score, NavLinkType::WALK);
 		}
 	}
 	return list;
@@ -95,8 +97,8 @@ NavPoint &Pathfinding::GetNavPoint(iPoint position) const
 
 bool Pathfinding::IsValidPosition(iPoint position) const
 {
-	return (position.x >= 0 && position.x <= groundMap->size() &&
-			position.y >= 0 && position.y <= groundMap->at(0).size());
+	return (position.x >= 0 && position.x < groundMap->size() &&
+			position.y >= 0 && position.y < groundMap->at(0).size());
 
 }
 
@@ -105,7 +107,7 @@ int Pathfinding::HeuristicCost(iPoint origin, iPoint destination) const
 	return origin.DistanceManhattan(destination);
 }
 
-std::unique_ptr<std::vector<iPoint>> Pathfinding::AStarSearch(iPoint origin, iPoint destination) const
+std::unique_ptr<std::vector<iPoint>> Pathfinding::AStarSearch(iPoint origin, iPoint destination, PathfindTerrain pTerrain) const
 {
 	// Check if path is valid. If it isn't log it and return an empty path
 	if(!IsValidPosition(origin) || !IsValidPosition(destination))
@@ -156,9 +158,19 @@ std::unique_ptr<std::vector<iPoint>> Pathfinding::AStarSearch(iPoint origin, iPo
 		closedList.emplace_back(currentNode.position);
 		
 		// Get nodes that are adjacent or linked to the current node
-		auto adjacentNodes = currentNode.GetAdjacentGroundNodes(
-			std::make_shared<SearchNode>(currentNode)
-		);
+		std::vector<NavLink> adjacentNodes;
+		if(pTerrain == PathfindTerrain::GROUND)
+		{
+			adjacentNodes = currentNode.GetAdjacentGroundNodes(
+				std::make_shared<SearchNode>(currentNode)
+			);
+		}
+		else
+		{
+			adjacentNodes = currentNode.GetAdjacentAirNodes(
+				std::make_shared<SearchNode>(currentNode), destination
+			);
+		}
 
 		// Loop through the adjacent nodes and modify or add them to the open list if required
 		for(auto const &node : adjacentNodes)
@@ -224,7 +236,7 @@ std::unique_ptr<std::vector<iPoint>> Pathfinding::AStarSearch(iPoint origin, iPo
 			openList.emplace(
 				node.destination,
 				cost,
-				HeuristicCost(node.destination, destination),
+				HeuristicCost(node.destination, destination) * 10,
 				std::make_shared<SearchNode>(currentNode)
 			);
 		}
@@ -236,7 +248,7 @@ std::unique_ptr<std::vector<iPoint>> Pathfinding::AStarSearch(iPoint origin, iPo
 	return nullptr;
 }
 
-iPoint Pathfinding::GetTerrainUnder(iPoint position) const
+iPoint Pathfinding::GetDestinationCoordinates(iPoint position, PathfindTerrain pTerrain) const
 {
 	position = app->map->WorldToCoordinates(position);
 	if(!IsValidPosition(position))
@@ -245,6 +257,16 @@ iPoint Pathfinding::GetTerrainUnder(iPoint position) const
 		position.y = in_range(position.y, 0, groundMap->at(0).size());
 	}
 
+	// If it's a ground enemy, we pathfind to the node
+	// that is under the position, even if he is on the air
+	if(pTerrain == PathfindTerrain::GROUND)
+		return GetTerrainUnder(position);
+	
+	return position;
+}
+
+iPoint Pathfinding::GetTerrainUnder(iPoint position) const
+{
 	for(int y = position.y; y < groundMap->at(position.x).size(); y++)
 		if(GetNavPoint({position.x, y}).type !=  CL::NavType::NONE)
 			return {position.x, y};

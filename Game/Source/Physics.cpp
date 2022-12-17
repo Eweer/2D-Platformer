@@ -550,6 +550,19 @@ bool PhysBody::Contains(int x, int y) const
 	return false;
 }
 
+bool PhysBody::Contains(iPoint position) const
+{
+	b2Vec2 p(PIXEL_TO_METERS(position));
+
+	for(const b2Fixture *fixture = body->GetFixtureList(); fixture; fixture = fixture->GetNext())
+	{
+		//if point P is inside the fixture shape
+		if(fixture->GetShape()->TestPoint(body->GetTransform(), p)) return true;
+	}
+
+	return false;
+}
+
 int PhysBody::RayCast(int x1, int y1, int x2, int y2, float &normal_x, float &normal_y) const
 {
 	b2RayCastInput input;

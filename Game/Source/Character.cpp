@@ -32,7 +32,7 @@ void Character::InitializeTexture() const
 	if(!texture) return;
 
 	if(!texture->Start("idle"))
-		LOG("Couldnt start %s anim", texture->GetCurrentAnimName());
+		LOG("Couldnt start anim");
 	if(texture->GetAnimStyle() != AnimIteration::LOOP_FROM_START)
 		texture->SetAnimStyle(AnimIteration::LOOP_FROM_START);
 }

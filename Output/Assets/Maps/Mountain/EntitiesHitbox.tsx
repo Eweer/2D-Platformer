@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.9" tiledversion="1.9.2" name="EntitiesHitbox" class="Characters" tilewidth="1600" tileheight="800" tilecount="31" columns="0" objectalignment="topleft">
+<tileset version="1.9" tiledversion="1.9.2" name="EntitiesHitbox" class="Characters" tilewidth="128" tileheight="128" tilecount="32" columns="0" objectalignment="topleft">
  <grid orientation="orthogonal" width="1" height="1"/>
  <properties>
   <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="2"/>
@@ -274,6 +274,14 @@
    </object>
    <object id="6" x="32" y="60" width="24" height="22">
     <ellipse/>
+   </object>
+  </objectgroup>
+ </tile>
+ <tile id="32">
+  <image width="128" height="128" source="../../../../../2D Platformer Gamekit/Animations/Base/Monster/Forest/mosquito/flight1.png"/>
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="28" y="35" width="72" height="58">
+    <polygon points="-1,39 -1,13 15,-1 42,4 73,46 48,46 30,58 10,58"/>
    </object>
   </objectgroup>
  </tile>

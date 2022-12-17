@@ -16,13 +16,18 @@ public:
 	void OnCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB) override;
 	bool SetPath(iPoint destination);
 
-	float SetPathMovementParameters(iPoint currentCords);
+	b2Vec2 SetPathMovementParameters(iPoint currentCords);
 	void DrawDebug() const final;
 	void DrawDebugPath() const;
+	b2Vec2 SetGroundPathMovement(iPoint currentCoords);
+	b2Vec2 SetAirPathMovement(iPoint currentCoords);
 
 	int currentPathIndex = 0;
 	std::unique_ptr<std::vector<iPoint>> path;
 	bool bRequestPath = true;
+	PathfindTerrain pTerrain = PathfindTerrain::GROUND;
+
+	int tileYOnDeath = 0;
 
 	bool bAttack = false;
 	bool bDeath = false;
