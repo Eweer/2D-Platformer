@@ -40,17 +40,16 @@ private:
 	void DrawUIPosition(iPoint &position) const;
 	void DrawCameraPosition(iPoint &position) const;
 	void DrawMousePosition(iPoint &position) const;
-
 	void DrawPlayerJumps(iPoint &position) const;
-
 	void DrawPlayerAnimation(iPoint &position) const;
+
+	int IncreaseY(int font) const;
 
 	bool bDrawPause = false;
 	int fCleanCraters = 0;
 	iPoint pTopLeft = {10, 10};
 	iPoint pMiddle = {0, 0};
 
-	Player *player = nullptr;
 };
 
 #endif

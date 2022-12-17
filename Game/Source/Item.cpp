@@ -132,7 +132,7 @@ void Item::BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBo
 {
 	if(pBodyB->ctype == CL::ColliderLayers::PLAYER)
 	{
-		PickUpEffect();
+ 		PickUpEffect();
 		Disable();
 	}
 }

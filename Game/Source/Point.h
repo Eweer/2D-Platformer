@@ -57,6 +57,16 @@ public:
 		return r;
 	}
 
+	Point operator /(const Point &v) const
+	{
+		return {x / v.x, y / v.y};
+	}
+
+	Point operator /(T i) const
+	{
+		return {x / i, y / i};
+	}
+
 	const Point& operator -=(const Point &v)
 	{
 		x -= v.x;
@@ -93,6 +103,26 @@ public:
 		y = -y;
 
 		return(*this);
+	}
+
+	Point Left()
+	{
+		return Point(x - 1, y);
+	}
+
+	Point Right()
+	{
+		return Point(x + 1, y);
+	}
+
+	Point Up()
+	{
+		return Point(x, y - 1);
+	}
+
+	Point Down()
+	{
+		return Point(x, y + 1);
 	}
 
 	// Distances ---------------------------------------------

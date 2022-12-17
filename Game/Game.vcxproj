@@ -116,6 +116,7 @@
     <ClCompile Include="Source\UI.cpp" />
     <ClCompile Include="Source\Window.cpp" />
     <ClInclude Include="Source\Animation.h" />
+    <ClInclude Include="Source\BitMaskNavType.h" />
     <ClInclude Include="Source\Character.h" />
     <ClInclude Include="Source\AdjacencyList.h" />
     <ClInclude Include="Source\dirent.h" />

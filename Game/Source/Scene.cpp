@@ -9,6 +9,7 @@
 #include "Map.h"
 #include "BitMaskColliderLayers.h"
 #include "Player.h"
+#include "Pathfinding.h"
 
 #include "Defs.h"
 #include "Log.h"
@@ -27,7 +28,6 @@ Scene::~Scene() = default;
 bool Scene::Awake(pugi::xml_node& config)
 {
 	LOG("Loading Scene");
-	bool ret = true;
 
 	// Instantiate the player using the entity manager
 	if (config.child("player")) {
@@ -39,19 +39,14 @@ bool Scene::Awake(pugi::xml_node& config)
 		app->entityManager->CreateEntity("enemy", elem);
 	}
 
-	return ret;
+	return true;
 }
 
 // Called before the first frame
 bool Scene::Start()
 {	
 	// Load map
-	if(app->map->Load())
-	{
-		int w = 0;
-		int h = 0;
-		app->map->CreateWalkabilityMap(w, h);
-	}
+	if(app->map->Load()) app->pathfinding->SetWalkabilityMap();
 
 	// Set the window title with map/tileset info
 	std::string title = std::format(

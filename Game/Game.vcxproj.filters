@@ -153,6 +153,9 @@
     <ClInclude Include="Source\Pathfinding.h">
       <Filter>Headers\Entities</Filter>
     </ClInclude>
+    <ClInclude Include="Source\BitMaskNavType.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="External">

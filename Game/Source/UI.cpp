@@ -30,7 +30,6 @@ bool UI::Awake(pugi::xml_node &)
 bool UI::Start()
 {
 	fCleanCraters = app->fonts->Load("CleanCraters");
-	player = app->entityManager->GetPlayerCharacter();
 	return true;
 }
 
@@ -62,20 +61,20 @@ bool UI::PostUpdate()
 void UI::DrawPause(iPoint &position) const
 {
 	app->fonts->DrawMiddlePoint("GAME PAUSED", position, fCleanCraters);
-	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
+	position.y += IncreaseY(fCleanCraters);
 }
 
 void UI::DrawFPS(iPoint &position) const
 {
 	// Always Draw this
 	app->fonts->Draw(std::format("Current FPS: {}", app->render->fps), position, fCleanCraters);
-	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
+	position.y += IncreaseY(fCleanCraters);
 
 	if(!app->render->vSyncActive)
 	{
 		// Non-sense to Draw this if VSync is active
 		app->fonts->Draw(std::format("Target FPS: {}", app->render->fpsTarget), position, fCleanCraters);
-		position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
+		position.y += IncreaseY(fCleanCraters);
 	}
 
 	// VSync state
@@ -84,7 +83,7 @@ void UI::DrawFPS(iPoint &position) const
 	else
 		app->fonts->Draw(std::format("VSync is {}.", app->render->vSyncActive ? "enabled" : "disabled"), position, fCleanCraters);
 	
-	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
+	position.y += IncreaseY(fCleanCraters);
 }
 
 void UI::DrawGravity(iPoint &position) const
@@ -98,7 +97,7 @@ void UI::DrawGravity(iPoint &position) const
 		position,
 		fCleanCraters
 	);
-	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
+	position.y += IncreaseY(fCleanCraters);
 
 }
 
@@ -107,13 +106,13 @@ void UI::DrawPlayerPosition(iPoint &position) const
 	app->fonts->Draw(
 		std::format(
 			"Player position: \"{},{}\"",
-			player->position.x,
-			player->position.y
+			app->entityManager->player->position.x,
+			app->entityManager->player->position.y
 		),
 		position,
 		fCleanCraters
 	);
-	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
+	position.y += IncreaseY(fCleanCraters);
 }
 
 void UI::DrawUIPosition(iPoint &position) const
@@ -127,7 +126,7 @@ void UI::DrawUIPosition(iPoint &position) const
 		position,
 		fCleanCraters
 	);
-	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
+	position.y += IncreaseY(fCleanCraters);
 }
 
 void UI::DrawCameraPosition(iPoint &position) const
@@ -141,7 +140,7 @@ void UI::DrawCameraPosition(iPoint &position) const
 		position,
 		fCleanCraters
 	);
-	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
+	position.y += IncreaseY(fCleanCraters);
 }
 
 void UI::DrawMousePosition(iPoint &position) const
@@ -155,30 +154,36 @@ void UI::DrawMousePosition(iPoint &position) const
 		position,
 		fCleanCraters
 	);
-	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
+	position.y += IncreaseY(fCleanCraters);
 }
 
 void UI::DrawPlayerJumps(iPoint &position) const
 {
-	app->fonts->Draw(std::format("Max Jumps: {}", player->jump.maxJumps), position, fCleanCraters);
-	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
-	app->fonts->Draw(std::format("Is on air: {}", player->jump.bOnAir ? "Yes." : "No."), position, fCleanCraters);
-	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
-	app->fonts->Draw(std::format("Current Jumps: {}", player->jump.currentJumps), position, fCleanCraters);
-	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
-	app->fonts->Draw(std::format("Jump Impulse: {}", player->jump.jumpImpulse), position, fCleanCraters);
-	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
+	const auto &jump = app->entityManager->player->jump;
+	app->fonts->Draw(std::format("Max Jumps: {}", jump.maxJumps), position, fCleanCraters);
+	position.y += IncreaseY(fCleanCraters);
+	app->fonts->Draw(std::format("Is on air: {}", jump.bOnAir ? "Yes." : "No."), position, fCleanCraters);
+	position.y += IncreaseY(fCleanCraters);
+	app->fonts->Draw(std::format("Current Jumps: {}", jump.currentJumps), position, fCleanCraters);
+	position.y += IncreaseY(fCleanCraters);
+	app->fonts->Draw(std::format("Jump Impulse: {}", jump.jumpImpulse), position, fCleanCraters);
+	position.y += IncreaseY(fCleanCraters);
 }
 
 void UI::DrawPlayerAnimation(iPoint &position) const
 {
+	const auto &player = app->entityManager->player;
 	app->fonts->Draw(std::format("Able to move: {}", player->bAbleToMove ? "Yes." : "No."), position, fCleanCraters);
-	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
+	position.y += IncreaseY(fCleanCraters);
 	app->fonts->Draw(std::format("Locked Animation: {}", player->bLockAnim ? "Yes." : "No."), position, fCleanCraters);
-	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
-	app->fonts->Draw(std::format("Current Veloicty: {:.1f}, {:.1f}", player->pBody->body->GetLinearVelocity().x, player->pBody->body->GetLinearVelocity().y), position, fCleanCraters);
-	position.y += app->fonts->fonts[fCleanCraters].lineHeight + app->fonts->fonts[fCleanCraters].spacing.y;
-	
+	position.y += IncreaseY(fCleanCraters);
+	const auto &velocity = player->pBody->body->GetLinearVelocity();
+	app->fonts->Draw(std::format("Current Veloicty: {:.1f}, {:.1f}", velocity.x, velocity.y), position, fCleanCraters);
+}
+
+int UI::IncreaseY(int font) const
+{
+	return app->fonts->fonts[font].lineHeight + app->fonts->fonts[font].spacing.y;
 }
 
 bool UI::Pause(int phase)

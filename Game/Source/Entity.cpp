@@ -47,8 +47,11 @@ bool Entity::CleanUp()
 
 bool Entity::Stop()
 {
-	app->physics->DestroyBody(pBody->body);
-	pBody.reset();
+	if(pBody)
+	{
+ 		if(pBody->body) app->physics->DestroyBody(pBody->body);
+		pBody.reset();
+	}
 	disableOnNextUpdate = false;
 	return true;
 }

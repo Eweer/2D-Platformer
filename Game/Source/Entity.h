@@ -50,6 +50,8 @@ public:
 	virtual void OnCollisionEnd(PhysBody *physA, PhysBody *physB) { /* Method to Override */ };
 	virtual void BeforeCollisionStart(b2Fixture *fixtureA, b2Fixture *fixtureB, PhysBody *pBodyA, PhysBody *pBodyB) { /* Method to Override */ };
 
+	virtual void DrawDebug() const { /* Method to Override */ };
+
 	bool active = true;
 
 	bool disableOnNextUpdate = false;

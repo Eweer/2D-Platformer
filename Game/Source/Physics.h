@@ -257,7 +257,6 @@ public:
 	void PostSolve(b2Contact *contact, const b2ContactImpulse *impule) final;
 	void EndContact(b2Contact *contact) final;
 
-
 	//---------------- Body Creation
 
 	b2Body *CreateBody(

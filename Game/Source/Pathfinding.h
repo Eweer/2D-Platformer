@@ -2,13 +2,29 @@
 #define __PATHFINDING_H__
 
 #include "Module.h"
+#include "Map.h"
 
 #include "Point.h"
 #include <memory>
 #include <vector>
+#include <queue>
+
+
+enum class PathfindTerrain
+{
+	NONE = 0x0000,
+	GROUND = 0x0001,
+	AIR = 0x0002,
+	WATER = 0x0004,
+	LAVA = 0x0008
+};
 
 struct SearchNode
 {
+	SearchNode() = default;
+	SearchNode(iPoint p, int score, int dist, std::shared_ptr<SearchNode>node)
+		: position(p), g(score), h(dist), parent(node) {}
+
 	iPoint position;
 	// Cost to reach node
 	int g;
@@ -18,11 +34,14 @@ struct SearchNode
 	// Pointer to parent node
 	std::shared_ptr<SearchNode> parent;
 
-	std::vector<iPoint> GetAdjacentNodes(std::shared_ptr<SearchNode> searchNode) const;
+	std::vector<NavLink> GetAdjacentGroundNodes(std::shared_ptr<SearchNode> searchNode) const;
+	std::vector<NavLink> GetAdjacentAirNodes(std::shared_ptr<SearchNode> searchNode) const;
 
-	std::strong_ordering operator<=>(const SearchNode &right) const
+	bool IsWalkable(iPoint p) const;
+	
+	bool operator<(const SearchNode &right) const
 	{
-		return (g + h) <=> (right.g + right.h);
+		return (g + h) > (right.g + right.h);
 	}
 
 };
@@ -30,12 +49,29 @@ struct SearchNode
 class Pathfinding : public Module
 {
 public:
+	// ------ Algorithms
+	std::unique_ptr<std::vector<iPoint>> AStarSearch(iPoint origin, iPoint destination) const;
 
-	bool CreateWalkabilityMap;
+	iPoint GetTerrainUnder(iPoint position) const;
 
-	int width;
-	int height;
-	std::vector<bool>* walkability;
+	bool Update(float dt) override;
+	
+	// ------ Utils
+	// --- Set maps
+	bool SetWalkabilityMap();
+	// --- Get information
+	bool IsValidPosition(iPoint position) const;
+	NavPoint &GetNavPoint(iPoint position) const;
+
+private:
+	void DrawNodeDebug() const;
+	bool CreateWalkabilityLinks();
+	void AddFallLinks(iPoint position, iPoint limit);
+	int HeuristicCost(iPoint origin, iPoint destination) const;
+
+	int maxJump = 1;
+	int minJump = 1;
+	std::unique_ptr<navPointMatrix> groundMap;
 };
 
 #endif //__PATHFINDING_H_

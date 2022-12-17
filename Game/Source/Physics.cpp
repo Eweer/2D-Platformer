@@ -170,6 +170,12 @@ void Physics::BeginContact(b2Contact *contact)
 	auto pBodyA = static_cast<PhysBody *>(contact->GetFixtureA()->GetBody()->GetUserData());
 	auto pBodyB = static_cast<PhysBody *>(contact->GetFixtureB()->GetBody()->GetUserData());
 
+	if((pBodyA->ctype & pBodyB->ctype) == CL::ColliderLayers::PLATFORMS)
+	{
+		contact->SetEnabled(false);
+		return;
+	}
+
 	if(pBodyA && pBodyB)
 	{	
 		if(auto [i, success] = collisionMap[pBodyA->body].insert(pBodyB->body);
@@ -409,14 +415,24 @@ void Physics::DragSelectedObject()
 	{
 		case KeyState::KEY_DOWN:
 		{
-			mouseJoint = CreateMouseJoint(ground, selected, PIXEL_TO_METERS(app->input->GetMousePosition()));
+			iPoint mousePos =
+			{
+				app->input->GetMousePosition().x - app->render->GetCamera().x,
+				app->input->GetMousePosition().y - app->render->GetCamera().y
+			};
+			mouseJoint = CreateMouseJoint(ground, selected, PIXEL_TO_METERS(mousePos));
 			break;
 		}
 		case KeyState::KEY_REPEAT:
 		{
-			mouseJoint->SetTarget(PIXEL_TO_METERS(app->input->GetMousePosition()));
+			iPoint mousePos =
+			{
+				app->input->GetMousePosition().x - app->render->GetCamera().x,
+				app->input->GetMousePosition().y - app->render->GetCamera().y
+			};
+			mouseJoint->SetTarget(PIXEL_TO_METERS(mousePos));
 			app->render->DrawLine(
-				app->input->GetMousePosition(),
+				mousePos,
 				METERS_TO_PIXELS(selected->GetPosition()),
 				SDL_Color(0, 255, 255, 255)
 			);
@@ -463,7 +479,12 @@ void Physics::DrawDebug(const b2Body *body, const int32 count, const b2Vec2 *ver
 
 bool Physics::IsMouseOverObject(b2Fixture const *f) const
 {
-	if (f->TestPoint(IPointToWorldVec(app->input->GetMousePosition())))
+	iPoint mousePos =
+	{
+		app->input->GetMousePosition().x - app->render->GetCamera().x,
+		app->input->GetMousePosition().y - app->render->GetCamera().y
+	};
+	if (f->TestPoint(IPointToWorldVec(mousePos)))
 		return true;
 	return false;
 }
