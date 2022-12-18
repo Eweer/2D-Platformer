@@ -107,6 +107,18 @@ bool Scene::PreUpdate()
 	return true;
 }
 
+
+bool Scene::Pause(int phase)
+{
+	for(auto &elem : background)
+	{
+		app->render->DrawBackground(elem.texture, elem.position + 2 - elem.size * bgScale, bgScale);
+		app->render->DrawBackground(elem.texture, elem.position, bgScale);
+		app->render->DrawBackground(elem.texture, elem.position - 2 + elem.size * bgScale, bgScale);
+	}
+	return true;
+}
+
 // Called each loop iteration
 bool Scene::Update(float dt)
 {

@@ -31,6 +31,8 @@ public:
 	// Called before all Updates
 	bool PreUpdate() final;
 
+	bool Pause(int phase) final;
+
 	// Called each loop iteration
 	bool Update(float dt) final;
 

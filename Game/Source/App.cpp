@@ -319,6 +319,7 @@ bool App::DoPaused() const
 
 	// Update
 	phase++;
+	scene->Pause(phase);
 	map->Pause(phase);
 	entityManager->Pause(phase);
 
