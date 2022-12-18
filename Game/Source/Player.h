@@ -39,11 +39,6 @@ private:
 	iPoint coordinates = {0, 0};
 	bool changedTile = true;
 
-	CharacterJump jump;
-
-	bool bKeepMomentum = false;
-	b2Vec2 velocityToKeep = {0.0f, 0.0f};
-
 	std::string playerCharacter;
 
 	std::unordered_map<std::string, std::unique_ptr<ProjectileData>, StringHash, std::equal_to<>> projectileMap;

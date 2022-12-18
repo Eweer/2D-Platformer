@@ -27,7 +27,12 @@ bool Enemy::Awake()
 	if(StrEquals(parameters.attribute("type").as_string(), "Air"))
 			pTerrain = PathfindTerrain::AIR;
 
+	enemyClass = parameters.attribute("class").as_string();
+
 	aggroRadius = parameters.attribute("aggro").as_int();
+	if(aggroRadius == 0) aggroRadius = 8;
+	patrolRadius = parameters.attribute("patrol").as_int();
+	if(patrolRadius == 0) patrolRadius = 5;
 
 	return true;
 }
@@ -227,6 +232,16 @@ BehaviourState Enemy::SetBehaviour(iPoint playerPosition, iPoint screenSize)
 	return behaviour;
 }
 
+bool Enemy::HasSaveData() const
+{
+	return true;
+}
+
+bool Enemy::LoadState(pugi::xml_node const &data)
+{
+	return false;
+}
+
 b2Vec2 Enemy::SetAirPathMovement(iPoint currentCoords)
 {
 	b2Vec2 sign = {0, 0};
@@ -259,4 +274,33 @@ b2Vec2 Enemy::SetPathMovementParameters(iPoint currentCoords)
 {
 	if(pTerrain == PathfindTerrain::GROUND) return SetGroundPathMovement(currentCoords);
 	else return SetAirPathMovement(currentCoords);
+}
+
+pugi::xml_node Enemy::SaveState(pugi::xml_node const &data)
+{
+	std::string saveData2 = "<{} {}=\"{}\"/>\n";
+	std::string saveOpenData2 = "<{} {}=\"{}\">\n";
+	std::string saveData4 = "<{} {}=\"{}\" {}=\"{}\"/>\n";
+	std::string saveOpenData4 = "<{} {}=\"{}\" {}=\"{}\">\n";
+	std::string saveData6 = "<{} {}=\"{}\" {}=\"{}\" {}=\"{}\"/>\n";
+	std::string saveFloatData = "<{} {}=\"{:.2f}\" {}=\"{:.2f}\"/>\n";
+	std::string dataToSave = "<enemy>\n";
+	dataToSave += AddSaveData(saveData4, "enemy", "id", id, "class", enemyClass);
+	dataToSave += AddSaveData(saveData4, "position", "x", position.x, "y", position.y);
+	dataToSave += AddSaveData(saveFloatData, "velocity", "x", pBody->body->GetLinearVelocity().x, "y", pBody->body->GetLinearVelocity().y);
+	dataToSave += AddSaveData(saveData4, "entity", "active", active, "disablenextupdate", disableOnNextUpdate);
+	dataToSave += AddSaveData(saveData4, "character", "hp", hp, "iframes", iFrames);
+	dataToSave += AddSaveData(saveData6, "jump", "onair", jump.bOnAir, "currentjumps", jump.currentJumps, "keepmomentum", bKeepMomentum);
+	if(path && !path->empty())
+	{
+		dataToSave += AddSaveData(saveOpenData2, "pathfind", "behaviour", static_cast<int>(behaviour));
+		dataToSave += AddSaveData(saveData4, "destination", "x", path->back().x, "y", path->back().y);
+		dataToSave += "</pathfind>";
+	}
+	else dataToSave += AddSaveData(saveData2, "pathfind", "behaviour", static_cast<int>(behaviour));
+	dataToSave += "</enemy>";
+
+	app->AppendFragment(data, dataToSave.c_str());
+
+	return data;
 }

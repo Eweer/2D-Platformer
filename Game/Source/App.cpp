@@ -217,13 +217,21 @@ std::string App::GetOrganization() const
 
 void App::LoadGameRequest()
 {
-	loadGameRequested = true;
+	if(!loadGameRequested)
+	{
+		loadGameRequested = true;
+
+	}
 }
 
 // ---------------------------------------
 void App::SaveGameRequest() 
 {
-	saveGameRequested = true;
+	if(!saveGameRequested)
+	{
+		saveGameRequested = true;
+		ui->ToggleSavingIcon();
+	}
 }
 
 bool App::LoadFromFile()
@@ -253,7 +261,6 @@ bool App::LoadFromFile()
 // check https://pugixml.org/docs/quickstart.html#modify
 bool App::SaveToFile() 
 {
-	ui->ToggleSavingIcon();
 	auto saveDoc = std::make_unique<pugi::xml_document>();
 	pugi::xml_node saveStateNode = saveDoc->append_child("save_state");
 	for(auto const &item : modules)

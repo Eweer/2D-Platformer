@@ -45,7 +45,7 @@
 				</animation>
 			</animationdata>
 		</player>
-		<enemy name="Enemies" level="Mountain" class="Dwarf" aggro="8" maxjumps="1" jumpimpulse="5">
+		<enemy name="Enemies" level="Mountain" class="Dwarf" aggro="8" patrol="6" maxjumps="1" jumpimpulse="5">
 			<physics bodytype="dynamic" gravityscale="1" restitution="0" friction="1" colliderlayers="4" />
 			<animationdata>
 				<properties width="128" height="128" pivotx="42" pivoty="85" animstyle="4" animloop="true" />
@@ -67,7 +67,7 @@
 			</animationdata>
 			<spawn id="0" x="2124" y="840" />
 		</enemy>
-		<enemy name="Enemies" level="Mountain" class="Mosquito" aggro="8" type="Air">
+		<enemy name="Enemies" level="Mountain" class="Mosquito" aggro="8" patrol="12" type="Air">
 			<physics bodytype="dynamic" gravityscale="0" restitution="0" friction="1" colliderlayers="4" />
 			<animationdata>
 				<properties width="128" height="128" pivotx="42" pivoty="85" animstyle="4" animloop="true" />

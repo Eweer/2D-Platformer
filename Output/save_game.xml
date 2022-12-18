@@ -11,6 +11,24 @@
 			<misc move="true" skillcdtimer="0" />
 			<attack queue="false" abletomove="true" />
 		</player>
+		<enemy>
+			<enemy id="0" class="Dwarf" />
+			<position x="2148" y="1182" />
+			<velocity x="0.00" y="0.00" />
+			<entity active="true" disablenextupdate="false" />
+			<character hp="3" iframes="0" />
+			<jump onair="false" currentjumps="0" keepmomentum="false" />
+			<pathfind behaviour="0" />
+		</enemy>
+		<enemy>
+			<enemy id="1" class="Mosquito" />
+			<position x="3151" y="575" />
+			<velocity x="0.00" y="0.00" />
+			<entity active="true" disablenextupdate="false" />
+			<character hp="3" iframes="0" />
+			<jump onair="false" currentjumps="0" keepmomentum="false" />
+			<pathfind behaviour="0" />
+		</enemy>
 	</entitymanager>
 	<renderer>
 		<camera x="-264" y="-533" />
