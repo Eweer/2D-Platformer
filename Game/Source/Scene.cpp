@@ -36,6 +36,8 @@ bool Scene::Awake(pugi::xml_node& config)
 				elem.attribute("path").as_string(),
 				elem.attribute("frames").as_int()
 			);
+
+		bgSpeed = elem.attribute("speed").as_float();
 	}
 
 	// Instantiate the player using the entity manager
@@ -65,13 +67,21 @@ bool Scene::Start()
 		{
 			std::string filePath = std::format("{}{}.png", bgFolder, i);
 			
-			background.emplace_back(BGInfo(app->tex->Load(filePath.c_str()), {0,0}, 0.2f * i, fPoint(0,0)));
+			background.emplace_back(BGInfo(app->tex->Load(filePath.c_str()), {0,0}, bgSpeed * i, fPoint(0,0)));
 
 			uint w;
 			uint h;
 			app->tex->GetSize(background.back().texture, w, h);
 			background.back().size.x = static_cast<float>(w);
 		}
+	}
+
+	if(!background.empty())
+	{
+		uint w;
+		uint h;
+		app->tex->GetSize(background.back().texture, w, h);
+		bgScale = static_cast<float>(app->win->GetHeight()) / static_cast<float>(h);
 	}
 
 	// Set the window title with map/tileset info
@@ -102,12 +112,12 @@ bool Scene::Update(float dt)
 {
 	for(auto &elem : background)
 	{
-		app->render->DrawBackground(elem.texture, elem.position - elem.size * 2.0f, 2.0f);
-		app->render->DrawBackground(elem.texture, elem.position, 2.0f);
-		app->render->DrawBackground(elem.texture, elem.position + elem.size * 2.0f, 2.0f);
+		app->render->DrawBackground(elem.texture, elem.position - elem.size * bgScale, bgScale);
+		app->render->DrawBackground(elem.texture, elem.position, bgScale);
+		app->render->DrawBackground(elem.texture, elem.position + elem.size * bgScale, bgScale);
 		elem.position.x -= elem.increase;
 
-		if(elem.position.x <= elem.size.x * -2.0f)
+		if(elem.position.x <= elem.size.x * (-1 * bgScale))
 		{
 			elem.position.x = 0;
 		}

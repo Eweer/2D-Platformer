@@ -40,9 +40,9 @@ public:
 	// Called before quitting
 	bool CleanUp() final;
 
-	void SetBackgroundPosition();
-
 	iPoint bgPosition = {0, 0};
+	float bgSpeed = 0.2f;
+	float bgScale = 1.0f;
 	std::vector<BGInfo> background;
 	std::unordered_map<std::string, std::pair<std::string, int>, StringHash, std::less_equal<>> backgroundInfo;
 };
