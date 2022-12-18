@@ -38,10 +38,15 @@ public:
 	void OnCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fixtureB, PhysBody const *pBodyA, PhysBody const *pBodyB) override;
 	void BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fixtureB, PhysBody const *pBodyA, PhysBody const *pBodyB) override;
 
-	uint hp = 3;
 	int dir = 0;
 	SDL_Point textureOffset = {0,0};
+
+	uint hp = 3;
 	int iFrames = 0;
+
+	CharacterJump jump;
+	bool bKeepMomentum = false;
+	b2Vec2 velocityToKeep = {0.0f, 0.0f};
 
 private:
 	//---- Utils

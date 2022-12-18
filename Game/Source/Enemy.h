@@ -4,7 +4,7 @@
 #include "Character.h"
 #include "Pathfinding.h"
 
-enum class BehaviourState
+enum class BehaviourState : int
 {
 	IDLE = 0x0000,
 	PATROL = 0x0001,
@@ -31,6 +31,12 @@ public:
 	b2Vec2 SetAirPathMovement(iPoint currentCoords);
 
 	BehaviourState SetBehaviour(iPoint playerPosition, iPoint screenSize);
+
+	bool HasSaveData() const final;
+	bool LoadState(pugi::xml_node const &data) final;
+	pugi::xml_node SaveState(pugi::xml_node const &data) final;
+
+	std::string enemyClass = "";
 
 	int currentPathIndex = 0;
 	std::unique_ptr<std::vector<iPoint>> path;

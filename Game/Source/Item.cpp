@@ -61,7 +61,6 @@ void Item::CreatePhysBody()
 		pBodyPos.y += colliderMap.begin()->second.front().second.y;
 	}
 
-	
 	auto itemBody = app->physics->CreateBody(
 		pBodyPos
 	);
@@ -135,3 +134,32 @@ void Item::BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fixt
 }
 
 void Item::PickUpEffect() const { /* TODO */ };
+
+bool Item::HasSaveData() const
+{
+	return true;
+}
+
+bool Item::LoadState(pugi::xml_node const &data)
+{
+	return false;
+}
+
+pugi::xml_node Item::SaveState(pugi::xml_node const &data)
+{
+	std::string saveData2 = "<{} {}=\"{}\"/>\n";
+	std::string saveOpenData2 = "<{} {}=\"{}\">\n";
+	std::string saveData4 = "<{} {}=\"{}\" {}=\"{}\"/>\n";
+	std::string saveOpenData4 = "<{} {}=\"{}\" {}=\"{}\">\n";
+	std::string saveData6 = "<{} {}=\"{}\" {}=\"{}\" {}=\"{}\"/>\n";
+	std::string saveFloatData = "<{} {}=\"{:.2f}\" {}=\"{:.2f}\"/>\n";
+	std::string dataToSave = "<item>\n";
+	dataToSave += AddSaveData(saveData4, "item", "imgvariation", imageVariation, "class", itemClass);
+	dataToSave += AddSaveData(saveData4, "position", "x", position.x, "y", position.y);
+	dataToSave += AddSaveData(saveData4, "entity", "active", active, "disablenextupdate", disableOnNextUpdate);
+	dataToSave += "</item>";
+
+	app->AppendFragment(data, dataToSave.c_str());
+
+	return data;
+}

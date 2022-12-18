@@ -16,6 +16,9 @@
 #include "Log.h"
 
 #include <sstream>
+#include <format>
+#include <string>
+#include <string_view>
 
 // Constructor
 App::App(int argc, char* args[]) : argc(argc), args(args)
@@ -214,13 +217,26 @@ std::string App::GetOrganization() const
 
 void App::LoadGameRequest()
 {
-	loadGameRequested = true;
+	if(!loadGameRequested)
+	{
+		loadGameRequested = true;
+
+	}
 }
 
 // ---------------------------------------
 void App::SaveGameRequest() 
 {
-	saveGameRequested = true;
+	if(!saveGameRequested)
+	{
+		saveGameRequested = true;
+		ui->ToggleSavingIcon();
+	}
+}
+
+void App::GameSaved()
+{
+	saveGameRequested = false;
 }
 
 bool App::LoadFromFile()
@@ -242,7 +258,9 @@ bool App::LoadFromFile()
 		}
 	}
 
-	return !(loadGameRequested = false);
+	loadGameRequested = false;
+
+	return true;
 }
 
 // check https://pugixml.org/docs/quickstart.html#modify
@@ -260,9 +278,8 @@ bool App::SaveToFile()
 				LOG("Error saving state of module %s", item->name.c_str());
 		}
 	}
-	saveGameRequested = saveDoc->save_file("save_game.xml");
 
-	return !saveGameRequested;
+	return saveDoc->save_file("save_game.xml");
 }
 
 bool App::SaveAttributeToConfig(std::string const &moduleName, std::string const &node, std::string const &attribute, std::string const &value)
@@ -308,8 +325,7 @@ bool App::SaveAttributeToConfig(std::string const &moduleName, std::string const
 	return false;
 }
 
-
-bool App::DoPaused() const
+bool App::DoPaused()
 {
 	// PreUpdate
 	int phase = 1;
@@ -327,10 +343,15 @@ bool App::DoPaused() const
 	phase++;
 	ui->Pause(phase);
 	render->Pause(phase);
+
+	// FinishUpdate
+	phase++;
+	FinishUpdate();
+
 	return false;
 }
 
-bool App::PauseGame() const
+bool App::PauseGame()
 {
 	physics->ToggleStep();
 	ui->TogglePauseDraw();
@@ -353,4 +374,20 @@ bool App::PauseGame() const
 uint App::GetLevelNumber() const
 {
 	return levelNumber;
+}
+
+bool App::AppendFragment(pugi::xml_node target, const char *data) const
+{
+	pugi::xml_document doc;
+	if(auto result = doc.load_string(data);
+	   !result)
+	{
+		LOG("Error parsing XML: ", result.description());
+		return false;
+	}
+
+	for(auto const &child : doc)
+		target.append_copy(child);
+
+	return true;
 }

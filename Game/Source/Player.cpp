@@ -9,11 +9,17 @@
 #include "Physics.h"
 #include "Scene.h"
 
+#include "Defs.h"
+
 #include "Box2D/Box2D/Box2D.h"
-#include <string>
 #include <unordered_map>
 #include <regex>
 #include <list>
+
+#include <format>
+#include <string>
+#include <string_view>
+
 
 Player::Player()
 {
@@ -437,4 +443,47 @@ bool Player::Pause() const
 bool Player::DidChangeTile() const
 {
 	return changedTile;
+}
+
+bool Player::HasSaveData() const
+{
+	return true;
+}
+
+bool Player::LoadState(pugi::xml_node const &data)
+{
+	return false;
+}
+
+pugi::xml_node Player::SaveState(pugi::xml_node const &data)
+{
+	std::string saveData2 = "<{} {}=\"{}\"/>\n";
+	std::string saveData4 = "<{} {}=\"{}\" {}=\"{}\"/>\n";
+	std::string saveOpenData4 = "<{} {}=\"{}\" {}=\"{}\">\n";
+	std::string saveData6 = "<{} {}=\"{}\" {}=\"{}\" {}=\"{}\"/>\n";
+	std::string saveFloatData = "<{} {}=\"{:.2f}\" {}=\"{:.2f}\"/>\n";
+	std::string dataToSave = "<player>\n";
+	dataToSave += AddSaveData(saveData4, "position", "x", position.x, "y", position.y);
+	dataToSave += AddSaveData(saveFloatData, "velocity", "x", pBody->body->GetLinearVelocity().x, "y", pBody->body->GetLinearVelocity().y);
+	dataToSave += AddSaveData(saveData4, "entity", "active", active, "disablenextupdate", disableOnNextUpdate);
+	dataToSave += AddSaveData(saveData4, "character", "hp", hp, "iframes", iFrames);
+	dataToSave += AddSaveData(saveData6, "jump", "onair", jump.bOnAir, "currentjumps", jump.currentJumps, "keepmomentum", bKeepMomentum);
+	dataToSave += AddSaveData(saveData2, "anim", "falling", bFalling);
+	dataToSave += AddSaveData(saveData4, "misc", "move", bMoveCamera, "skillcdtimer", skillCDTimer);
+	if(bAttackQueue)
+	{
+		dataToSave += AddSaveData(saveOpenData4, "attack", "queue", bAttackQueue, "abletomove", bAbleToMove);
+		dataToSave += AddSaveData(saveData6, "queue", "attack1", bAttack1, "attack2", bAttack2, "frame", texture->GetCurrentIndex());
+		dataToSave += AddSaveData(saveFloatData, "dir", "x", attackDir.x, "y", attackDir.y);
+		dataToSave += "</attack>";
+	}
+	else
+	{
+		dataToSave += AddSaveData(saveData4, "attack", "queue", bAttackQueue, "abletomove", bAbleToMove);
+	}
+	dataToSave += "</player>";
+
+	app->AppendFragment(data, dataToSave.c_str());
+
+	return data;
 }

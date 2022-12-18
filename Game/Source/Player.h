@@ -29,16 +29,15 @@ public:
 
 	bool DidChangeTile() const;
 
+	bool HasSaveData() const final;
+	bool LoadState(pugi::xml_node const &data) final;
+	pugi::xml_node SaveState(pugi::xml_node const &data) final;
+
 private:
 	bool LoadProjectileData();
 
 	iPoint coordinates = {0, 0};
 	bool changedTile = true;
-
-	CharacterJump jump;
-
-	bool bKeepMomentum = false;
-	b2Vec2 velocityToKeep = {0.0f, 0.0f};
 
 	std::string playerCharacter;
 

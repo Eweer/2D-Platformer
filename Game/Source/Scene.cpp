@@ -116,6 +116,14 @@ bool Scene::Pause(int phase)
 		app->render->DrawBackground(elem.texture, elem.position, bgScale);
 		app->render->DrawBackground(elem.texture, elem.position - 2 + elem.size * bgScale, bgScale);
 	}
+
+	// Request App to Load / Save when pressing the keys F5 (save) / F6 (load)
+	if (app->input->GetKey(SDL_SCANCODE_F5) == KEY_DOWN)
+		app->SaveGameRequest();
+
+	if (app->input->GetKey(SDL_SCANCODE_F6) == KEY_DOWN)
+		app->LoadGameRequest();
+
 	return true;
 }
 
@@ -174,4 +182,44 @@ void Scene::IncreaseBGScrollSpeed(float x)
 	else additionalSpeed = x;
 
 	if(additionalSpeed == 0) additionalSpeed = 0.1f;
+}
+
+bool Scene::HasSaveData() const
+{
+	return true;
+}
+
+bool Scene::LoadState(pugi::xml_node const &data)
+{
+	return false;
+}
+
+pugi::xml_node Scene::SaveState(pugi::xml_node const &data) const
+{
+	std::string saveData2 = "<{} {}=\"{}\"/>\n";
+	std::string saveOpenData2 = "<{} {}=\"{}\">\n";
+	std::string saveData4 = "<{} {}=\"{}\" {}=\"{}\"/>\n";
+	std::string saveOpenData4 = "<{} {}=\"{}\" {}=\"{}\">\n";
+	std::string saveData6 = "<{} {}=\"{}\" {}=\"{}\" {}=\"{}\"/>\n";
+	std::string saveData6OneFloat = "<{} {}=\"{}\" {}=\"{}\" {}=\"{}\" {}=\"{:.2f}\"/>\n";
+	std::string saveData6OneInt = "<{} {}=\"{}\" {}=\"{:.2f}\" {}=\"{:.2f}\" {}=\"{:.2f}\"/>\n";
+	std::string saveFloatData = "<{} {}=\"{:.2f}\" {}=\"{:.2f}\"/>\n";
+	std::string dataToSave = "<scene>\n";
+	for (int i = 1; auto const &elem : background)
+	{
+		dataToSave += AddSaveData(
+			saveData6OneInt,
+			"layer",
+			"id", i,
+			"x", elem.position.x,
+			"y", elem.position.y,
+			"additionalspeed", additionalSpeed
+		);
+		i++;
+	}
+	dataToSave += "</scene>";
+
+	app->AppendFragment(data, dataToSave.c_str());
+
+	return data;
 }

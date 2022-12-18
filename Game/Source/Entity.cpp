@@ -69,6 +69,11 @@ void Entity::SpawnEntity()
 	CreatePhysBody();
 }
 
+bool Entity::HasSaveData() const
+{
+	return false;
+}
+
 bool Entity::LoadState(pugi::xml_node const &)
 {
 	return true;

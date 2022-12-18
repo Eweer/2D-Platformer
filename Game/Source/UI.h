@@ -8,6 +8,8 @@
 #include "Defs.h"
 #include "Point.h"
 
+#include <unordered_map>
+
 class UI : public Module
 {
 public:
@@ -28,11 +30,14 @@ public:
 	// Called each loop iteration
 	bool PostUpdate() final;
 
-	void DrawPlayerSkill(iPoint &position) const;
-
 	bool Pause(int phase) final;
 
 	bool TogglePauseDraw();
+	bool ToggleSavingIcon();
+
+	bool HasSaveData() const final;
+	bool LoadState(pugi::xml_node const &data) final;
+	pugi::xml_node SaveState(pugi::xml_node const &) const final;
 
 private:
 	void DrawPause(iPoint &position) const;
@@ -44,15 +49,25 @@ private:
 	void DrawMousePosition(iPoint &position) const;
 	void DrawPlayerJumps(iPoint &position) const;
 	void DrawPlayerAnimation(iPoint &position) const;
+	void DrawSaving(iPoint &position);
+	void DrawSavingCheck(iPoint &position);
+	void DrawPlayerSkill(iPoint &position) const;
 
 	int IncreaseY(int font) const;
 
+	std::unordered_map<std::string, SDL_Texture *, StringHash, std::less_equal<>> uiElements;
+
+	float degree = 0.0f;
+	int laps = 0;
+
+	bool bSavingGame = false;
 	bool bDrawPause = false;
 	int fCleanCraters = 0;
 	iPoint pTopLeft = {10, 10};
 	iPoint pMiddle = {0, 0};
 	iPoint pBottomLeft = {0,0};
 
+	pugi::xml_node parameters;
 };
 
 #endif
