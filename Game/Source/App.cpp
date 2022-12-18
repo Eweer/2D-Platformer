@@ -141,6 +141,7 @@ void App::FinishUpdate()
 {
 	if (loadGameRequested) LoadFromFile();
 	if (saveGameRequested) SaveToFile();
+	if(resetLevelRequested) entityManager->RestartLevel();
 }
 
 // Call modules before each loop iteration
@@ -225,6 +226,13 @@ void App::LoadGameRequest()
 }
 
 // ---------------------------------------
+void App::ResetLevelRequest()
+{
+	if(!resetLevelRequested)
+	{
+		resetLevelRequested = true;
+	}
+}
 void App::SaveGameRequest() 
 {
 	if(!saveGameRequested)

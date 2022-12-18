@@ -284,6 +284,18 @@ void Character::CreatePhysBody()
 	}
 }
 
+void Character::RestartLevel()
+{
+	position = startingPosition;
+	hp = 3;
+	iFrames = 0;
+	jump.bOnAir = false;
+	jump.currentJumps = 0;
+	bKeepMomentum = false;
+	velocityToKeep = {0,0};
+	SpecificRestart();
+}
+
 //---------- Main Loop
 
 bool Character::Update()

@@ -215,7 +215,8 @@ public:
 	{}
 
 	~PhysBody() = default;
-	
+
+	iPoint GetPosition() const;
 	void GetPosition(int &x, int &y) const;
 	float GetRotation() const;
 	bool Contains(int x, int y) const;

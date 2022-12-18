@@ -29,7 +29,7 @@ public:
 	bool Start() override;
 	void AddTexturesAndAnimationFrames();
 	void CreatePhysBody() override;
-
+	void RestartLevel() override;
 	//---------- Main Loop
 	bool Update() override;
 	bool Pause() const override;

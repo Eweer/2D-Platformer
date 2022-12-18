@@ -62,6 +62,10 @@ bool Enemy::Update()
 			iFrames = 0;
 		}
 	}
+	else if(StrEquals(texture->GetCurrentAnimName(), "attack"))
+	{
+		if(texture->IsAnimFinished()) texture->SetCurrentAnimation("idle");
+	}
 	// If there's a valid path and we haven't finished it, we have to move
 	else if(path && !path->empty())
 	{
@@ -136,6 +140,15 @@ void Enemy::BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fix
 		}
 		bRequestPath = true;
 		
+	}
+	if((pBodyB->ctype & PLAYER) == PLAYER)
+	{
+		if(pBodyB->GetPosition().x > position.x)
+			dir = 0;
+		else
+			dir = 1;
+
+		texture->SetCurrentAnimation("attack");
 	}
 }
 
@@ -314,4 +327,21 @@ pugi::xml_node Enemy::SaveState(pugi::xml_node const &data)
 	app->AppendFragment(data, dataToSave.c_str());
 
 	return data;
+}
+
+void Enemy::SpecificRestart()
+{
+	behaviour = BehaviourState::IDLE;
+	
+	path.reset();
+	
+	currentPathIndex = 0;
+	bRequestPath = false;
+	pTerrain = PathfindTerrain::GROUND;
+	tileYOnDeath = 0;
+	bAttack = false;
+	bDeath = false;
+	bHurt = false;
+	bIdle = false;
+	bWalk = false;
 }

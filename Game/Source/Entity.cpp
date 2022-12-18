@@ -27,6 +27,7 @@ bool Entity::Awake()
 bool Entity::Start()
 {
 	SpawnEntity();
+	active = true;
 	return true;
 }
 
@@ -100,6 +101,12 @@ void Entity::Disable()
 		active = false;
 		disableOnNextUpdate = true;
 	}
+}
+
+void Entity::RestartLevel()
+{
+	position = startingPosition;
+	SpecificRestart();
 }
 
 BodyType Entity::BodyTypeStrToEnum(std::string const &str) const

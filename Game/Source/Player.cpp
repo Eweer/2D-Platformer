@@ -123,7 +123,7 @@ std::string Player::ChooseAnim()
 	if(bAttack1 || bAttack2 || bHurt || bDead || bFalling >= 100)
 		bLockAnim = true;
 
-	if(bDead) return "dead";
+	if(bDead) return "death";
 	if(bHurt) return "hurt";
 	if(bFalling >= 100) return "falling";
 	if(bFalling >= 10) return "jump";
@@ -163,7 +163,37 @@ bool Player::Update()
 {
 	if(skillCDTimer >= skillCD) skillCDTimer = 0;
 	if(skillCDTimer > 0) skillCDTimer++;
-	
+
+	if(iFrames > 0)
+	{
+		iFrames++;
+
+		// If player is dead
+		if(hp == 0)
+		{
+			if(texture->IsLastFrame()) texture->Pause();
+			if(iFrames >= 100)
+			{
+				iFrames = 0;
+				active = false;
+				Start();
+				active = true;
+				bDead = false;
+				bAbleToMove = true;
+				bLockAnim = false;
+				hp = 3;
+			}
+		}
+		// If it's not dead and iFrame timer expired
+		else if(iFrames >= 40)
+		{
+			iFrames = 0;
+			bHurt = false;
+		}
+		else if(iFrames >= 20)
+			bAbleToMove = true;
+	}
+
 	// If landing
 	if(bKeepMomentum)
 	{
@@ -171,10 +201,16 @@ bool Player::Update()
 		bKeepMomentum = false;
 	}
 	
-	// Set movement variables
-	b2Vec2 vel = pBody->body->GetLinearVelocity();
-	b2Vec2 impulse = {0, 0};
-	float maxVel = app->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT ? 7.5f : 5.0f;
+	b2Vec2 vel;
+	b2Vec2 impulse;
+	float maxVel;
+	if(pBody)
+	{
+		// Set movement variables
+		vel = pBody->body->GetLinearVelocity();
+		impulse = {0, 0};
+		maxVel = app->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT ? 7.5f : 5.0f;
+	}
 
 	// If it's able to move
 	if(bAbleToMove)
@@ -230,8 +266,6 @@ bool Player::Update()
 			projectiles.push_back(std::move(projPtr));
 		}
 		if(bHighJump) bHighJump = false;
-		if(bHurt) bHurt = false;
-		if(bDead) bDead = false;
 
 		// If the texture finished playing, we give the control back to the player
 		if(texture->GetAnimFinished())
@@ -310,36 +344,42 @@ bool Player::Update()
 		}		
 	}
 
-	// Set player speed
-	pBody->body->SetLinearVelocity(b2Vec2(impulse.x, pBody->body->GetLinearVelocity().y));
-
-	// Set boolean actions based on current movement
-	if(pBody->body->GetLinearVelocity().y <= 0)	bFalling = 0;
-	else if(pBody->body->GetLinearVelocity().y > 1.0f) bFalling++;
-
-	if(pBody->body->GetLinearVelocity().x == 0)
+	if(pBody)
 	{
-		bWalking = false;
-		bRunning = false;
-		bIdle = true;
-	}
-	else
-	{
-		bIdle = false;
-		bWalking = true;
-		if(app->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT)
-			bRunning = true;
-		else
+		// Set player speed
+		pBody->body->SetLinearVelocity(b2Vec2(impulse.x, pBody->body->GetLinearVelocity().y));
+	
+
+		// Set boolean actions based on current movement
+		if(pBody->body->GetLinearVelocity().y <= 0)	bFalling = 0;
+		else if(pBody->body->GetLinearVelocity().y > 1.0f) bFalling++;
+
+		if(pBody->body->GetLinearVelocity().x == 0)
+		{
+			bWalking = false;
 			bRunning = false;
+			bIdle = true;
+		}
+		else
+		{
+			bIdle = false;
+			bWalking = true;
+			if(app->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT)
+				bRunning = true;
+			else
+				bRunning = false;
+		}
+		
+		app->scene->IncreaseBGScrollSpeed(impulse.x);
+		// Set image position and draw character
+		position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x);
+		position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y);
+		
 	}
 
 	// If it's not locked, we set the texture based on priority
 	if(!bLockAnim) texture->SetCurrentAnimation(ChooseAnim());
 
-	app->scene->IncreaseBGScrollSpeed(impulse.x);
-	// Set image position and draw character
-	position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x);
-	position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y);
 	app->render->DrawCharacterTexture(
 		texture->UpdateAndGetFrame(),
 		iPoint(position.x - colliderOffset.x, position.y - colliderOffset.y),
@@ -363,6 +403,9 @@ bool Player::Update()
 	if(app->input->GetKey(SDL_SCANCODE_M) == KEY_DOWN)
 		bMoveCamera = !bMoveCamera;
 
+	if(app->input->GetKey(SDL_SCANCODE_F10) == KEY_DOWN)
+		bGodMode = !bGodMode;
+
 	return true;
 }
 
@@ -372,11 +415,9 @@ void Player::BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fi
 	{
 		using enum CL::ColliderLayers;
 		case ITEMS:
-			LOG("Collision ITEMS");
 			break;
 		case PLATFORMS:
 		{
-			LOG("Collision PLATFORMS");
 			if(pBody->ground->ptr == fixtureA && pBody->body->GetLinearVelocity().y > 0)
 			{
 				if (bNormalJump) bLockAnim = false;
@@ -402,10 +443,42 @@ void Player::BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fi
 		}
 		case ENEMIES:
 		{
+			if(iFrames == 0)
+			{
+				if(!bGodMode) hp -= 1;
+				iFrames = 1;
+				if(hp <= 0)
+				{
+					position.x -= 20;
+					position.y -= 10;
+					bDead = true;
+					bAbleToMove = false;
+					bLockAnim = false;
+					pBody->body->SetLinearVelocity(b2Vec2(0, pBody->body->GetLinearVelocity().y));
+					Disable();
+					active = true;
+				}
+				else
+				{
+					position.x -= 20;
+					position.y -= 10;
+					bHurt = true;
+					bAbleToMove = false;
+				}
+			}
 			break;
 		}
 		case TRIGGERS:
 		{
+			if(bGodMode) break;
+			hp = 0;
+			iFrames = 1;
+			bDead = true;
+			bAbleToMove = false;
+			bLockAnim = false;
+			pBody->body->SetLinearVelocity(b2Vec2(0, pBody->body->GetLinearVelocity().y));
+			Disable();
+			active = true;
 			break;
 		}
 		case CHECKPOINTS:
@@ -443,6 +516,35 @@ bool Player::Pause() const
 bool Player::DidChangeTile() const
 {
 	return changedTile;
+}
+
+void Player::SpecificRestart()
+{
+	for(auto &elem: projectiles)
+		elem.reset();
+
+	projectiles.clear();
+
+	changedTile = true;
+	bMoveCamera = true;
+	skillCDTimer = 0;
+	bFalling = 0;
+	bDead = false;
+	bHurt = false;
+	bAttack2 = false;
+	bClimbing = false;
+	bPushing = false;
+	bHighJump = false;
+	bNormalJump = false;
+	bRunning = false;
+	bWalking = false;
+	bIdle = false;
+	bAttack1 = false;
+	bLockAnim = false;
+	bAbleToMove = true;
+	bGodMode = false;
+	bAttackQueue = false;
+	attackDir = {0, 0};
 }
 
 bool Player::HasSaveData() const

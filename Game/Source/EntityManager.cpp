@@ -309,14 +309,8 @@ bool EntityManager::PreUpdate()
 				if(b == AGGRO)
 				{
 					destinationCoords = app->pathfinding->GetDestinationCoordinates(player->position, enemy->pTerrain);
-					auto originCoords = app->map->WorldToCoordinates(enemy->position - enemy->colliderOffset/2);
-					// Adjust X position to nearest tile to enemy that is next to the player
-					if(enemy->pTerrain == PathfindTerrain::GROUND)
-					{
-						if(destinationCoords.x - originCoords.x > 0) destinationCoords.x--;
-						else destinationCoords.x++;
-					}
-					else
+					// Adjust Y position for air enemis, they'll look for the one above the player
+					if(enemy->pTerrain == PathfindTerrain::AIR)
 						destinationCoords.y--;
 				}
 				else if(b == PATROL && (!enemy->path || enemy->currentPathIndex + 1 >= enemy->path->size()))
@@ -332,6 +326,18 @@ bool EntityManager::PreUpdate()
 	}
 	return true;
 };
+
+void EntityManager::RestartLevel() const
+{
+	for(auto const &[entityType, entityInfo] : allEntities)
+	{
+		for(auto const &entity : entityInfo.entities)
+		{
+			if(!entity->active) entity->Start();
+			entity->RestartLevel();
+		}
+	}
+}
 
 bool EntityManager::PostUpdate()
 {

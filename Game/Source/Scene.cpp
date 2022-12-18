@@ -104,7 +104,6 @@ bool Scene::Start()
 // Called each loop iteration
 bool Scene::PreUpdate()
 {
-	
 	return true;
 }
 
@@ -145,6 +144,9 @@ bool Scene::Update(float dt)
 	}
 
 	additionalSpeed = 0.0f;
+
+	//if(app->input->GetKey(SDL_SCANCODE_F3) == KEY_DOWN)
+		//app->ResetLevelRequest();
 
 	// Request App to Load / Save when pressing the keys F5 (save) / F6 (load)
 	if (app->input->GetKey(SDL_SCANCODE_F5) == KEY_DOWN)

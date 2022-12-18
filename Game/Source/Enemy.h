@@ -36,6 +36,8 @@ public:
 	bool LoadState(pugi::xml_node const &data) final;
 	pugi::xml_node SaveState(pugi::xml_node const &data) final;
 
+	void SpecificRestart() final;
+
 	std::string enemyClass = "";
 
 	int currentPathIndex = 0;
