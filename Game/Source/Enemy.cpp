@@ -126,6 +126,17 @@ void Enemy::BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fix
 		}
 		else texture->SetCurrentAnimation("hurt");
 	}
+	if((pBodyB->ctype & ENEMIES) == ENEMIES)
+	{
+		if((pBody->body->GetLinearVelocity().x * pBodyB->body->GetLinearVelocity().x > 0)
+		   && (pBody->body->GetPosition().x > pBodyB->body->GetPosition().x))
+		{
+			dir = dir ? 0 : 1;
+			pBody->body->SetLinearVelocity(b2Vec2(pBody->body->GetLinearVelocity().x*-1, pBody->body->GetLinearVelocity().y));
+		}
+		bRequestPath = true;
+		
+	}
 }
 
 bool Enemy::SetPath(iPoint destinationCoords)

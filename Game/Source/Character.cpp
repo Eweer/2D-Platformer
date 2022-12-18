@@ -377,10 +377,10 @@ void Character::SetAnimationParameters(pugi::xml_node const &animDataNode, std::
 
 uint16 Character::SetMaskFlag(std::string_view name, pugi::xml_node const &colliderGroupNode, pugi::xml_node const &colliderNode) const
 {
+	using enum CL::ColliderLayers;
 	uint16 maskFlag = 0x0001;
 	if(StrEquals(name, "player"))
 	{
-		using enum CL::ColliderLayers;
 		if(StrEquals(colliderGroupNode.attribute("name").as_string(), "CharacterSensor"))
 			maskFlag = static_cast<uint16>(ENEMIES | TRIGGERS | CHECKPOINTS | BULLET);
 		else if(StrEquals(colliderGroupNode.attribute("name").as_string(), "Terrain"))
@@ -388,11 +388,10 @@ uint16 Character::SetMaskFlag(std::string_view name, pugi::xml_node const &colli
 	}
 	else if(StrEquals(name, "enemy"))
 	{
-		using enum CL::ColliderLayers;
 		if(StrEquals(colliderGroupNode.attribute("name").as_string(), "CharacterSensor"))
-			maskFlag = static_cast<uint16>(TRIGGERS | PLAYER | BULLET);
+			maskFlag = static_cast<uint16>(TRIGGERS | PLAYER | BULLET | ENEMIES);
 		else if(StrEquals(colliderGroupNode.attribute("name").as_string(), "Terrain"))
-			maskFlag = static_cast<uint16>(PLATFORMS | PLAYER);
+			maskFlag = static_cast<uint16>(PLATFORMS | PLAYER | ENEMIES);
 	}
 	return maskFlag;
 }

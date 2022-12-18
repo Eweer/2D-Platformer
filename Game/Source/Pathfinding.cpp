@@ -114,7 +114,7 @@ std::unique_ptr<std::vector<iPoint>> Pathfinding::AStarSearch(iPoint origin, iPo
 	// Check if path is valid. If it isn't log it and return an empty path
 	if(!IsValidPosition(origin) || !IsValidPosition(destination))
 	{
-		LOG("Path from %s, %s to %s, %s is not valid", origin.x, origin.y, destination.x, destination.y);
+		//LOG("Path from %s, %s to %s, %s is not valid", origin.x, origin.y, destination.x, destination.y);
 		return nullptr;
 	}
 

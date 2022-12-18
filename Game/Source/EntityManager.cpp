@@ -311,8 +311,13 @@ bool EntityManager::PreUpdate()
 					destinationCoords = app->pathfinding->GetDestinationCoordinates(player->position, enemy->pTerrain);
 					auto originCoords = app->map->WorldToCoordinates(enemy->position - enemy->colliderOffset/2);
 					// Adjust X position to nearest tile to enemy that is next to the player
-					if(destinationCoords.x - originCoords.x > 0) destinationCoords.x--;
-					else destinationCoords.x++;
+					if(enemy->pTerrain == PathfindTerrain::GROUND)
+					{
+						if(destinationCoords.x - originCoords.x > 0) destinationCoords.x--;
+						else destinationCoords.x++;
+					}
+					else
+						destinationCoords.y--;
 				}
 				else if(b == PATROL && (!enemy->path || enemy->currentPathIndex + 1 >= enemy->path->size()))
 					destinationCoords = app->pathfinding->GetPatrolCoordinates(enemy->position, enemy->dir, enemy->pTerrain, enemy->patrolRadius);

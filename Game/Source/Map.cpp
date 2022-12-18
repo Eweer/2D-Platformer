@@ -358,12 +358,29 @@ bool Map::LoadAllLayers(pugi::xml_node const &node)
 			iPoint position{objectNode.attribute("x").as_int(), objectNode.attribute("y").as_int()};
 			int width = objectNode.attribute("width").as_int();
 			int height = objectNode.attribute("height").as_int();
-			auto gid = objectNode.attribute("gid").as_uint();
-			TileSet const *tileset = GetTilesetFromTileId(gid);
-			auto aux = tileset->tileInfo.find(gid - tileset->firstgid);
-			TileInfo const *tileInfo = aux->second.get();
+			if(objectNode.child("properties").empty())
+			{
+				auto gid = objectNode.attribute("gid").as_uint();
+				TileSet const *tileset = GetTilesetFromTileId(gid);
+				auto aux = tileset->tileInfo.find(gid - tileset->firstgid);
+				TileInfo const *tileInfo = aux->second.get();
 
-			app->entityManager->LoadEntities(tileInfo, position, width, height);
+				app->entityManager->LoadEntities(tileInfo, position, width, height);
+			}
+			else
+			{
+				using enum CL::ColliderLayers;
+				std::vector<b2Vec2> temp;
+				temp.emplace_back(b2Vec2(static_cast<float>(width/2), static_cast<float>(height/2)));
+				iPoint pos(width/2, height/2);
+				ShapeData shapeData("rectangle", temp);
+				auto body = app->physics->CreateBody(position + pos);
+				auto fixtureDef = app->physics->CreateFixtureDef(shapeData, static_cast<uint>(TRIGGERS), static_cast<uint>(PLAYER),true);
+				body->CreateFixture(fixtureDef.get());
+				auto pbPtr = app->physics->CreatePhysBody(body, iPoint(width, height), TRIGGERS);
+				terrainColliders.push_back(std::move(pbPtr));
+
+			}
 		}
 	}
 

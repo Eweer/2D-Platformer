@@ -45,7 +45,8 @@ bool Scene::Awake(pugi::xml_node& config)
 		app->entityManager->CreateEntity("player", config.child("player"));
 
 	for(auto const &elem : config.children("enemy"))
-		app->entityManager->CreateEntity("enemy", elem);
+		for(auto const &id : elem.children("spawn"))
+			app->entityManager->CreateEntity("enemy", elem);
 
 	return true;
 }
