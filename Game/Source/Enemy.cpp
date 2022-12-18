@@ -1,5 +1,6 @@
 #include "Enemy.h"
 #include "App.h"
+#include "Map.h"
 #include "Projectile.h"
 #include "BitMaskColliderLayers.h"
 #include "PugiXml/src/pugixml.hpp"
@@ -25,6 +26,8 @@ bool Enemy::Awake()
 	};
 	if(StrEquals(parameters.attribute("type").as_string(), "Air"))
 			pTerrain = PathfindTerrain::AIR;
+
+	aggroRadius = parameters.attribute("aggro").as_int();
 
 	return true;
 }
@@ -61,13 +64,15 @@ bool Enemy::Update()
 
 		// and the currentCoords are the same as the ones on the path[currentPathIndex]
 		// and we are not in the air if the pathfinding is for a ground enemy
+		// or we are pathfinding an air enemy
 		if(currentCoords == path->at(currentPathIndex) &&
-		   (pBody->body->GetLinearVelocity().y == 0 && pTerrain == PathfindTerrain::GROUND))
+		    ((pBody->body->GetLinearVelocity().y == 0 && pTerrain == PathfindTerrain::GROUND)
+			|| pTerrain == PathfindTerrain::AIR))
 		{
-			// We request a new path in case destination has moved
-			bRequestPath = true;
 			// We update our index unless it's the last tile, as that is our destination
 			if(currentPathIndex < path->size() - 1) currentPathIndex++;
+			// If it's the last tile, we request a new path in case destination has moved
+			else bRequestPath = true;
 		}
 
 		// Set direction and animation
@@ -88,6 +93,7 @@ bool Enemy::Update()
 		(bool)dir,
 		texture->GetFlipPivot()
 	);
+
 	return true;
 }
 
@@ -104,7 +110,7 @@ void Enemy::BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fix
 		if(hp <= 0)
 		{
 			texture->SetCurrentAnimation("death");
-
+			behaviour = BehaviourState::DEAD;
 			// We stop all X momentum
 			pBody->body->SetLinearVelocity(b2Vec2(0, pBody->body->GetLinearVelocity().y));
 			tileYOnDeath = app->map->GetTileHeight()/2 + app->map->MapToWorld(app->pathfinding->GetDestinationCoordinates(position, PathfindTerrain::GROUND)).y;
@@ -157,8 +163,6 @@ void Enemy::DrawDebug() const
 	if(path && currentPathIndex < path->size() - 1) DrawDebugPath();
 }
 
-
-
 b2Vec2 Enemy::SetGroundPathMovement(iPoint currentCoords)
 {
 	float sign = 0;
@@ -188,6 +192,39 @@ b2Vec2 Enemy::SetGroundPathMovement(iPoint currentCoords)
 	return b2Vec2(2.0f * sign, pBody->body->GetLinearVelocity().y);
 }
 
+BehaviourState Enemy::SetBehaviour(iPoint playerPosition, iPoint screenSize)
+{
+	using enum BehaviourState;
+	BehaviourState prevBehaviour = behaviour;
+	switch(behaviour)
+	{
+		case IDLE:
+			// If the x distance is less than the width of the screen we activate patrol
+			if(abs(playerPosition.x - position.x) <= screenSize.x + 20)
+				behaviour = PATROL;
+			break;
+		case PATROL:
+			// If player is in aggro radius we activate aggro behaviour
+			if(app->map->WorldToCoordinates(playerPosition).DistanceManhattan(app->map->WorldToCoordinates(position)) <= aggroRadius)
+				behaviour = AGGRO;
+			break;
+		case AGGRO:
+		{
+			// If the player left the screen, we put the enemy in idle
+			if(abs(playerPosition.x - position.x) > screenSize.x + 20)
+				behaviour = IDLE;
+			break;
+		}
+		default:
+			return DEAD;
+	}
+
+	if(behaviour != prevBehaviour)
+		bRequestPath = true;
+
+	return behaviour;
+}
+
 b2Vec2 Enemy::SetAirPathMovement(iPoint currentCoords)
 {
 	b2Vec2 sign = {0, 0};
@@ -206,10 +243,6 @@ b2Vec2 Enemy::SetAirPathMovement(iPoint currentCoords)
 	if(sign == b2Vec2{0,0})
 	{
 		texture->SetCurrentAnimation("idle");
-		// We request a new path in case destination has moved
-		bRequestPath = true;
-		// We update our index unless it's the last tile, as that is our destination
-		if(currentPathIndex < path->size() - 1) currentPathIndex++;
 	}
 	else
 	{

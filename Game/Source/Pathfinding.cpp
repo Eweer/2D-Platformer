@@ -8,6 +8,8 @@
 
 #include "BitMaskNavType.h"
 
+#include <numeric>
+#include <utility>
 #include <queue>
 
 // ---------- SearchNode ----------
@@ -253,8 +255,8 @@ iPoint Pathfinding::GetDestinationCoordinates(iPoint position, PathfindTerrain p
 	position = app->map->WorldToCoordinates(position);
 	if(!IsValidPosition(position))
 	{
-		position.x = in_range(position.x, 0, groundMap->size());
-		position.y = in_range(position.y, 0, groundMap->at(0).size());
+		position.x = (position.x < 0) ? 2 : groundMap->size() - 2;
+		position.y = (position.y < 0) ? 2 : groundMap->at(0).size() - 2;
 	}
 
 	// If it's a ground enemy, we pathfind to the node
@@ -264,6 +266,61 @@ iPoint Pathfinding::GetDestinationCoordinates(iPoint position, PathfindTerrain p
 	
 	return position;
 }
+
+iPoint Pathfinding::GetPatrolCoordinates(iPoint position, int dir, PathfindTerrain pTerrain, int patrolRadius) const
+{
+	using enum CL::NavType;
+	position = app->map->WorldToCoordinates(position);
+
+	if(!IsValidPosition(position)) return position;
+	
+	auto type = groundMap->at(position.x)[position.y].type & (LEFT | PLATFORM | RIGHT);
+	auto check = NONE;
+	if(pTerrain == PathfindTerrain::GROUND)
+	{
+		check = (type & PLATFORM) == PLATFORM
+			? (TERRAIN | LEFT | RIGHT | PLATFORM) ^ type
+			: (TERRAIN | LEFT | RIGHT) ^ type;
+	}
+	iPoint left(position);
+	iPoint right(position);
+
+	CL::NavType leftCheck = (pTerrain == PathfindTerrain::GROUND) ? (RIGHT | PLATFORM) : NONE;
+	CL::NavType rightCheck = (pTerrain == PathfindTerrain::GROUND) ? (LEFT | PLATFORM) : NONE;
+
+	if((type ^ leftCheck) == NONE)
+		left = GetPatrolMaxX(position, check, patrolRadius * -1);
+	if((type ^ rightCheck) == NONE)
+		right = GetPatrolMaxX(position, check, patrolRadius);
+
+	// If there is a path in the other direction, take it
+	if(position.x - right.x != 0 && dir == 1)
+		return right;
+
+	// If there wasn't, because either direction was wrong or right.x == position.x
+	if(position.x - left.x != 0)
+		return left;
+	
+	// If position.x is the same as left.x return right
+	// Right can be either currentPos or a differentPos
+	return right;
+}
+
+iPoint Pathfinding::GetPatrolMaxX(iPoint position, CL::NavType check, int patrolRadius) const
+{
+	int sign = patrolRadius > 0 ? 1 : -1;
+	for(int i = sign; abs(i) < abs(patrolRadius); i += sign)
+	{
+		// Check if position is valid and 
+		// if the tile at position is an ending one
+		if(std::cmp_less(position.x + i, groundMap->size()) && position.x + i >= 0 &&
+		   (groundMap->at(position.x + i)[position.y].type | check) != check)
+			return iPoint(position.x + i - sign, position.y);
+	}
+	return iPoint(position.x + patrolRadius, position.y);
+}
+
+
 
 iPoint Pathfinding::GetTerrainUnder(iPoint position) const
 {

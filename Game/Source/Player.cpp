@@ -339,6 +339,15 @@ bool Player::Update()
 		texture->GetFlipPivot()
 	);
 
+	if(auto currentCoords = app->map->WorldToCoordinates(position);
+	   currentCoords != coordinates)
+	{
+		changedTile = true;
+		coordinates = currentCoords;
+	}
+	else
+		changedTile = false;
+
 	// Move camera
 	if(bMoveCamera)
 		app->render->AdjustCamera(position);
@@ -425,4 +434,9 @@ bool Player::Pause() const
 		if(!it->get()->Pause()) return false;
 	}
 	return true;
+}
+
+bool Player::DidChangeTile() const
+{
+	return changedTile;
 }

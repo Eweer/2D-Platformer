@@ -27,8 +27,13 @@ public:
 
 	bool Pause() const final;
 
+	bool DidChangeTile() const;
+
 private:
 	bool LoadProjectileData();
+
+	iPoint coordinates = {0, 0};
+	bool changedTile = true;
 
 	CharacterJump jump;
 

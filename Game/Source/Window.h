@@ -3,6 +3,7 @@
 
 #include "Module.h"
 #include "Defs.h"
+#include "Point.h"
 
 #include <memory>
 #include <functional>
@@ -34,7 +35,7 @@ public:
 
 	// Retrive window size
 	void GetWindowSize(uint &w, uint &h) const;
-
+	iPoint GetWindowSize() const;
 	// Retrieve window scale
 	uint GetScale() const;
 	int GetHeight() const; 

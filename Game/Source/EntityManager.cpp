@@ -6,6 +6,7 @@
 #include "Enemy.h"
 
 #include "Map.h"
+#include "Window.h"
 
 #include "Defs.h"
 #include "Log.h"
@@ -294,21 +295,33 @@ bool EntityManager::PreUpdate()
 			{
 				auto enemy = dynamic_cast<Enemy *>(entity.get());
 
-				// if either enemy or enemy->path is nullptr or enemy is not requesting a path
+				// If the cast failed
 				if(!enemy) continue;
 
+				auto b = enemy->SetBehaviour(player->position, app->win->GetWindowSize());
+
+				if(!(player->DidChangeTile() || enemy->bRequestPath)) continue;
+
 				// Get destination coordinates depending on the type of terrain the enemy can go through
-				auto destinationCoords = app->pathfinding->GetDestinationCoordinates(player->position, enemy->pTerrain);
+				iPoint destinationCoords = {0, 0};
 
-				// Adjust X position to nearest tile to enemy that is next to the player
-				auto originCoords = app->map->WorldToCoordinates(enemy->position - enemy->colliderOffset/2);
+				using enum BehaviourState;
+				if(b == AGGRO)
+				{
+					destinationCoords = app->pathfinding->GetDestinationCoordinates(player->position, enemy->pTerrain);
+					auto originCoords = app->map->WorldToCoordinates(enemy->position - enemy->colliderOffset/2);
+					// Adjust X position to nearest tile to enemy that is next to the player
+					if(destinationCoords.x - originCoords.x > 0) destinationCoords.x--;
+					else destinationCoords.x++;
+				}
+				else if(b == PATROL && (!enemy->path || enemy->currentPathIndex + 1 >= enemy->path->size()))
+					destinationCoords = app->pathfinding->GetPatrolCoordinates(enemy->position, enemy->dir, enemy->pTerrain, enemy->patrolRadius);
+				else
+					continue;
+								
+				if(destinationCoords == app->map->WorldToCoordinates(enemy->position)) continue;
 
-				if(destinationCoords.x - originCoords.x > 0) destinationCoords.x--;
-				else destinationCoords.x++;
-
-				int s = 0;
-				if(enemy->path) s = enemy->path->size();
-				if(s <= 1 || (s > 1 && enemy->bRequestPath)) enemy->SetPath(destinationCoords);
+				enemy->SetPath(destinationCoords);
 			}
 		}
 	}

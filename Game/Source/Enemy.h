@@ -4,6 +4,14 @@
 #include "Character.h"
 #include "Pathfinding.h"
 
+enum class BehaviourState
+{
+	IDLE = 0x0000,
+	PATROL = 0x0001,
+	AGGRO = 0x0002,
+	DEAD = 0x0004
+};
+
 class Enemy : public Character
 {
 public:
@@ -22,10 +30,17 @@ public:
 	b2Vec2 SetGroundPathMovement(iPoint currentCoords);
 	b2Vec2 SetAirPathMovement(iPoint currentCoords);
 
+	BehaviourState SetBehaviour(iPoint playerPosition, iPoint screenSize);
+
 	int currentPathIndex = 0;
 	std::unique_ptr<std::vector<iPoint>> path;
-	bool bRequestPath = true;
+	bool bRequestPath = false;
 	PathfindTerrain pTerrain = PathfindTerrain::GROUND;
+
+	int aggroRadius = 0;
+	int patrolRadius = 5;
+
+	BehaviourState behaviour = BehaviourState::IDLE;
 
 	int tileYOnDeath = 0;
 

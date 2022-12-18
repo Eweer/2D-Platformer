@@ -54,6 +54,10 @@ public:
 
 	iPoint GetDestinationCoordinates(iPoint position, PathfindTerrain pTerrain) const;
 
+	iPoint GetPatrolCoordinates(iPoint position, int dir, PathfindTerrain pTerrain = PathfindTerrain::GROUND, int patrolRadius = 10) const;
+
+	iPoint GetPatrolMaxX(iPoint position, CL::NavType check, int patrolRadius = 10) const;
+
 
 	bool Update(float dt) override;
 	
