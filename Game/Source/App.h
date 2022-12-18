@@ -74,6 +74,7 @@ public:
 	
 	// Saving / Loading
 	void LoadGameRequest();
+	void ResetLevelRequest();
 	void SaveGameRequest();
 	void GameSaved();
 	bool LoadFromFile();
@@ -140,6 +141,7 @@ private:
 
 	bool saveGameRequested;
 	bool loadGameRequested;
+	bool resetLevelRequested;
 
 	uint levelNumber = 1;
 };

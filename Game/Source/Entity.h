@@ -27,11 +27,12 @@ public:
 	virtual ~Entity() = default;
 
 	virtual bool Awake();
-
 	void Enable();
 	virtual bool Start();
 	virtual void SpawnEntity();
 	virtual void CreatePhysBody() { /* Method to Override */ };
+	virtual void RestartLevel();
+	virtual void SpecificRestart() { /* To override */ };
 	BodyType BodyTypeStrToEnum(std::string const &str) const;
 
 	void Disable();

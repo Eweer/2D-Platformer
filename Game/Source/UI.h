@@ -60,6 +60,7 @@ private:
 	float degree = 0.0f;
 	int laps = 0;
 
+	bool bDrawUI = false;
 	bool bSavingGame = false;
 	bool bDrawPause = false;
 	int fCleanCraters = 0;

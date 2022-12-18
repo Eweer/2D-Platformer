@@ -35,6 +35,7 @@ public:
 
 	// Called every frame
 	bool PreUpdate() final;
+	void RestartLevel() const;
 	bool Update(float dt) final;
 	bool PostUpdate() final;
 

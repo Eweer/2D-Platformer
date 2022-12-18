@@ -29,6 +29,8 @@ public:
 
 	bool DidChangeTile() const;
 
+	void SpecificRestart() final;
+
 	bool HasSaveData() const final;
 	bool LoadState(pugi::xml_node const &data) final;
 	pugi::xml_node SaveState(pugi::xml_node const &data) final;
@@ -63,6 +65,8 @@ private:
 	bool bAttack1 = false;
 	bool bLockAnim = false;
 	bool bAbleToMove = true;
+
+	bool bGodMode = false;
 
 	bool bAttackQueue = false;
 	b2Vec2 attackDir = {0, 0};

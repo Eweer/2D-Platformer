@@ -62,6 +62,10 @@ bool Enemy::Update()
 			iFrames = 0;
 		}
 	}
+	else if(StrEquals(texture->GetCurrentAnimName(), "attack"))
+	{
+		if(texture->IsAnimFinished()) texture->SetCurrentAnimation("idle");
+	}
 	// If there's a valid path and we haven't finished it, we have to move
 	else if(path && !path->empty())
 	{
@@ -125,6 +129,26 @@ void Enemy::BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fix
 			active = true;
 		}
 		else texture->SetCurrentAnimation("hurt");
+	}
+	if((pBodyB->ctype & ENEMIES) == ENEMIES)
+	{
+		if((pBody->body->GetLinearVelocity().x * pBodyB->body->GetLinearVelocity().x > 0)
+		   && (pBody->body->GetPosition().x > pBodyB->body->GetPosition().x))
+		{
+			dir = dir ? 0 : 1;
+			pBody->body->SetLinearVelocity(b2Vec2(pBody->body->GetLinearVelocity().x*-1, pBody->body->GetLinearVelocity().y));
+		}
+		bRequestPath = true;
+		
+	}
+	if((pBodyB->ctype & PLAYER) == PLAYER)
+	{
+		if(pBodyB->GetPosition().x > position.x)
+			dir = 0;
+		else
+			dir = 1;
+
+		texture->SetCurrentAnimation("attack");
 	}
 }
 
@@ -303,4 +327,21 @@ pugi::xml_node Enemy::SaveState(pugi::xml_node const &data)
 	app->AppendFragment(data, dataToSave.c_str());
 
 	return data;
+}
+
+void Enemy::SpecificRestart()
+{
+	behaviour = BehaviourState::IDLE;
+	
+	path.reset();
+	
+	currentPathIndex = 0;
+	bRequestPath = false;
+	pTerrain = PathfindTerrain::GROUND;
+	tileYOnDeath = 0;
+	bAttack = false;
+	bDeath = false;
+	bHurt = false;
+	bIdle = false;
+	bWalk = false;
 }

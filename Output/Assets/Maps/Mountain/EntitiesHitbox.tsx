@@ -135,29 +135,11 @@
   </properties>
   <image width="128" height="128" source="../../Animations/Enemies/Mountain/Dwarf/Walk/walk1.png"/>
   <objectgroup draworder="index" id="2">
-   <object id="1" name="Sensor" class="Dynamic" x="24" y="44" width="57" height="48">
-    <polygon points="11,-1 30,-1 41,11 40,26 42,35 41.2453,39 35,45 10,45 7,42 -1,39 2,24 2,16"/>
-   </object>
    <object id="2" name="Ground" class="Dynamic" x="41" y="84" width="7" height="7">
     <ellipse/>
    </object>
-   <object id="3" name="BottomRight" class="Dynamic" x="59" y="81" width="7" height="7">
-    <ellipse/>
-   </object>
-   <object id="4" name="Front" class="Dynamic" x="59" y="62" width="7" height="7">
-    <ellipse/>
-   </object>
-   <object id="5" name="TopRight" class="Dynamic" x="54" y="47" width="7" height="7">
-    <ellipse/>
-   </object>
-   <object id="6" name="Top" class="Dynamic" x="41" y="42" width="7" height="7">
-    <ellipse/>
-   </object>
-   <object id="7" name="TopLeft" class="Dynamic" x="27" y="50" width="7" height="7">
-    <ellipse/>
-   </object>
-   <object id="8" name="BottomLeft" class="Dynamic" x="21" y="78" width="7" height="7">
-    <ellipse/>
+   <object id="9" name="CharacterSensor" class="Dynamic" x="21" y="44" width="43" height="46">
+    <polygon points="0,0 21,0 43,0 43,23 43,46 22,46 0,46 0,21"/>
    </object>
   </objectgroup>
   <animation>
@@ -278,7 +260,7 @@
   </objectgroup>
  </tile>
  <tile id="32">
-  <image width="128" height="128" source="../../../../../2D Platformer Gamekit/Animations/Base/Monster/Forest/mosquito/flight1.png"/>
+  <image source="../../../../../2D Platformer Gamekit/Animations/Base/Monster/Forest/mosquito/flight1.png"/>
   <objectgroup draworder="index" id="2">
    <object id="1" x="28" y="35" width="72" height="58">
     <polygon points="-1,39 -1,13 15,-1 42,4 73,46 48,46 30,58 10,58"/>

@@ -56,14 +56,17 @@ bool UI::PreUpdate()
 // Called each loop iteration
 bool UI::PostUpdate()
 {
-	DrawFPS(pTopLeft);
-	DrawGravity(pTopLeft);
-	DrawMousePosition(pTopLeft);
-	DrawCameraPosition(pTopLeft);
-	DrawUIPosition(pTopLeft);
-	DrawPlayerPosition(pTopLeft);
-	DrawPlayerJumps(pTopLeft);
-	DrawPlayerAnimation(pTopLeft);
+	if(bDrawUI)
+	{
+		DrawFPS(pTopLeft);
+		DrawGravity(pTopLeft);
+		DrawMousePosition(pTopLeft);
+		DrawCameraPosition(pTopLeft);
+		DrawUIPosition(pTopLeft);
+		DrawPlayerPosition(pTopLeft);
+		DrawPlayerJumps(pTopLeft);
+		DrawPlayerAnimation(pTopLeft);
+	}
 
 	DrawPlayerSkill(pBottomLeft);
 
@@ -71,6 +74,9 @@ bool UI::PostUpdate()
 
 	if(bSavingGame) DrawSaving(pBottomLeft);
 	if(!bSavingGame && degree > 0) DrawSavingCheck(pBottomLeft);
+
+	if(app->input->GetKey(SDL_SCANCODE_F3) == KEY_DOWN)
+		bDrawUI = !bDrawUI;
 
 	return true;
 }
@@ -286,7 +292,7 @@ void UI::DrawPlayerAnimation(iPoint &position) const
 	position.y += IncreaseY(fCleanCraters);
 	app->fonts->Draw(std::format("Locked Animation: {}", player->bLockAnim ? "Yes." : "No."), position, fCleanCraters);
 	position.y += IncreaseY(fCleanCraters);
-	const auto &velocity = player->pBody->body->GetLinearVelocity();
+	const auto &velocity = (player->pBody) ? player->pBody->body->GetLinearVelocity() : b2Vec2(0,0);
 	app->fonts->Draw(std::format("Current Veloicty: {:.1f}, {:.1f}", velocity.x, velocity.y), position, fCleanCraters);
 }
 
