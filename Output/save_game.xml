@@ -2,7 +2,7 @@
 <save_state>
 	<entitymanager>
 		<player>
-			<position x="520" y="1045" />
+			<position x="632" y="1365" />
 			<velocity x="0.00" y="0.00" />
 			<entity active="true" disablenextupdate="false" />
 			<character hp="3" iframes="0" />
@@ -13,12 +13,14 @@
 		</player>
 		<enemy>
 			<enemy id="0" class="Dwarf" />
-			<position x="2148" y="1182" />
-			<velocity x="0.00" y="0.00" />
+			<position x="2359" y="1182" />
+			<velocity x="2.00" y="0.00" />
 			<entity active="true" disablenextupdate="false" />
 			<character hp="3" iframes="0" />
 			<jump onair="false" currentjumps="0" keepmomentum="false" />
-			<pathfind behaviour="0" />
+			<pathfind behaviour="1">
+				<destination x="39" y="18" />
+			</pathfind>
 		</enemy>
 		<enemy>
 			<enemy id="1" class="Mosquito" />
@@ -29,9 +31,24 @@
 			<jump onair="false" currentjumps="0" keepmomentum="false" />
 			<pathfind behaviour="0" />
 		</enemy>
+		<item>
+			<item imgvariation="0" class="star" />
+			<position x="594" y="1368" />
+			<entity active="false" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="0" class="coin" />
+			<position x="3268" y="1364" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="0" class="gem" />
+			<position x="146" y="414" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
 	</entitymanager>
 	<renderer>
-		<camera x="-264" y="-533" />
+		<camera x="-376" y="-576" />
 		<graphics vsync="false" targetfps="60" />
 	</renderer>
 </save_state>

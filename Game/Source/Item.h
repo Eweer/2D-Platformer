@@ -23,6 +23,10 @@ public:
 
 	void PickUpEffect() const;
 
+	bool HasSaveData() const final;
+	bool LoadState(pugi::xml_node const &data) final;
+	pugi::xml_node SaveState(pugi::xml_node const &data) final;
+
 	TileInfo const *info = nullptr;
 	std::unordered_map<std::string, std::vector<std::pair<ShapeData, iPoint>>, StringHash, std::equal_to<>> colliderMap;
 	int width = 0;
