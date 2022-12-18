@@ -489,10 +489,10 @@ void Render::AdjustCamera(iPoint position)
 	if(-1 * camera.x > app->map->GetWidth() * app->map->GetTileWidth() - camera.w)
 		camera.x = -1 * (app->map->GetWidth() * app->map->GetTileWidth()) + camera.w;
 
-	if(position.y > (app->map->GetHeight() - 4) * app->map->GetTileHeight())
+	if(position.y > (app->map->GetHeight() - 7) * app->map->GetTileHeight())
 		camera.y = -1 * (app->map->GetHeight() * app->map->GetTileHeight() - camera.h);
 	else
-		camera.y = -position.y + app->win->GetHeight() - 4 * app->map->GetTileHeight();
+		camera.y = -position.y + app->win->GetHeight() - 7 * app->map->GetTileHeight();
 
 	if(camera.y > 0) camera.y = 0;
 }
