@@ -135,6 +135,8 @@ private:
 	uint32 ticksForNextFrame = 0;
 	// Last tick in which we updated render
 	uint32 renderLastTime = 0;
+	// Remember last fps for the 30fps toggle option
+	uint32 prevFPSTarget = 0;
 	
 	// -------- Required for showing FPS on screen
 	// FPS on last update

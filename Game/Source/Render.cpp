@@ -146,6 +146,20 @@ bool Render::PostUpdate()
 		fpsTarget -= 10;
 		ticksForNextFrame = 1000/fpsTarget;
 	}
+	if(app->input->GetKey(SDL_SCANCODE_F11) == KEY_DOWN)
+	{
+		if(fpsTarget != 30)
+		{
+			prevFPSTarget = fpsTarget;
+			fpsTarget = 30;
+		}
+		else
+		{
+			fpsTarget = prevFPSTarget;
+			prevFPSTarget = 30;
+		}
+		ticksForNextFrame = 1000/fpsTarget;
+	}
 	
 	if(!vSyncActive) renderLastTime = SDL_GetTicks();
 	
