@@ -371,25 +371,21 @@ void Player::BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fi
 		case PLATFORMS:
 		{
 			LOG("Collision PLATFORMS");
-			if(pBody->ground->ptr == fixtureA)
+			if(pBody->ground->ptr == fixtureA && pBody->body->GetLinearVelocity().y > 0)
 			{
-				if(bNormalJump)
-				{
-					bLockAnim = false;
-				}
+				if (bNormalJump) bLockAnim = false;
+
 				bNormalJump = false;
 				bHighJump = false;
-				if(jump.bOnAir)
-				{
-					bKeepMomentum = true;
-					velocityToKeep = pBody->body->GetLinearVelocity();
-					jump = {
-						.bOnAir = false,
-						.currentJumps = 0,
-						.maxJumps = jump.maxJumps,
-						.jumpImpulse = jump.jumpImpulse,
-					};
-				}
+
+				bKeepMomentum = true;
+				velocityToKeep = pBody->body->GetLinearVelocity();
+				jump = {
+					.bOnAir = false,
+					.currentJumps = 0,
+					.maxJumps = jump.maxJumps,
+					.jumpImpulse = jump.jumpImpulse,
+				};
 			}
  			
 			break;
