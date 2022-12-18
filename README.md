@@ -25,8 +25,8 @@ F2: Debug draw while a mouse joint is active.
 F5: Saves the game.
 Escape: Quit game.
 
-Left Click: Basic Attack
-Right Click: Special Attack
-Shift: Sprint
-WASD: Move character.
-Space: Jump.
+ - Left Click: Basic Attack
+ - Right Click: Special Attack
+ - Shift: Sprint
+ - WASD: Move character.
+ - Space: Jump.
