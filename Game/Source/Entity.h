@@ -43,8 +43,9 @@ public:
 	
 	virtual bool CleanUp();
 
-	virtual bool LoadState(pugi::xml_node const &);
-	virtual pugi::xml_node SaveState(pugi::xml_node const &);
+	virtual bool HasSaveData() const;
+	virtual bool LoadState(pugi::xml_node const &data);
+	virtual pugi::xml_node SaveState(pugi::xml_node const &data);
 
 	virtual void OnCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fixtureB, PhysBody const *pBodyA, PhysBody const *pBodyB) { /* Method to Override */ };
 	virtual void OnCollisionEnd(PhysBody const *physA, PhysBody const *physB) { /* Method to Override */ };

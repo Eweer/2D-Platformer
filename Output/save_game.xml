@@ -1,7 +1,19 @@
 <?xml version="1.0"?>
 <save_state>
+	<entitymanager>
+		<player>
+			<position x="520" y="1045" />
+			<velocity x="0.00" y="0.00" />
+			<entity active="true" disablenextupdate="false" />
+			<character hp="3" iframes="0" />
+			<jump onair="false" currentjumps="0" keepmomentum="false" />
+			<anim falling="0" />
+			<misc move="true" skillcdtimer="0" />
+			<attack queue="false" abletomove="true" />
+		</player>
+	</entitymanager>
 	<renderer>
-		<camera x="-2496" y="-469" />
+		<camera x="-264" y="-533" />
 		<graphics vsync="false" targetfps="60" />
 	</renderer>
 </save_state>

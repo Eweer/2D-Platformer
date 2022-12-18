@@ -22,14 +22,20 @@ UI::UI() : Module()
 UI::~UI() = default;
 
 // Called before render is available
-bool UI::Awake(pugi::xml_node &)
+bool UI::Awake(pugi::xml_node &config)
 {
+	parameters = config;
+	
 	return true;
 }
 
 // Called before the first frame
 bool UI::Start()
 {
+	for(auto const &elem : parameters.children())
+	{
+		uiElements[elem.name()] = app->tex->Load(std::string(elem.attribute("path").as_string()).c_str());
+	}
 	fCleanCraters = app->fonts->Load("CleanCraters");
 	return true;
 }
@@ -63,7 +69,70 @@ bool UI::PostUpdate()
 
 	if(bDrawPause) DrawPause(pMiddle);
 
+	if(bSavingGame) DrawSaving(pBottomLeft);
+	if(!bSavingGame && degree > 0) DrawSavingCheck(pBottomLeft);
+
 	return true;
+}
+
+void UI::DrawSavingCheck(iPoint &position)
+{
+	degree--;
+	if(degree == 0) return; 
+	if(auto it = uiElements.find("check");
+	   it != uiElements.end())
+	{
+		app->render->DrawTexture(
+			it->second,
+			position.x + 16+ app->render->camera.x * -1,
+			position.y - 76 + app->render->camera.y * -1
+		);
+	}
+}
+
+void UI::DrawSaving(iPoint &position)
+{
+	degree += 360.0f * DEGTORAD;
+
+	if(degree >= 360)
+	{
+		laps++;
+		if(laps >= 2)
+		{
+			bSavingGame = false;
+			degree = 120;
+			laps = 0;
+			return;
+		}
+		degree = 0;
+	}
+	uint h = 0;
+	uint w = 0;
+	auto reIt = uiElements.find("recycle");
+	if(reIt != uiElements.end())
+		app->tex->GetSize(reIt->second, w, h);
+
+	if(auto it = uiElements.find("disk");
+	   it != uiElements.end())
+	{
+		app->render->DrawTexture(
+			it->second,
+			position.x + w/2 + app->render->camera.x * -1,
+			position.y - h/2 + app->render->camera.y * -1
+		);
+	}
+	
+	if(reIt != uiElements.end())
+	{
+		app->render->DrawTexture(
+			reIt->second,
+			position.x + 16 + app->render->camera.x * -1,
+			position.y - 76 + app->render->camera.y * -1,
+			nullptr,
+			1.0f,
+			degree
+		);
+	}
 }
 
 void UI::DrawPlayerSkill(iPoint &position) const
@@ -238,4 +307,9 @@ bool UI::Pause(int phase)
 bool UI::TogglePauseDraw()
 {
 	return bDrawPause = !bDrawPause;
+}
+
+bool UI::ToggleSavingIcon()
+{
+	return bSavingGame = !bSavingGame;
 }

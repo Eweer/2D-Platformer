@@ -382,3 +382,23 @@ Player *EntityManager::GetPlayerCharacter() const
 		return dynamic_cast<Player *>(it->second.entities.front().get());
 	return nullptr;
 }
+
+pugi::xml_node EntityManager::SaveState(pugi::xml_node const &data) const
+{
+	pugi::xml_node temp = data;
+	temp = temp.append_child("entitymanager");
+	for(auto const &[name, entityInfo]: allEntities)
+	{
+		for(auto const &entity : entityInfo.entities)
+		{
+			if(!entity->HasSaveData()) continue;
+			entity->SaveState(temp);
+		}
+	}
+	return temp;
+}
+
+bool EntityManager::HasSaveData() const
+{
+	return true;
+}

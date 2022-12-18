@@ -305,6 +305,11 @@ public:
 		};
 	}
 
+	int GetCurrentIndex() const
+	{
+		return static_cast<int>(floor(currentFrame));
+	}
+
 	std::vector<SDL_Texture *>GetAnim(std::string_view anim)
 	{
 		if(auto it = frames.find(anim); it != frames.end())

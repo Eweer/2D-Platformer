@@ -29,6 +29,10 @@ public:
 
 	bool DidChangeTile() const;
 
+	bool HasSaveData() const final;
+	bool LoadState(pugi::xml_node const &data) final;
+	pugi::xml_node SaveState(pugi::xml_node const &data) final;
+
 private:
 	bool LoadProjectileData();
 

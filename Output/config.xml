@@ -88,4 +88,9 @@
 		<mapfolder path="Assets/Maps/Mountain/" />
 		<mapfile path="Assets/Maps/Mountain/Mountain64.tmx" />
 	</map>
+	<ui>
+		<check path="Assets/Textures/UI/check.png"/>
+		<recycle path="Assets/Textures/UI/recycle.png"/>
+		<disk path="Assets/Textures/UI/disk.png"/>
+	</ui>
 </config>

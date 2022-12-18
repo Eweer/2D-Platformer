@@ -59,6 +59,8 @@ private:
 	// ------ Utils
 	// --- Getters
 	Player *GetPlayerCharacter() const;
+	pugi::xml_node SaveState(pugi::xml_node const &data) const final;
+	bool HasSaveData() const final;
 	bool DoesEntityExist(Entity const *entity = nullptr) const;
 	bool IsEntityActive(Entity const *entity = nullptr) const;
 	// --- Constructors

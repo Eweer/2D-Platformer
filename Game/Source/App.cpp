@@ -16,6 +16,9 @@
 #include "Log.h"
 
 #include <sstream>
+#include <format>
+#include <string>
+#include <string_view>
 
 // Constructor
 App::App(int argc, char* args[]) : argc(argc), args(args)
@@ -242,12 +245,15 @@ bool App::LoadFromFile()
 		}
 	}
 
-	return !(loadGameRequested = false);
+	loadGameRequested = false;
+
+	return true;
 }
 
 // check https://pugixml.org/docs/quickstart.html#modify
 bool App::SaveToFile() 
 {
+	ui->ToggleSavingIcon();
 	auto saveDoc = std::make_unique<pugi::xml_document>();
 	pugi::xml_node saveStateNode = saveDoc->append_child("save_state");
 	for(auto const &item : modules)
@@ -260,9 +266,9 @@ bool App::SaveToFile()
 				LOG("Error saving state of module %s", item->name.c_str());
 		}
 	}
-	saveGameRequested = saveDoc->save_file("save_game.xml");
+	saveGameRequested = !saveDoc->save_file("save_game.xml");
 
-	return !saveGameRequested;
+	return saveGameRequested;
 }
 
 bool App::SaveAttributeToConfig(std::string const &moduleName, std::string const &node, std::string const &attribute, std::string const &value)
@@ -308,7 +314,6 @@ bool App::SaveAttributeToConfig(std::string const &moduleName, std::string const
 	return false;
 }
 
-
 bool App::DoPaused() const
 {
 	// PreUpdate
@@ -353,4 +358,20 @@ bool App::PauseGame() const
 uint App::GetLevelNumber() const
 {
 	return levelNumber;
+}
+
+bool App::AppendFragment(pugi::xml_node target, const char *data) const
+{
+	pugi::xml_document doc;
+	if(auto result = doc.load_string(data);
+	   !result)
+	{
+		LOG("Error parsing XML: ", result.description());
+		return false;
+	}
+
+	for(auto const &child : doc)
+		target.append_copy(child);
+
+	return true;
 }

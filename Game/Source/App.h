@@ -9,6 +9,9 @@
 
 #include "PugiXml/src/pugixml.hpp"
 #include "SDL/include/SDL.h"
+#include <format>
+#include <string>
+#include <string_view>
 
 constexpr auto CONFIG_FILENAME = "config.xml";
 constexpr auto SAVE_STATE_FILENAME = "save_game.xml";
@@ -26,6 +29,12 @@ class Physics;
 class Fonts;
 class UI;
 class Pathfinding;
+
+template <typename... Args>
+std::string AddSaveData(std::string_view format, Args&&... args)
+{
+	return std::vformat(format, std::make_format_args(args...));
+}
 
 class App
 {
@@ -60,6 +69,8 @@ public:
 	std::string GetTitle() const;
 	std::string GetOrganization() const;
 	uint GetLevelNumber() const;
+
+	bool AppendFragment(pugi::xml_node target, const char *data) const;
 	
 	// Saving / Loading
 	void LoadGameRequest();
