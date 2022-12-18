@@ -101,17 +101,25 @@ bool Render::Update(float dt)
 		app->SaveAttributeToConfig(name, "vsync", "value", vSyncOnRestart ? "true" : "false");
 	}
 
+	int cameraSpeed = 1;
+	if(app->input->GetKey(SDL_SCANCODE_LCTRL) == KEY_REPEAT)
+		cameraSpeed *= 10;
+	if(app->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT)
+		cameraSpeed *= 100;
+	if(app->input->GetKey(SDL_SCANCODE_LALT) == KEY_REPEAT)
+		cameraSpeed *= 250;
+
 	if(app->input->GetKey(SDL_SCANCODE_UP) == KEY_REPEAT)
-		camera.y += 1;
+		camera.y += cameraSpeed;
 
 	if(app->input->GetKey(SDL_SCANCODE_DOWN) == KEY_REPEAT)
-		camera.y -= 1;
+		camera.y -= cameraSpeed;
 
 	if(app->input->GetKey(SDL_SCANCODE_LEFT) == KEY_REPEAT)
-		camera.x += 1;
+		camera.x += cameraSpeed;
 
 	if(app->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_REPEAT)
-		camera.x -= 1;
+		camera.x -= cameraSpeed;
 
 	return true;
 }

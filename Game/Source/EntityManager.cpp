@@ -323,7 +323,7 @@ bool EntityManager::PostUpdate()
 		{
 			if(!IsEntityActive(entity.get())) continue;
 			if(app->physics->IsDebugActive()) entity->DrawDebug();
-			entity->StopProjectiles();
+			entity->UpdateProjectiles();
 		}
 	}
 	return true;
@@ -333,7 +333,7 @@ bool EntityManager::Update(float dt)
 {
 	for(auto const &[entityType, entityInfo] : allEntities)
 	{
-		if(!StrEquals(entityType, "player"))
+		if(!(StrEquals(entityType, "player") || StrEquals(entityType, "enemy")))
 		{
 			for(auto const &[key, anim] : entityInfo.animation)
 			{

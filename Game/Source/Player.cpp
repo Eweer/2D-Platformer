@@ -140,7 +140,7 @@ std::string Player::ChooseAnim()
 	return "unknown";
 }
 
-bool Player::StopProjectiles()
+bool Player::UpdateProjectiles()
 {
 	// Update Projectiles
 	for(auto it = projectiles.begin(); it < projectiles.end(); ++it)
@@ -233,7 +233,8 @@ bool Player::Update()
 			bAbleToMove = true;
 		}
 	}
-	else // If it's not animation locked
+	// Jump / Attacks
+	else 
 	{
 		// Check if player is able and wants to jump
 		if(jump.currentJumps < jump.maxJumps && app->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN)
@@ -305,7 +306,7 @@ bool Player::Update()
 	// Set player speed
 	pBody->body->SetLinearVelocity(b2Vec2(impulse.x, pBody->body->GetLinearVelocity().y));
 
-	// Set booleans based on current movement
+	// Set boolean actions based on current movement
 	if(pBody->body->GetLinearVelocity().y <= 0)	bFalling = 0;
 	else if(pBody->body->GetLinearVelocity().y > 1.0f) bFalling++;
 
@@ -328,9 +329,6 @@ bool Player::Update()
 	// If it's not locked, we set the texture based on priority
 	if(!bLockAnim) texture->SetCurrentAnimation(ChooseAnim());
 
-	// Move camera
-	app->render->AdjustCamera(position);
-
 	// Set image position and draw character
 	position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x);
 	position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y);
@@ -340,6 +338,13 @@ bool Player::Update()
 		(bool)dir,
 		texture->GetFlipPivot()
 	);
+
+	// Move camera
+	if(bMoveCamera)
+		app->render->AdjustCamera(position);
+
+	if(app->input->GetKey(SDL_SCANCODE_M) == KEY_DOWN)
+		bMoveCamera = !bMoveCamera;
 
 	return true;
 }
@@ -403,4 +408,21 @@ void Player::BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fi
 bool Player::IsOnAir() const
 {
 	return jump.bOnAir;
+}
+
+bool Player::Pause() const
+{
+	app->render->DrawCharacterTexture(
+		texture->GetCurrentTexture(),
+		iPoint(position.x - colliderOffset.x, position.y - colliderOffset.y),
+		(bool)dir,
+		texture->GetFlipPivot()
+	);
+
+	for(auto it = projectiles.begin(); it < projectiles.end(); ++it)
+	{
+		if(!it->get()) continue;
+		if(!it->get()->Pause()) return false;
+	}
+	return true;
 }

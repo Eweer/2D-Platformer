@@ -28,6 +28,8 @@ public:
 	// Called each loop iteration
 	bool PostUpdate() final;
 
+	void DrawPlayerSkill(iPoint &position) const;
+
 	bool Pause(int phase) final;
 
 	bool TogglePauseDraw();
@@ -49,6 +51,7 @@ private:
 	int fCleanCraters = 0;
 	iPoint pTopLeft = {10, 10};
 	iPoint pMiddle = {0, 0};
+	iPoint pBottomLeft = {0,0};
 
 };
 

@@ -6,6 +6,7 @@
 #include "Physics.h"
 #include "EntityManager.h"
 #include "Player.h"
+#include "Textures.h"
 #include "Input.h"
 
 #include "Defs.h"
@@ -37,9 +38,12 @@ bool UI::Start()
 bool UI::PreUpdate()
 {
 	// Return all coordinates to their original values
-	pTopLeft = {10, -1 * app->render->camera.y + 10};
-	if(pTopLeft.x < 10) pTopLeft.x = 10;
-	pMiddle = {app->render->camera.w / 2, app->render->camera.h / 2};
+	pTopLeft = {10, 10};
+
+	pBottomLeft = {app->render->viewport.w - 10, app->render->viewport.h - 10};
+	
+	pMiddle = {app->render->viewport.w / 2, app->render->viewport.h / 2};
+
 	return true;
 }
 
@@ -54,8 +58,39 @@ bool UI::PostUpdate()
 	DrawPlayerPosition(pTopLeft);
 	DrawPlayerJumps(pTopLeft);
 	DrawPlayerAnimation(pTopLeft);
+
+	DrawPlayerSkill(pBottomLeft);
+
 	if(bDrawPause) DrawPause(pMiddle);
+
 	return true;
+}
+
+void UI::DrawPlayerSkill(iPoint &position) const
+{
+	const auto &player = app->entityManager->player;
+
+	auto tex = (player->skillCDTimer == 0) ? player->texture->GetAnimationByName("skill") : player->texture->GetAnimationByName("skill_CD");
+	
+	if(!tex) return;
+
+	uint w = 0;
+	uint h = 0;
+	app->tex->GetSize(tex, w, h);
+	position -= iPoint(w, h);
+	app->render->DrawTexture(tex, position.x + app->render->camera.x * -1, position.y + app->render->camera.y * -1);
+	if(player->skillCDTimer > 0)
+	{
+		app->fonts->DrawMiddlePoint(
+			std::format(
+				"{:.1f}",
+				(player->skillCD - player->skillCDTimer)/60.0f
+			),
+			position + iPoint(w/2, h/2),
+			fCleanCraters
+		);
+	}
+	position.y -= IncreaseY(fCleanCraters);
 }
 
 void UI::DrawPause(iPoint &position) const

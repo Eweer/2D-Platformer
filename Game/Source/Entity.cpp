@@ -56,7 +56,7 @@ bool Entity::Stop()
 	return true;
 }
 
-bool Entity::StopProjectiles()
+bool Entity::UpdateProjectiles()
 {
 	return false;
 }

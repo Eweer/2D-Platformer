@@ -17,13 +17,15 @@ public:
 	bool Awake() final;
 
 	std::string ChooseAnim();
-	bool StopProjectiles() override;
+	bool UpdateProjectiles() override;
 
 	bool Update() final;
 
 	void BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fixtureB, PhysBody const *pBodyA, PhysBody const *pBodyB) final;
 
 	bool IsOnAir() const;
+
+	bool Pause() const final;
 
 private:
 	bool LoadProjectileData();
@@ -37,6 +39,8 @@ private:
 
 	std::unordered_map<std::string, std::unique_ptr<ProjectileData>, StringHash, std::equal_to<>> projectileMap;
 	std::vector<std::unique_ptr<Projectile>> projectiles;
+
+	bool bMoveCamera = true;
 
 	int skillCDTimer = 0;
 	int skillCD = 0;

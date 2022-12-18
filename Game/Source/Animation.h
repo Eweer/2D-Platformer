@@ -121,6 +121,13 @@ public:
 			return frames.at(currentAnimName).at((uint)currentFrame);
 	}
 
+	SDL_Texture *GetAnimationByName(std::string_view name) const
+	{
+		if(auto tex = frames.find(name); tex != frames.end() && !tex->second.empty())
+			return tex->second.front();
+		return nullptr;
+	}
+
 	int GetCurrentFrame() const
 	{
 		return static_cast<int>(currentFrame);

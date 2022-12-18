@@ -141,6 +141,7 @@ void Fonts::Draw(std::string_view text, iPoint position, int fontId, bool isFixe
 	if(isFixed)
 	{
 		position.x += camera.x * -1;
+		position.y += camera.y * -1;
 	}
 	
 	for(int i = 0; auto const &elem : text)
@@ -212,7 +213,7 @@ void Fonts::DrawMiddlePoint(std::string_view text, iPoint position, int fontId, 
 		}
 	}
 	position.x -= (total / 4);
-	position.y -= font.lineHeight;
+	position.y -= font.lineHeight/2;
 	Draw(text, position, fontId, isFixed, maxX, pivot, angle);
 }
 

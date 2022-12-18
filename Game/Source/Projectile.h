@@ -167,7 +167,7 @@ public:
 			}
 			if(currentFrame >= animation.size()) return false;
 		}
-		if(!bExploding)
+		else
 		{
 			position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x);
 			position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y);
@@ -202,6 +202,19 @@ public:
 	}
 	
 	virtual void OnCollisionEnd(PhysBody *physA, PhysBody *physB) { /* Method to Override */ };
+
+	bool Pause() const
+	{
+		return app->render->DrawCharacterTexture(
+				animation[currentFrame],
+				iPoint(position.x - animOffset.x, position.y - animOffset.y),
+				false,
+				rotationCenter,
+				iPoint(INT_MAX, INT_MAX),
+				degree,
+				flipValue
+		);
+	}
 
 	bool bDestroyPBody = false;
 	bool bExploding = false;
