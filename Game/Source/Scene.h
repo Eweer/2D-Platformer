@@ -44,6 +44,10 @@ public:
 
 	void IncreaseBGScrollSpeed(float x);
 
+	bool HasSaveData() const final;
+	bool LoadState(pugi::xml_node const &data) final;
+	pugi::xml_node SaveState(pugi::xml_node const &) const final;
+
 	iPoint bgPosition = {0, 0};
 	float bgSpeed = 0.2f;
 	float additionalSpeed = 0.0f;

@@ -78,7 +78,11 @@ bool UI::PostUpdate()
 void UI::DrawSavingCheck(iPoint &position)
 {
 	degree--;
-	if(degree == 0) return; 
+	if(degree == 0)
+	{
+		app->GameSaved();
+		return;
+	}
 	if(auto it = uiElements.find("check");
 	   it != uiElements.end())
 	{
@@ -312,4 +316,32 @@ bool UI::TogglePauseDraw()
 bool UI::ToggleSavingIcon()
 {
 	return bSavingGame = !bSavingGame;
+}
+
+bool UI::HasSaveData() const
+{
+	return true;
+}
+
+bool UI::LoadState(pugi::xml_node const &data)
+{
+	return false;
+}
+
+pugi::xml_node UI::SaveState(pugi::xml_node const &data) const
+{
+	std::string saveData2 = "<{} {}=\"{}\"/>\n";
+	std::string saveOpenData2 = "<{} {}=\"{}\">\n";
+	std::string saveData4 = "<{} {}=\"{}\" {}=\"{}\"/>\n";
+	std::string saveOpenData4 = "<{} {}=\"{}\" {}=\"{}\">\n";
+	std::string saveData6 = "<{} {}=\"{}\" {}=\"{}\" {}=\"{}\"/>\n";
+	std::string saveData6OneFloat = "<{} {}=\"{}\" {}=\"{}\" {}=\"{}\" {}=\"{:.2f}\"/>\n";
+	std::string saveFloatData = "<{} {}=\"{:.2f}\" {}=\"{:.2f}\"/>\n";
+	std::string dataToSave = "<ui>\n";
+	dataToSave += AddSaveData(saveData2, "pause", "pause", bDrawPause);
+	dataToSave += "</ui>";
+
+	app->AppendFragment(data, dataToSave.c_str());
+
+	return data;
 }

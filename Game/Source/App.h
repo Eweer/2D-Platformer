@@ -75,6 +75,7 @@ public:
 	// Saving / Loading
 	void LoadGameRequest();
 	void SaveGameRequest();
+	void GameSaved();
 	bool LoadFromFile();
 	bool SaveToFile();
 	bool SaveAttributeToConfig(
@@ -85,7 +86,7 @@ public:
 	);
 	
 	// Utils
-	bool PauseGame() const;
+	bool PauseGame();
 
 	// Modules
 	std::unique_ptr<Window> win;
@@ -122,7 +123,7 @@ private:
 	bool PostUpdate();
 
 	// Calls the pause on modules so they can still render
-	bool DoPaused() const;
+	bool DoPaused();
 
 	int argc;
 	char** args;

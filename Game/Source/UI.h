@@ -35,6 +35,10 @@ public:
 	bool TogglePauseDraw();
 	bool ToggleSavingIcon();
 
+	bool HasSaveData() const final;
+	bool LoadState(pugi::xml_node const &data) final;
+	pugi::xml_node SaveState(pugi::xml_node const &) const final;
+
 private:
 	void DrawPause(iPoint &position) const;
 	void DrawFPS(iPoint &position) const;

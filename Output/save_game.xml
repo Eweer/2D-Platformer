@@ -1,8 +1,16 @@
 <?xml version="1.0"?>
 <save_state>
+	<scene>
+		<layer id="1" x="-519.33" y="0.00" additionalspeed="0.10" />
+		<layer id="2" x="-1038.66" y="0.00" additionalspeed="0.10" />
+		<layer id="3" x="-1558.00" y="0.00" additionalspeed="0.10" />
+		<layer id="4" x="-370.37" y="0.00" additionalspeed="0.10" />
+		<layer id="5" x="-886.96" y="0.00" additionalspeed="0.10" />
+		<layer id="6" x="-1407.54" y="0.00" additionalspeed="0.10" />
+	</scene>
 	<entitymanager>
 		<player>
-			<position x="632" y="1365" />
+			<position x="1685" y="789" />
 			<velocity x="0.00" y="0.00" />
 			<entity active="true" disablenextupdate="false" />
 			<character hp="3" iframes="0" />
@@ -13,28 +21,30 @@
 		</player>
 		<enemy>
 			<enemy id="0" class="Dwarf" />
-			<position x="2359" y="1182" />
+			<position x="2426" y="1182" />
 			<velocity x="2.00" y="0.00" />
 			<entity active="true" disablenextupdate="false" />
 			<character hp="3" iframes="0" />
 			<jump onair="false" currentjumps="0" keepmomentum="false" />
 			<pathfind behaviour="1">
-				<destination x="39" y="18" />
+				<destination x="40" y="18" />
 			</pathfind>
 		</enemy>
 		<enemy>
 			<enemy id="1" class="Mosquito" />
-			<position x="3151" y="575" />
-			<velocity x="0.00" y="0.00" />
+			<position x="2648" y="575" />
+			<velocity x="-2.00" y="0.00" />
 			<entity active="true" disablenextupdate="false" />
 			<character hp="3" iframes="0" />
 			<jump onair="false" currentjumps="0" keepmomentum="false" />
-			<pathfind behaviour="0" />
+			<pathfind behaviour="1">
+				<destination x="37" y="8" />
+			</pathfind>
 		</enemy>
 		<item>
 			<item imgvariation="0" class="star" />
 			<position x="594" y="1368" />
-			<entity active="false" disablenextupdate="false" />
+			<entity active="true" disablenextupdate="false" />
 		</item>
 		<item>
 			<item imgvariation="0" class="coin" />
@@ -47,8 +57,11 @@
 			<entity active="true" disablenextupdate="false" />
 		</item>
 	</entitymanager>
+	<ui>
+		<pause pause="false" />
+	</ui>
 	<renderer>
-		<camera x="-376" y="-576" />
+		<camera x="-1429" y="-277" />
 		<graphics vsync="false" targetfps="60" />
 	</renderer>
 </save_state>

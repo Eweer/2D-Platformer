@@ -234,6 +234,11 @@ void App::SaveGameRequest()
 	}
 }
 
+void App::GameSaved()
+{
+	saveGameRequested = false;
+}
+
 bool App::LoadFromFile()
 {
 	pugi::xml_document gameStateFile;
@@ -273,9 +278,8 @@ bool App::SaveToFile()
 				LOG("Error saving state of module %s", item->name.c_str());
 		}
 	}
-	saveGameRequested = !saveDoc->save_file("save_game.xml");
 
-	return saveGameRequested;
+	return saveDoc->save_file("save_game.xml");
 }
 
 bool App::SaveAttributeToConfig(std::string const &moduleName, std::string const &node, std::string const &attribute, std::string const &value)
@@ -321,7 +325,7 @@ bool App::SaveAttributeToConfig(std::string const &moduleName, std::string const
 	return false;
 }
 
-bool App::DoPaused() const
+bool App::DoPaused()
 {
 	// PreUpdate
 	int phase = 1;
@@ -339,10 +343,15 @@ bool App::DoPaused() const
 	phase++;
 	ui->Pause(phase);
 	render->Pause(phase);
+
+	// FinishUpdate
+	phase++;
+	FinishUpdate();
+
 	return false;
 }
 
-bool App::PauseGame() const
+bool App::PauseGame()
 {
 	physics->ToggleStep();
 	ui->TogglePauseDraw();
