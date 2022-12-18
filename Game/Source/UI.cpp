@@ -87,7 +87,8 @@ void UI::DrawPlayerSkill(iPoint &position) const
 				(player->skillCD - player->skillCDTimer)/60.0f
 			),
 			position + iPoint(w/2, h/2),
-			fCleanCraters
+			fCleanCraters,
+			{2.0f, 2.0f}
 		);
 	}
 	position.y -= IncreaseY(fCleanCraters);

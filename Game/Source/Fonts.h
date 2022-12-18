@@ -49,21 +49,22 @@ public:
 
 	Fonts();
 	~Fonts() final;
-	
+
 	bool Awake(pugi::xml_node &config) final;
 
 	// Load Font
 	int Load(std::string const &fontName);
 	void UnLoad(int font_id);
-	
+
 	// Create a surface from text
 	void Draw(
 		std::string_view text,
 		iPoint position,
 		int fontId,
+		fPoint scale = {1.0f, 1.0f},
 		bool isFixed = true,
 		std::pair<FontDrawNewLine, int> maxX = {FontDrawNewLine::NONE, 0},
-		iPoint pivot = iPoint(0,0),
+		SDL_Point pivot = SDL_Point(0, 0),
 		double angle = 0.0f
 	) const;
 
@@ -71,9 +72,10 @@ public:
 		std::string_view text,
 		iPoint position,
 		int fontId,
+		fPoint scale = {1.0f, 1.0f},
 		bool isFixed = true,
 		std::pair<FontDrawNewLine, int> maxX = {FontDrawNewLine::NONE, 0},
-		iPoint pivot = iPoint(0,0),
+		SDL_Point pivot = SDL_Point(0,0),
 		double angle = 0.0f
 	) const;
 

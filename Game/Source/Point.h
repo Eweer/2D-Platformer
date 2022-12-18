@@ -156,5 +156,6 @@ public:
 
 using iPoint = Point<int>;
 using fPoint = Point<float>;
+using uPoint = Point<unsigned int>;
 
 #endif // __POINT_H__

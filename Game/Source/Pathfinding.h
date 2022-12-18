@@ -59,7 +59,7 @@ public:
 	iPoint GetPatrolMaxX(iPoint position, CL::NavType check, int patrolRadius = 10) const;
 
 
-	bool Update(float dt) override;
+	bool PostUpdate() override;
 	
 	// ------ Utils
 	// --- Set maps

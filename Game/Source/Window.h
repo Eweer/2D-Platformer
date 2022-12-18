@@ -33,7 +33,7 @@ public:
 
 	SDL_Surface *GetSurface() const;
 
-	// Retrive window size
+	// Retrieve window size
 	void GetWindowSize(uint &w, uint &h) const;
 	iPoint GetWindowSize() const;
 	// Retrieve window scale

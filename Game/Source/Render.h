@@ -58,6 +58,21 @@ public:
 		int flipValue = 0
 	) const;
 
+	bool DrawBackground(
+		SDL_Texture *texture,
+		fPoint pos,
+		float scale
+	) const;
+
+	bool DrawFont(
+		SDL_Texture *texture,
+		iPoint position,
+		fPoint scale,
+		const SDL_Rect *section,
+		double angle = 0,
+		SDL_Point pivot = SDL_Point(INT_MAX, INT_MAX)
+	) const;
+
 	bool DrawRectangle(
 		const SDL_Rect &rect,
 		SDL_Color color,

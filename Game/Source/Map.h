@@ -225,6 +225,8 @@ public:
 
 	bool IsTerrain(uint gid) const;
 
+	std::string_view GetMapFolderName() const;
+
 private:
 
 	bool LoadMap(pugi::xml_node const &mapFile);

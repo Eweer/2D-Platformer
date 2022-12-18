@@ -699,3 +699,8 @@ bool Map::IsTerrain(uint gid) const
 	}
 	return false;
 }
+
+std::string_view Map::GetMapFolderName() const
+{
+	return mapFolder;
+}

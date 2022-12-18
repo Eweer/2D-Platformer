@@ -320,8 +320,6 @@ iPoint Pathfinding::GetPatrolMaxX(iPoint position, CL::NavType check, int patrol
 	return iPoint(position.x + patrolRadius, position.y);
 }
 
-
-
 iPoint Pathfinding::GetTerrainUnder(iPoint position) const
 {
 	for(int y = position.y; y < groundMap->at(position.x).size(); y++)
@@ -331,7 +329,7 @@ iPoint Pathfinding::GetTerrainUnder(iPoint position) const
 	return position;
 }
 
-bool Pathfinding::Update(float dt)
+bool Pathfinding::PostUpdate()
 {
 	if(app->physics->IsDebugActive()) DrawNodeDebug();
 	return true;

@@ -232,6 +232,73 @@ bool Render::DrawCharacterTexture(SDL_Texture *texture, iPoint const &pos, const
 }
 
 // Blit to screen
+bool Render::DrawBackground(SDL_Texture *texture, fPoint pos, float scale) const
+{
+	iPoint position = {
+		static_cast<int>(floor(pos.x)),
+		static_cast<int>(floor(pos.y))
+	};
+
+	SDL_Rect rect = {
+		.x = position.x,
+		.y = position.y,
+		.w = 0,
+		.h = 0
+	};
+
+	SDL_QueryTexture(texture, nullptr, nullptr, &rect.w, &rect.h);
+	
+	rect.w = static_cast<int>(static_cast<float>(rect.w) * scale);
+	rect.h = static_cast<int>(static_cast<float>(rect.h) * scale);
+
+	if(SDL_RenderCopyEx(renderer.get(), texture, nullptr, &rect, 0, nullptr, SDL_RendererFlip::SDL_FLIP_NONE) != 0)
+	{
+		LOG("Cannot blit to screen. SDL_RenderCopy error: %s", SDL_GetError());
+		return false;
+	}
+
+	return true;
+}
+
+// Blit to screen
+bool Render::DrawFont(SDL_Texture *texture, iPoint position, fPoint scale, const SDL_Rect *section, double angle, SDL_Point pivot) const
+{
+	SDL_Rect rect = {
+		.x = position.x + camera.x,
+		.y = position.y + camera.y,
+		.w = 0,
+		.h = 0
+	};
+
+	if(section)
+	{
+		rect.w = section->w;
+		rect.h = section->h;
+	}
+	else SDL_QueryTexture(texture, nullptr, nullptr, &rect.w, &rect.h);
+
+	rect.w = static_cast<int>(static_cast<float>(rect.w) * scale.x);
+	rect.h = static_cast<int>(static_cast<float>(rect.h) * scale.y);
+
+	SDL_Point const *p = nullptr;
+
+	if(pivot.x != INT_MAX && pivot.y != INT_MAX)
+	{
+		SDL_Point tempPivot{pivot.x, pivot.y};
+		p = &tempPivot;
+	}
+
+	if(SDL_RenderCopyEx(renderer.get(), texture, section, &rect, angle, p, SDL_RendererFlip::SDL_FLIP_NONE) != 0)
+	{
+		LOG("Cannot blit to screen. SDL_RenderCopy error: %s", SDL_GetError());
+		return false;
+	}
+
+	return true;
+}
+
+
+// Blit to screen
 bool Render::DrawTexture(SDL_Texture* texture, int x, int y, const SDL_Rect* section, float speed, double angle, int pivotX, int pivotY, SDL_RendererFlip flip) const
 {
 	uint scale = app->win->GetScale();

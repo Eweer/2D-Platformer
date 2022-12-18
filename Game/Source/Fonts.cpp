@@ -122,7 +122,7 @@ void Fonts::UnLoad(int font_id)
 	}
 }
 
-void Fonts::Draw(std::string_view text, iPoint position, int fontId, bool isFixed, std::pair<FontDrawNewLine, int> maxX, iPoint pivot, double angle) const
+void Fonts::Draw(std::string_view text, iPoint position, int fontId, fPoint scale, bool isFixed, std::pair<FontDrawNewLine, int> maxX, SDL_Point pivot, double angle) const
 {
 	if(!in_range(fontId, 0, static_cast<int>(fonts.size())))
 	{
@@ -140,8 +140,8 @@ void Fonts::Draw(std::string_view text, iPoint position, int fontId, bool isFixe
 	// Fix X position if it's a static text on window
 	if(isFixed)
 	{
-		position.x += camera.x * -1;
-		position.y += camera.y * -1;
+		position.x -= camera.x;
+		position.y -= camera.y;
 	}
 	
 	for(int i = 0; auto const &elem : text)
@@ -155,7 +155,7 @@ void Fonts::Draw(std::string_view text, iPoint position, int fontId, bool isFixe
 			switch(newLine)
 			{
 				// If newLine == 1, we need to wait until a space to go to next line
-				case 1: [[likely]]
+				case 1:
 					if(elem != std::string(" ")[0]) break;
 					[[fallthrough]];
 				// If newLine == 2, we need to go to next line now
@@ -167,22 +167,24 @@ void Fonts::Draw(std::string_view text, iPoint position, int fontId, bool isFixe
 					if(elem == std::string(" ")[0]) continue;
 					break;
 				//If newLine == 0, we don't need to do anything
-				default:
+				default: [[likely]]
 					break;
 			}
 
 			SDL_Rect rect = it->second.rect;
-			app->render->DrawTexture(font.graphic,
-									 position.x + xAdvance + it->second.offset.x,
-									 position.y + it->second.offset.y,
-									 &rect,
-									 1.0,
-									 angle,
-									 pivot.x,
-									 pivot.y
+			iPoint tempPos(
+				position.x + xAdvance + it->second.offset.x,
+				position.y + static_cast<int>(static_cast<float>(it->second.offset.y) * scale.y));
+			app->render->DrawFont(
+				font.graphic,
+				tempPos,
+				scale,
+				&rect,
+				angle,
+				pivot
 			);
 			
-			xAdvance += it->second.xAdvance + font.spacing.x;
+			xAdvance += static_cast<int>(static_cast<float>(it->second.xAdvance + font.spacing.x) * scale.x);
 
 			if(maxX.first == SCREEN_FIT && xAdvance + position.x > camera.w - camera.x) [[unlikely]]
 				newLine = 2;
@@ -194,7 +196,7 @@ void Fonts::Draw(std::string_view text, iPoint position, int fontId, bool isFixe
 	}
 }
 
-void Fonts::DrawMiddlePoint(std::string_view text, iPoint position, int fontId, bool isFixed, std::pair<FontDrawNewLine, int> maxX, iPoint pivot, double angle) const
+void Fonts::DrawMiddlePoint(std::string_view text, iPoint position, int fontId, fPoint scale, bool isFixed, std::pair<FontDrawNewLine, int> maxX, SDL_Point pivot, double angle) const
 {
 	if(!in_range(fontId, 0, static_cast<int>(fonts.size())))
 	{
@@ -212,9 +214,9 @@ void Fonts::DrawMiddlePoint(std::string_view text, iPoint position, int fontId, 
 			total += it->second.rect.w + it->second.xAdvance + font.spacing.x;
 		}
 	}
-	position.x -= (total / 4);
-	position.y -= font.lineHeight/2;
-	Draw(text, position, fontId, isFixed, maxX, pivot, angle);
+	position.x -= static_cast<int>(scale.x * static_cast<float>(total) / 4.0f);
+	position.y -= static_cast<int>(scale.y * static_cast<float>(font.lineHeight) / 2.0f);
+	Draw(text, position, fontId, scale, isFixed, maxX, pivot, angle);
 }
 
 // WARNING: Modifies i. If you need to use it after calling this function, you need to do it before

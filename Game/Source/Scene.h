@@ -5,6 +5,14 @@
 
 struct SDL_Texture;
 
+struct BGInfo
+{
+	SDL_Texture *texture;
+	fPoint position;
+	float increase;
+	fPoint size;
+};
+
 class Scene : public Module
 {
 public:
@@ -31,6 +39,12 @@ public:
 
 	// Called before quitting
 	bool CleanUp() final;
+
+	void SetBackgroundPosition();
+
+	iPoint bgPosition = {0, 0};
+	std::vector<BGInfo> background;
+	std::unordered_map<std::string, std::pair<std::string, int>, StringHash, std::less_equal<>> backgroundInfo;
 };
 
 #endif // __SCENE_H__
