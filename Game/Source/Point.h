@@ -42,9 +42,15 @@ public:
 		return r;
 	}
 
-	Point operator +(int const &a) const
+	Point operator +(T a) const
 	{
 		return {x + a, y + a};
+	}
+	
+
+	Point operator -(T a) const
+	{
+		return {x - a, y - a};
 	}
 
 	Point operator *(T i)

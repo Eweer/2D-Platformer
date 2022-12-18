@@ -7,6 +7,7 @@
 #include "Projectile.h"
 #include "Log.h"
 #include "Physics.h"
+#include "Scene.h"
 
 #include "Box2D/Box2D/Box2D.h"
 #include <string>
@@ -329,6 +330,7 @@ bool Player::Update()
 	// If it's not locked, we set the texture based on priority
 	if(!bLockAnim) texture->SetCurrentAnimation(ChooseAnim());
 
+	app->scene->IncreaseBGScrollSpeed(impulse.x);
 	// Set image position and draw character
 	position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x);
 	position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y);

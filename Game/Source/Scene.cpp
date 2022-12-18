@@ -112,16 +112,18 @@ bool Scene::Update(float dt)
 {
 	for(auto &elem : background)
 	{
-		app->render->DrawBackground(elem.texture, elem.position - elem.size * bgScale, bgScale);
+		app->render->DrawBackground(elem.texture, elem.position + 2 - elem.size * bgScale, bgScale);
 		app->render->DrawBackground(elem.texture, elem.position, bgScale);
-		app->render->DrawBackground(elem.texture, elem.position + elem.size * bgScale, bgScale);
-		elem.position.x -= elem.increase;
+		app->render->DrawBackground(elem.texture, elem.position - 2 + elem.size * bgScale, bgScale);
+		elem.position.x -= (elem.increase * additionalSpeed) + elem.increase;
 
 		if(elem.position.x <= elem.size.x * (-1 * bgScale))
 		{
 			elem.position.x = 0;
 		}
 	}
+
+	additionalSpeed = 0.0f;
 
 	// Request App to Load / Save when pressing the keys F5 (save) / F6 (load)
 	if (app->input->GetKey(SDL_SCANCODE_F5) == KEY_DOWN)
@@ -151,4 +153,13 @@ bool Scene::CleanUp()
 	LOG("Freeing scene");
 
 	return true;
+}
+
+void Scene::IncreaseBGScrollSpeed(float x)
+{
+	if(x >= 3.0f) additionalSpeed = 3.0f;
+	else if(x <= -3.0f) additionalSpeed = -3.0f;
+	else additionalSpeed = x;
+
+	if(additionalSpeed == 0) additionalSpeed = 0.1f;
 }
