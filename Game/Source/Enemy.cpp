@@ -62,18 +62,20 @@ bool Enemy::Update()
 	{
 		auto currentCoords = app->map->WorldToCoordinates(position);
 
-		// and the currentCoords are the same as the ones on the path[currentPathIndex]
-		// and we are not in the air if the pathfinding is for a ground enemy
-		// or we are pathfinding an air enemy
-		if(currentCoords == path->at(currentPathIndex) &&
-		    ((pBody->body->GetLinearVelocity().y == 0 && pTerrain == PathfindTerrain::GROUND)
-			|| pTerrain == PathfindTerrain::AIR))
+		if(currentPathIndex < path->size() - 1)
 		{
-			// We update our index unless it's the last tile, as that is our destination
-			if(currentPathIndex < path->size() - 1) currentPathIndex++;
-			// If it's the last tile, we request a new path in case destination has moved
-			else bRequestPath = true;
+			// and the currentCoords are the same as the ones on the path[currentPathIndex]
+			// and we are not in the air if the pathfinding is for a ground enemy
+			// or we are pathfinding an air enemy
+			if(currentCoords == path->at(currentPathIndex) &&
+			((pBody->body->GetLinearVelocity().y == 0 && pTerrain == PathfindTerrain::GROUND)
+			|| pTerrain == PathfindTerrain::AIR))
+			{
+				currentPathIndex++;	
+			}
 		}
+		// As we already got to the last element of path, that is our destination
+		else bRequestPath = true;
 
 		// Set direction and animation
 		// This function returns the velocity as b2Vec2

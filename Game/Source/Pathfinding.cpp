@@ -278,7 +278,7 @@ iPoint Pathfinding::GetPatrolCoordinates(iPoint position, int dir, PathfindTerra
 	auto check = NONE;
 	if(pTerrain == PathfindTerrain::GROUND)
 	{
-		check = (type & PLATFORM) == PLATFORM
+  		check = (type & PLATFORM) != PLATFORM
 			? (TERRAIN | LEFT | RIGHT | PLATFORM) ^ type
 			: (TERRAIN | LEFT | RIGHT) ^ type;
 	}
@@ -288,9 +288,9 @@ iPoint Pathfinding::GetPatrolCoordinates(iPoint position, int dir, PathfindTerra
 	CL::NavType leftCheck = (pTerrain == PathfindTerrain::GROUND) ? (RIGHT | PLATFORM) : NONE;
 	CL::NavType rightCheck = (pTerrain == PathfindTerrain::GROUND) ? (LEFT | PLATFORM) : NONE;
 
-	if((type ^ leftCheck) == NONE)
+	if((type | leftCheck) == leftCheck)
 		left = GetPatrolMaxX(position, check, patrolRadius * -1);
-	if((type ^ rightCheck) == NONE)
+	if((type | rightCheck) == rightCheck)
 		right = GetPatrolMaxX(position, check, patrolRadius);
 
 	// If there is a path in the other direction, take it
