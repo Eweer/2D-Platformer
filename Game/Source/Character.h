@@ -41,7 +41,7 @@ public:
 	int dir = 0;
 	SDL_Point textureOffset = {0,0};
 
-	uint hp = 3;
+	int hp = 3;
 	int iFrames = 0;
 
 	CharacterJump jump;

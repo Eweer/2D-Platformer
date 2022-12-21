@@ -190,6 +190,11 @@ public:
 			return -1;
 	}
 
+	float GetFloatCurrentFrame() const
+	{
+		return currentFrame;
+	}
+
 	//returns -1 if currentAnimName doesn't exist
 	//otherwise it returns the number of frames in the vector
 	int GetFrameCount(std::string const &name) const

@@ -100,6 +100,8 @@ bool Player::LoadProjectileData()
 
 bool Player::Awake()
 {
+	hp = 100;
+
 	jump = {
 		.bOnAir = true,
 		.currentJumps = 0,
@@ -237,7 +239,11 @@ void Player::BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fi
 		{
 			if(iFrames == 0)
 			{
-				if(!bGodMode) hp -= 1;
+				if(!bGodMode)
+				{
+					damageTaken = 10;
+					hp -= damageTaken;
+				}
 				iFrames = 1;
 				if(hp <= 0)
 				{
@@ -394,8 +400,8 @@ std::string Player::ChooseAnim()
 		bLockAnim = true;
 
 	if(bDead) return "death";
-	if(bHolding) return "hold";
 	if(bHurt) return "hurt";
+	if(bHolding) return "hold";
 	if(bFalling) return "short_fall";
 	if(bClimbing) return "climb";
 	if(bPushing) return "push";
@@ -465,7 +471,7 @@ void Player::UpdateDamaged()
 	iFrames++;
 
 	// If player is dead
-	if(hp == 0)
+	if(bDead)
 	{
 		if(texture->IsLastFrame()) texture->Pause();
 		if(iFrames >= 100)
@@ -477,16 +483,18 @@ void Player::UpdateDamaged()
 			bDead = false;
 			bAbleToMove = true;
 			bLockAnim = false;
-			hp = 3;
+			hp = 100;
 		}
 	}
 	// If it's not dead and iFrame timer expired
-	else if(iFrames >= 40)
+	else if(texture->IsAnimFinished())
 	{
 		iFrames = 0;
 		bHurt = false;
+		damageTaken = 0;
+		bAbleToMove = true;
+		bLockAnim = false;
 	}
-	else if(iFrames >= 20) bAbleToMove = true;
 }
 
 b2Vec2 Player::GetHorizontalInput()

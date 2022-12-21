@@ -13,6 +13,8 @@
 #include "Point.h"
 
 #include <format>
+#include <unordered_map>
+#include <filesystem>
 
 UI::UI() : Module()
 {
@@ -32,8 +34,34 @@ bool UI::Awake(pugi::xml_node &config)
 // Called before the first frame
 bool UI::Start()
 {
+	commonBars = std::make_shared<SharedBar>(
+		app->tex->Load((std::string(parameters.child("bar").attribute("path").as_string()) + std::string("/bg.png")).c_str()),
+		app->tex->Load((std::string(parameters.child("bar").attribute("path").as_string()) + std::string("/border.png")).c_str()),
+		app->tex->Load((std::string(parameters.child("bar").attribute("path").as_string()) + std::string("/borderfull.png")).c_str())
+	);
+
+	for(auto const &entry : std::filesystem::directory_iterator(parameters.child("bar").attribute("path").as_string()))
+	{
+		if(!entry.is_directory()) continue;
+		
+		auto path = entry.path().string();
+
+		if(path == "." || path == "..") continue;
+
+		Bar b =
+		{
+			.left = app->tex->Load((path + std::string("/left.png")).c_str()),
+			.right = app->tex->Load((path + std::string("/right.png")).c_str()),
+			.point = app->tex->Load((path + std::string("/point.png")).c_str()),
+			.full = app->tex->Load((path + std::string("/full.png")).c_str()),
+			.common = commonBars
+		};
+		bars[entry.path().filename().string()] = b;
+	}
+
 	for(auto const &elem : parameters.children())
 	{
+		if(StrEquals(elem.name(), "bar") || StrEquals(elem.name(), "path")) continue;
 		uiElements[elem.name()] = app->tex->Load(std::string(elem.attribute("path").as_string()).c_str());
 	}
 	fCleanCraters = app->fonts->Load("CleanCraters");
@@ -46,8 +74,10 @@ bool UI::PreUpdate()
 	// Return all coordinates to their original values
 	pTopLeft = {10, 10};
 
-	pBottomLeft = {app->render->viewport.w - 10, app->render->viewport.h - 10};
+	pBottomRight = {app->render->viewport.w - 10, app->render->viewport.h - 10};
 	
+	pBottomLeft = {10, app->render->viewport.h - 40};
+
 	pMiddle = {app->render->viewport.w / 2, app->render->viewport.h / 2};
 
 	return true;
@@ -68,17 +98,37 @@ bool UI::PostUpdate()
 		DrawPlayerAnimation(pTopLeft);
 	}
 
-	DrawPlayerSkill(pBottomLeft);
+	DrawPlayerHP(pBottomLeft);
+	DrawPlayerSkill(pBottomRight);
 
 	if(bDrawPause) DrawPause(pMiddle);
 
-	if(bSavingGame) DrawSaving(pBottomLeft);
-	if(!bSavingGame && degree > 0) DrawSavingCheck(pBottomLeft);
+	if(bSavingGame) DrawSaving(pBottomRight);
+	if(!bSavingGame && degree > 0) DrawSavingCheck(pBottomRight);
 
 	if(app->input->GetKey(SDL_SCANCODE_F3) == KeyState::KEY_DOWN)
 		bDrawUI = !bDrawUI;
 
 	return true;
+}
+
+void UI::DrawPlayerHP(iPoint &position)
+{
+	
+	if(auto it = bars.find("HP"); it != bars.end())
+	{
+		auto const &player = app->entityManager->player;
+		if(player->bHurt)
+		{
+			auto frame = (player->texture->GetFloatCurrentFrame() != 0) ? player->texture->GetFloatCurrentFrame() : static_cast<float>(player->texture->GetFrameCount());
+			auto lastFrame = static_cast<float>(player->texture->GetFrameCount());
+			auto decrease = static_cast<int>(frame / lastFrame * static_cast<float>(player->damageTaken));
+			int originalHP = player->hp + player->damageTaken;
+			int hpToDraw = originalHP - decrease;
+			it->second.DrawBar(position, hpToDraw);
+		}
+		else it->second.DrawBar(position, app->entityManager->player->hp);
+	}
 }
 
 void UI::DrawSavingCheck(iPoint &position)
@@ -129,7 +179,7 @@ void UI::DrawSaving(iPoint &position)
 	{
 		uint h = 0;
 		uint w = 0;
-			app->tex->GetSize(it->second.get(), w, h);
+		app->tex->GetSize(it->second.get(), w, h);
 		app->render->DrawTexture(
 			it->second.get(),
 			position.x + static_cast<int>(static_cast<float>(w)*1.5f) + app->render->camera.x * -1,

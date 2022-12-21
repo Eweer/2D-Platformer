@@ -457,9 +457,10 @@ bool Pathfinding::IsLeftNode(iPoint position) const
 
 bool Pathfinding::IsBorderNode(iPoint position) const
 {
+	using enum CL::NavType;
 	auto coords = app->map->WorldToCoordinates(position);
 	if(!IsValidPosition(coords)) return false;
-	return groundMap->at(coords.x)[coords.y].type == CL::NavType::LEFT
-		|| groundMap->at(coords.x)[coords.y].type == CL::NavType::SOLO
-		|| groundMap->at(coords.x)[coords.y].type == CL::NavType::RIGHT;
+	return groundMap->at(coords.x)[coords.y].type == LEFT
+		|| groundMap->at(coords.x)[coords.y].type == SOLO
+		|| groundMap->at(coords.x)[coords.y].type == RIGHT;
 }

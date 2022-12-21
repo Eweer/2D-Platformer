@@ -64,6 +64,12 @@ public:
 		float scale
 	) const;
 
+	bool DrawImage(
+		SDL_Texture *texture,
+		iPoint position,
+		float scale
+	) const;
+
 	bool DrawFont(
 		SDL_Texture *texture,
 		iPoint position,

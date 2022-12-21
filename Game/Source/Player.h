@@ -64,7 +64,10 @@ private:
 
 	bool bFalling = false;
 	bool bDead = false;
+
 	bool bHurt = false;
+	int damageTaken = 0;
+
 	bool bAttack2 = false;
 	bool bClimbing = false;
 	bool bPushing = false;

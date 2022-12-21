@@ -92,6 +92,8 @@
 		<mapfile path="Assets/Maps/Mountain/Mountain64.tmx" />
 	</map>
 	<ui>
+		<path ui="Assets/Textures/UI/" />
+		<bar path="Assets/Textures/UI/Bar" />
 		<check path="Assets/Textures/UI/check.png"/>
 		<recycle path="Assets/Textures/UI/recycle.png"/>
 		<disk path="Assets/Textures/UI/disk.png"/>

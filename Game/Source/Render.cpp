@@ -275,6 +275,30 @@ bool Render::DrawBackground(SDL_Texture *texture, fPoint pos, float scale) const
 }
 
 // Blit to screen
+bool Render::DrawImage(SDL_Texture *texture, iPoint position, float scale) const
+{
+	SDL_Rect rect = {
+		.x = position.x,
+		.y = position.y,
+		.w = 0,
+		.h = 0
+	};
+
+	SDL_QueryTexture(texture, nullptr, nullptr, &rect.w, &rect.h);
+
+	rect.w = static_cast<int>(static_cast<float>(rect.w) * scale);
+	rect.h = static_cast<int>(static_cast<float>(rect.h) * scale);
+
+	if(SDL_RenderCopyEx(renderer.get(), texture, nullptr, &rect, 0, nullptr, SDL_RendererFlip::SDL_FLIP_NONE) != 0)
+	{
+		LOG("Cannot blit to screen. SDL_RenderCopy error: %s", SDL_GetError());
+		return false;
+	}
+
+	return true;
+}
+
+// Blit to screen
 bool Render::DrawFont(SDL_Texture *texture, iPoint position, fPoint scale, const SDL_Rect *section, double angle, SDL_Point pivot) const
 {
 	SDL_Rect rect = {
