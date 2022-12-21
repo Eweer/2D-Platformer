@@ -4,13 +4,17 @@
 #include "Module.h"
 #include "Point.h"
 
+#include <array>
+
 //#define NUM_KEYS 352
-#define NUM_MOUSE_BUTTONS 5
+constexpr auto NUM_MOUSE_BUTTONS = 5;
+constexpr auto NUM_EVENT_WINDOW = 4;
+constexpr auto MAX_KEYS = 300;
 //#define LAST_KEYS_PRESSED_BUFFER 50
 
 struct SDL_Rect;
 
-enum EventWindow
+enum class EventWindow : uint
 {
 	WE_QUIT = 0,
 	WE_HIDE = 1,
@@ -18,7 +22,7 @@ enum EventWindow
 	WE_COUNT = 3
 };
 
-enum KeyState
+enum class KeyState : uint
 {
 	KEY_IDLE = 0,
 	KEY_DOWN,
@@ -51,12 +55,12 @@ public:
 	bool CleanUp() final;
 
 	// Check key states (includes mouse and joy buttons)
-	KeyState GetKey(int id) const
+	KeyState GetKey(uint id) const
 	{
 		return keyboard[id];
 	}
 
-	KeyState GetMouseButtonDown(int id) const
+	KeyState GetMouseButtonDown(uint id) const
 	{
 		return mouseButtons[id - 1];
 	}
@@ -71,13 +75,11 @@ public:
 	void GetMouseMotion(int& x, int& y) const;
 
 private:
-	bool windowEvents[WE_COUNT];
-	KeyState*	keyboard;
-	KeyState mouseButtons[NUM_MOUSE_BUTTONS];
-	int	mouseMotionX;
-	int mouseMotionY;
-	int mouseX;
-	int mouseY;
+	std::array<bool, NUM_EVENT_WINDOW> windowEvents{};
+	std::array<KeyState, MAX_KEYS> keyboard{};
+	std::array<KeyState, NUM_MOUSE_BUTTONS> mouseButtons{};
+	iPoint mouseMotion;
+	iPoint mousePosition;
 	
 	friend class UI;
 };

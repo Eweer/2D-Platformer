@@ -95,30 +95,30 @@ bool Render::PreUpdate()
 
 bool Render::Update(float dt)
 {
-	if(app->input->GetKey(SDL_SCANCODE_V) == KEY_DOWN)
+	if(app->input->GetKey(SDL_SCANCODE_V) == KeyState::KEY_DOWN)
 	{
 		vSyncOnRestart = !vSyncOnRestart;
 		app->SaveAttributeToConfig(name, "vsync", "value", vSyncOnRestart ? "true" : "false");
 	}
 
 	int cameraSpeed = 1;
-	if(app->input->GetKey(SDL_SCANCODE_LCTRL) == KEY_REPEAT)
+	if(app->input->GetKey(SDL_SCANCODE_LCTRL) == KeyState::KEY_REPEAT)
 		cameraSpeed *= 10;
-	if(app->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT)
+	if(app->input->GetKey(SDL_SCANCODE_LSHIFT) == KeyState::KEY_REPEAT)
 		cameraSpeed *= 100;
-	if(app->input->GetKey(SDL_SCANCODE_LALT) == KEY_REPEAT)
+	if(app->input->GetKey(SDL_SCANCODE_LALT) == KeyState::KEY_REPEAT)
 		cameraSpeed *= 250;
 
-	if(app->input->GetKey(SDL_SCANCODE_UP) == KEY_REPEAT)
+	if(app->input->GetKey(SDL_SCANCODE_UP) == KeyState::KEY_REPEAT)
 		camera.y += cameraSpeed;
 
-	if(app->input->GetKey(SDL_SCANCODE_DOWN) == KEY_REPEAT)
+	if(app->input->GetKey(SDL_SCANCODE_DOWN) == KeyState::KEY_REPEAT)
 		camera.y -= cameraSpeed;
 
-	if(app->input->GetKey(SDL_SCANCODE_LEFT) == KEY_REPEAT)
+	if(app->input->GetKey(SDL_SCANCODE_LEFT) == KeyState::KEY_REPEAT)
 		camera.x += cameraSpeed;
 
-	if(app->input->GetKey(SDL_SCANCODE_RIGHT) == KEY_REPEAT)
+	if(app->input->GetKey(SDL_SCANCODE_RIGHT) == KeyState::KEY_REPEAT)
 		camera.x -= cameraSpeed;
 
 	return true;
@@ -136,17 +136,17 @@ bool Render::PostUpdate()
 	SDL_RenderPresent(renderer.get());
 	
 	// I -> increases fps target || O ->decreases fps target
-	if(app->input->GetKey(SDL_SCANCODE_I) == KEY_DOWN && fpsTarget < 1000)
+	if(app->input->GetKey(SDL_SCANCODE_I) == KeyState::KEY_DOWN && fpsTarget < 1000)
 	{
 		fpsTarget += 10;
 		ticksForNextFrame = 1000/fpsTarget;
 	}
-	if(app->input->GetKey(SDL_SCANCODE_K) == KEY_DOWN && fpsTarget > 10)
+	if(app->input->GetKey(SDL_SCANCODE_K) == KeyState::KEY_DOWN && fpsTarget > 10)
 	{
 		fpsTarget -= 10;
 		ticksForNextFrame = 1000/fpsTarget;
 	}
-	if(app->input->GetKey(SDL_SCANCODE_F11) == KEY_DOWN)
+	if(app->input->GetKey(SDL_SCANCODE_F11) == KeyState::KEY_DOWN)
 	{
 		if(fpsTarget != 30)
 		{

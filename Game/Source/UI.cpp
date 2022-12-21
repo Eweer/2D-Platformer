@@ -75,7 +75,7 @@ bool UI::PostUpdate()
 	if(bSavingGame) DrawSaving(pBottomLeft);
 	if(!bSavingGame && degree > 0) DrawSavingCheck(pBottomLeft);
 
-	if(app->input->GetKey(SDL_SCANCODE_F3) == KEY_DOWN)
+	if(app->input->GetKey(SDL_SCANCODE_F3) == KeyState::KEY_DOWN)
 		bDrawUI = !bDrawUI;
 
 	return true;
@@ -89,14 +89,20 @@ void UI::DrawSavingCheck(iPoint &position)
 		app->GameSaved();
 		return;
 	}
+	uint h = 0;
+	uint w = 0;
+
 	if(auto it = uiElements.find("check");
 	   it != uiElements.end())
 	{
+		app->tex->GetSize(it->second, w, h);
+
 		app->render->DrawTexture(
 			it->second,
-			position.x + 16+ app->render->camera.x * -1,
-			position.y - 76 + app->render->camera.y * -1
+			position.x + w/4+ app->render->camera.x * -1,
+			position.y - h + app->render->camera.y * -1
 		);
+		position -= iPoint(w/4, h);
 	}
 }
 
@@ -116,28 +122,32 @@ void UI::DrawSaving(iPoint &position)
 		}
 		degree = 0;
 	}
-	uint h = 0;
-	uint w = 0;
-	auto reIt = uiElements.find("recycle");
-	if(reIt != uiElements.end())
-		app->tex->GetSize(reIt->second, w, h);
+	
 
 	if(auto it = uiElements.find("disk");
 	   it != uiElements.end())
 	{
+		uint h = 0;
+		uint w = 0;
+			app->tex->GetSize(it->second, w, h);
 		app->render->DrawTexture(
 			it->second,
-			position.x + w/2 + app->render->camera.x * -1,
-			position.y - h/2 + app->render->camera.y * -1
+			position.x + static_cast<int>(static_cast<float>(w)*1.5f) + app->render->camera.x * -1,
+			position.y - static_cast<int>(static_cast<float>(h)*1.5f) + app->render->camera.y * -1
 		);
 	}
 	
-	if(reIt != uiElements.end())
+	if(auto reIt = uiElements.find("recycle"); 
+	   reIt != uiElements.end())
 	{
+		uint h = 0;
+		uint w = 0;
+		app->tex->GetSize(reIt->second, w, h);
+
 		app->render->DrawTexture(
 			reIt->second,
-			position.x + 16 + app->render->camera.x * -1,
-			position.y - 76 + app->render->camera.y * -1,
+			position.x + w/6 + app->render->camera.x * -1,
+			position.y - static_cast<int>(static_cast<float>(h)/1.2f) + app->render->camera.y * -1,
 			nullptr,
 			1.0f,
 			degree
@@ -263,8 +273,8 @@ void UI::DrawMousePosition(iPoint &position) const
 	app->fonts->Draw(
 		std::format(
 			"Mouse position: \"{},{}\"",
-			app->input->mouseX,
-			app->input->mouseY
+			app->input->mousePosition.x,
+			app->input->mousePosition.y
 		),
 		position,
 		fCleanCraters
