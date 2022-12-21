@@ -66,7 +66,7 @@ public:
 	iPoint startingPosition;
 	iPoint colliderOffset;
 
-	std::unique_ptr<Animation> texture;
+	std::shared_ptr<Animation> texture;
 	int imageVariation = -1;
 
 	std::unique_ptr<PhysBody> pBody;

@@ -381,7 +381,7 @@ bool Player::Update()
 	if(!bLockAnim) texture->SetCurrentAnimation(ChooseAnim());
 
 	app->render->DrawCharacterTexture(
-		texture->UpdateAndGetFrame(),
+		texture->UpdateAndGetFrame().get(),
 		iPoint(position.x - colliderOffset.x, position.y - colliderOffset.y),
 		(bool)dir,
 		texture->GetFlipPivot()
@@ -498,13 +498,15 @@ bool Player::IsOnAir() const
 
 bool Player::Pause() const
 {
-	app->render->DrawCharacterTexture(
-		texture->GetCurrentTexture(),
-		iPoint(position.x - colliderOffset.x, position.y - colliderOffset.y),
-		(bool)dir,
-		texture->GetFlipPivot()
-	);
-
+	if(auto tex = texture->GetCurrentTexture(); tex)
+	{
+		app->render->DrawCharacterTexture(
+			tex.get(),
+			iPoint(position.x - colliderOffset.x, position.y - colliderOffset.y),
+			(bool)dir,
+			texture->GetFlipPivot()
+		);
+	}
 	for(auto it = projectiles.begin(); it < projectiles.end(); ++it)
 	{
 		if(!it->get()) continue;

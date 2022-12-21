@@ -56,7 +56,7 @@ class Projectile
 {
 public:
 	Projectile() = default;
-	explicit Projectile(std::vector<SDL_Texture *> const &anim, iPoint origin, std::unique_ptr<ProjectileData> const &info, b2Vec2 dir)
+	explicit Projectile(std::vector<std::shared_ptr<SDL_Texture>> const &anim, iPoint origin, std::unique_ptr<ProjectileData> const &info, b2Vec2 dir)
 	{
 		if(anim.empty())
 		{
@@ -71,7 +71,7 @@ public:
 
 		uint tw = 0;
 		uint th = 0;
-		app->tex->GetSize(anim[0], tw, th);
+		app->tex->GetSize(anim[0].get(), tw, th);
 
 		direction = dir;
 		direction.Normalize();
@@ -175,7 +175,7 @@ public:
 		}
 
 		app->render->DrawCharacterTexture(
-				animation[currentFrame],
+				animation[currentFrame].get(),
 				iPoint(position.x - animOffset.x, position.y - animOffset.y),
 				false,
 				rotationCenter,
@@ -206,7 +206,7 @@ public:
 	bool Pause() const
 	{
 		return app->render->DrawCharacterTexture(
-				animation[currentFrame],
+				animation[currentFrame].get(),
 				iPoint(position.x - animOffset.x, position.y - animOffset.y),
 				false,
 				rotationCenter,
@@ -226,7 +226,7 @@ public:
 	iPoint position = {0,0};
 	SDL_Point rotationCenter = {0,0};
 	iPoint animOffset = {0,0};
-	std::vector<SDL_Texture *>animation;
+	std::vector<std::shared_ptr<SDL_Texture>>animation;
 	b2Vec2 direction = {0,0};
 	std::unique_ptr<PhysBody> pBody;
 };

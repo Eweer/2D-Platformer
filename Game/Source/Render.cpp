@@ -465,9 +465,9 @@ bool Render::HasSaveData() const
 	return true;
 }
 
-std::unique_ptr<SDL_Texture, std::function<void(SDL_Texture *)>> Render::LoadTexture(SDL_Surface *surface)
+std::shared_ptr<SDL_Texture> Render::LoadTexture(SDL_Surface *surface)
 {
-	std::unique_ptr<SDL_Texture, std::function<void(SDL_Texture *)>>texturePtr(
+	std::shared_ptr<SDL_Texture>texturePtr(
 			SDL_CreateTextureFromSurface(renderer.get(), surface),
 			[](SDL_Texture *tex) { if(tex) SDL_DestroyTexture(tex); }
 	);

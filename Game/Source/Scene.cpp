@@ -72,7 +72,7 @@ bool Scene::Start()
 
 			uint w;
 			uint h;
-			app->tex->GetSize(background.back().texture, w, h);
+			app->tex->GetSize(background.back().texture.get(), w, h);
 			background.back().size.x = static_cast<float>(w);
 		}
 	}
@@ -81,7 +81,7 @@ bool Scene::Start()
 	{
 		uint w;
 		uint h;
-		app->tex->GetSize(background.back().texture, w, h);
+		app->tex->GetSize(background.back().texture.get(), w, h);
 		bgScale = static_cast<float>(app->win->GetHeight()) / static_cast<float>(h);
 	}
 
@@ -112,9 +112,9 @@ bool Scene::Pause(int phase)
 {
 	for(auto &elem : background)
 	{
-		app->render->DrawBackground(elem.texture, elem.position + 2 - elem.size * bgScale, bgScale);
-		app->render->DrawBackground(elem.texture, elem.position, bgScale);
-		app->render->DrawBackground(elem.texture, elem.position - 2 + elem.size * bgScale, bgScale);
+		app->render->DrawBackground(elem.texture.get(), elem.position + 2 - elem.size * bgScale, bgScale);
+		app->render->DrawBackground(elem.texture.get(), elem.position, bgScale);
+		app->render->DrawBackground(elem.texture.get(), elem.position - 2 + elem.size * bgScale, bgScale);
 	}
 
 	// Request App to Load / Save when pressing the keys F5 (save) / F6 (load)
@@ -132,9 +132,9 @@ bool Scene::Update(float dt)
 {
 	for(auto &elem : background)
 	{
-		app->render->DrawBackground(elem.texture, elem.position + 2 - elem.size * bgScale, bgScale);
-		app->render->DrawBackground(elem.texture, elem.position, bgScale);
-		app->render->DrawBackground(elem.texture, elem.position - 2 + elem.size * bgScale, bgScale);
+		app->render->DrawBackground(elem.texture.get(), elem.position + 2 - elem.size * bgScale, bgScale);
+		app->render->DrawBackground(elem.texture.get(), elem.position, bgScale);
+		app->render->DrawBackground(elem.texture.get(), elem.position - 2 + elem.size * bgScale, bgScale);
 		elem.position.x -= (elem.increase * additionalSpeed) + elem.increase;
 
 		if(elem.position.x <= elem.size.x * (-1 * bgScale))

@@ -95,10 +95,10 @@ void UI::DrawSavingCheck(iPoint &position)
 	if(auto it = uiElements.find("check");
 	   it != uiElements.end())
 	{
-		app->tex->GetSize(it->second, w, h);
+		app->tex->GetSize(it->second.get(), w, h);
 
 		app->render->DrawTexture(
-			it->second,
+			it->second.get(),
 			position.x + w/4+ app->render->camera.x * -1,
 			position.y - h + app->render->camera.y * -1
 		);
@@ -129,9 +129,9 @@ void UI::DrawSaving(iPoint &position)
 	{
 		uint h = 0;
 		uint w = 0;
-			app->tex->GetSize(it->second, w, h);
+			app->tex->GetSize(it->second.get(), w, h);
 		app->render->DrawTexture(
-			it->second,
+			it->second.get(),
 			position.x + static_cast<int>(static_cast<float>(w)*1.5f) + app->render->camera.x * -1,
 			position.y - static_cast<int>(static_cast<float>(h)*1.5f) + app->render->camera.y * -1
 		);
@@ -142,10 +142,10 @@ void UI::DrawSaving(iPoint &position)
 	{
 		uint h = 0;
 		uint w = 0;
-		app->tex->GetSize(reIt->second, w, h);
+		app->tex->GetSize(reIt->second.get(), w, h);
 
 		app->render->DrawTexture(
-			reIt->second,
+			reIt->second.get(),
 			position.x + w/6 + app->render->camera.x * -1,
 			position.y - static_cast<int>(static_cast<float>(h)/1.2f) + app->render->camera.y * -1,
 			nullptr,
@@ -165,9 +165,9 @@ void UI::DrawPlayerSkill(iPoint &position) const
 
 	uint w = 0;
 	uint h = 0;
-	app->tex->GetSize(tex, w, h);
+	app->tex->GetSize(tex.get(), w, h);
 	position -= iPoint(w, h);
-	app->render->DrawTexture(tex, position.x + app->render->camera.x * -1, position.y + app->render->camera.y * -1);
+	app->render->DrawTexture(tex.get(), position.x + app->render->camera.x * -1, position.y + app->render->camera.y * -1);
 	if(player->skillCDTimer > 0)
 	{
 		app->fonts->DrawMiddlePoint(

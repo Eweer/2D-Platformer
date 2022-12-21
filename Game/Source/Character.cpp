@@ -312,7 +312,7 @@ bool Character::Update()
 	position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x);
 	position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y);
 	app->render->DrawCharacterTexture(
-		texture->UpdateAndGetFrame(),
+		texture->UpdateAndGetFrame().get(),
 		iPoint(position.x - colliderOffset.x, position.y - colliderOffset.y),
 		(bool)dir,
 		texture->GetFlipPivot()
@@ -325,12 +325,16 @@ bool Character::Update()
 
 bool Character::Pause() const
 {
-	return app->render->DrawCharacterTexture(
-		texture->GetCurrentTexture(),
-		iPoint(position.x - colliderOffset.x, position.y - colliderOffset.y),
-		(bool)dir,
-		texture->GetFlipPivot()
-	);
+	if(auto tex = texture->GetCurrentTexture(); tex)
+	{
+		return app->render->DrawCharacterTexture(
+			texture->GetCurrentTexture().get(),
+			iPoint(position.x - colliderOffset.x, position.y - colliderOffset.y),
+			(bool)dir,
+			texture->GetFlipPivot()
+		);
+	}
+	return false;
 }
 
 

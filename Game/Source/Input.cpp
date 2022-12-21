@@ -112,7 +112,7 @@ bool Input::PreUpdate()
 				mouseButtons[event.button.button - 1] = KeyState::KEY_DOWN;
 				//LOG("Mouse button %d down", event.button.button-1);
 			break;
-
+			
 			case SDL_MOUSEBUTTONUP:
 				mouseButtons[event.button.button - 1] = KeyState::KEY_UP;
 				//LOG("Mouse button %d up", event.button.button-1);
