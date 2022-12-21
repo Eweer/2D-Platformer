@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <save_state>
 	<scene>
-		<layer id="1" x="-67.52" y="0.00" additionalspeed="0.10" />
-		<layer id="2" x="-135.04" y="0.00" additionalspeed="0.10" />
-		<layer id="3" x="-202.56" y="0.00" additionalspeed="0.10" />
-		<layer id="4" x="-270.08" y="0.00" additionalspeed="0.10" />
-		<layer id="5" x="-337.60" y="0.00" additionalspeed="0.10" />
-		<layer id="6" x="-405.12" y="0.00" additionalspeed="0.10" />
+		<layer id="1" x="-53.88" y="0.00" additionalspeed="0.10" />
+		<layer id="2" x="-107.76" y="0.00" additionalspeed="0.10" />
+		<layer id="3" x="-161.64" y="0.00" additionalspeed="0.10" />
+		<layer id="4" x="-215.52" y="0.00" additionalspeed="0.10" />
+		<layer id="5" x="-269.40" y="0.00" additionalspeed="0.10" />
+		<layer id="6" x="-323.28" y="0.00" additionalspeed="0.10" />
 	</scene>
 	<entitymanager>
 		<player>
@@ -76,7 +76,7 @@
 		</enemy>
 		<enemy>
 			<enemy id="5" class="Mosquito" />
-			<position x="3309" y="1294" />
+			<position x="3274" y="1133" />
 			<velocity x="0.68" y="3.13" />
 			<entity active="true" disablenextupdate="false" />
 			<character hp="3" iframes="0" />
@@ -85,18 +85,18 @@
 		</enemy>
 		<enemy>
 			<enemy id="6" class="Mosquito" />
-			<position x="558" y="295" />
-			<velocity x="-2.00" y="0.00" />
+			<position x="501" y="295" />
+			<velocity x="2.00" y="0.00" />
 			<entity active="true" disablenextupdate="false" />
 			<character hp="3" iframes="0" />
 			<jump onair="false" currentjumps="0" keepmomentum="false" />
 			<pathfind behaviour="1">
-				<destination x="1" y="4" />
+				<destination x="10" y="4" />
 			</pathfind>
 		</enemy>
 		<enemy>
 			<enemy id="7" class="Mosquito" />
-			<position x="1018" y="1014" />
+			<position x="1121" y="1014" />
 			<velocity x="-2.00" y="0.00" />
 			<entity active="true" disablenextupdate="false" />
 			<character hp="3" iframes="0" />
@@ -107,7 +107,7 @@
 		</enemy>
 		<enemy>
 			<enemy id="8" class="Mosquito" />
-			<position x="3507" y="1880" />
+			<position x="3422" y="1684" />
 			<velocity x="1.65" y="3.80" />
 			<entity active="true" disablenextupdate="false" />
 			<character hp="3" iframes="0" />

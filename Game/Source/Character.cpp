@@ -230,9 +230,13 @@ void Character::CreatePhysBody()
 			}
 			else if(StrEquals(shapeType, "circle"))
 			{
+				float32 radius = (elem.attribute("radius").empty())
+					? colliderGroupNode.attribute("radius").as_float()
+					: elem.attribute("radius").as_float();
+
 				tempData.push_back(
 					{
-						colliderGroupNode.attribute("radius").as_float(),
+						radius,
 						0
 					}
 				);
@@ -276,6 +280,13 @@ void Character::CreatePhysBody()
 			if(StrEquals(elem.attribute("name").as_string(), "ground"))
 			{
 				pBody->ground = std::make_unique<FixtureData>(
+					std::string(elem.attribute("name").as_string()),
+					fixturePtr
+				);
+			}
+			if(StrEquals(elem.attribute("name").as_string(), "top"))
+			{
+				pBody->top = std::make_unique<FixtureData>(
 					std::string(elem.attribute("name").as_string()),
 					fixturePtr
 				);
@@ -400,7 +411,15 @@ uint16 Character::SetMaskFlag(std::string_view name, pugi::xml_node const &colli
 		if(StrEquals(colliderGroupNode.attribute("name").as_string(), "CharacterSensor"))
 			maskFlag = static_cast<uint16>(ENEMIES | TRIGGERS | CHECKPOINTS | BULLET);
 		else if(StrEquals(colliderGroupNode.attribute("name").as_string(), "Terrain"))
-			maskFlag = static_cast<uint16>(ENEMIES | PLATFORMS | ITEMS);
+		{
+			if(StrEquals(colliderNode.attribute("name").as_string(), "Ground") ||
+			   StrEquals(colliderNode.attribute("name").as_string(), "holdLeft") ||
+			   StrEquals(colliderNode.attribute("name").as_string(), "holdRight"))
+				maskFlag = static_cast<uint16>(ENEMIES | PLATFORMS | ITEMS);
+			else
+				maskFlag = static_cast<uint16>(ENEMIES | ITEMS);
+
+		}
 	}
 	else if(StrEquals(name, "enemy"))
 	{

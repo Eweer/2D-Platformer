@@ -26,14 +26,10 @@ Item::Item(TileInfo const *tileInfo, iPoint pos, int width, int height) : info(t
 	if(!itemClass.empty()) itemClass[0] = std::tolower(itemClass[0], std::locale());
 	else LOG("Item does not have a class.");
 	
-	for(auto const &elem : tileInfo->collider)
+	if(!tileInfo->collider.empty())
 	{
-		colliderMap["idle"].emplace_back(
-			std::make_pair<ShapeData, iPoint>(
-				ShapeData("chain", elem.points),
-				iPoint(elem.x, elem.y)
-			)
-		);
+		shape.Create("chain", tileInfo->collider[0].points);
+		colliderOffset = iPoint(tileInfo->collider[0].x, tileInfo->collider[0].y);
 	}
 	
 	imageVariation = *(std::get_if<int>(&tileInfo->properties.find("ImageVariation")->second));
@@ -54,53 +50,28 @@ void Item::CreatePhysBody()
 {
 	// Create PhysBody
 	iPoint pBodyPos = position;
-	
-	if(!colliderMap.begin()->second.empty())
-	{
-		pBodyPos.x += colliderMap.begin()->second.front().second.x;
-		pBodyPos.y += colliderMap.begin()->second.front().second.y;
-	}
 
 	auto itemBody = app->physics->CreateBody(
-		pBodyPos
+		position + colliderOffset
 	);
 
-	std::unique_ptr<PhysBody>physBodyPtr(
-		app->physics->CreatePhysBody(
-			itemBody,
-			iPoint(width, height),
-			CL::ColliderLayers::ITEMS
-		)
+	auto fixtureDef = app->physics->CreateFixtureDef(
+		shape,
+		(uint16)CL::ColliderLayers::ITEMS,
+		(uint16)CL::ColliderLayers::PLAYER,
+		true
 	);
+
+	itemBody->CreateFixture(fixtureDef.get());
+
+	auto physBodyPtr = app->physics->CreatePhysBody(
+		itemBody,
+		iPoint(width, height),
+		CL::ColliderLayers::ITEMS
+	);
+
 	pBody = std::move(physBodyPtr);
 	pBody->listener = this;
-
-	// Fill all fixtureDef (all colliders of item) of PhysBody and respective X,Y offsets
-	for(auto &[action, shapeData] : colliderMap)
-	{
-		auto rShapeData = std::ranges::subrange(shapeData.rbegin(), shapeData.rend());
-		for(auto &[shape, offset] : rShapeData)
-		{
-			std::unique_ptr<b2FixtureDef> fixtureDef(
-				app->physics->CreateFixtureDef(
-					shape,
-					(uint16)CL::ColliderLayers::ITEMS,
-					(uint16)CL::ColliderLayers::PLAYER,
-					true
-				)
-			);
-			pBody->fixtures.push_back(std::move(fixtureDef));
-			pBody->offsets.push_back(offset);
-		}
-	}
-
-	// If the body has colliders
-	if(!pBody->fixtures.empty())
-	{
-		auto itemPhysBody = pBody.get();
-		itemBody->CreateFixture(itemPhysBody->fixtures.front().get());
-		colliderOffset = pBody->offsets.front();
-	}
 }
 
 Item::~Item() = default;

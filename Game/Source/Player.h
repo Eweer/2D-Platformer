@@ -16,7 +16,6 @@ public:
 
 	bool Awake() final;
 
-	std::string ChooseAnim();
 	bool UpdateProjectiles() override;
 
 	bool Update() final;
@@ -37,6 +36,18 @@ public:
 
 private:
 	bool LoadProjectileData();
+
+	//---------- Update utils
+	b2Vec2 GetHorizontalInput();
+	void UpdateJumpImpulse(b2Vec2 &impulse);
+	void UpdateAttacks(b2Vec2 &impulse);
+	void UpdateActionBooleans();
+	void UpdateVelocity(const b2Vec2 impulse);
+	void UpdateNewCoordinates();
+	void UpdateCamera();
+	void UpdateAnimLock();
+	void UpdateDamaged();
+	std::string ChooseAnim();
 
 	iPoint coordinates = {0, 0};
 	bool changedTile = true;
@@ -64,6 +75,9 @@ private:
 	bool bIdle = false;
 	bool bAttack1 = false;
 	bool bLockAnim = false;
+
+	bool bHolding = false;
+	iPoint holdPosition = {0,0};
 	bool bAbleToMove = true;
 
 	bool bGodMode = false;
@@ -75,3 +89,5 @@ private:
 };
 
 #endif // __PLAYER_H__
+
+

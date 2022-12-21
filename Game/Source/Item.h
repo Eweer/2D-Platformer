@@ -2,9 +2,9 @@
 #define __ITEM_H__
 
 #include "Entity.h"
+#include "Physics.h"
 
 struct TileInfo;
-class ShapeData;
 
 class Item : public Entity
 {
@@ -28,7 +28,7 @@ public:
 	pugi::xml_node SaveState(pugi::xml_node const &data) final;
 
 	TileInfo const *info = nullptr;
-	std::unordered_map<std::string, std::vector<std::pair<ShapeData, iPoint>>, StringHash, std::equal_to<>> colliderMap;
+	ShapeData shape;
 	int width = 0;
 	int height = 0;
 	std::shared_ptr<Animation> anim;

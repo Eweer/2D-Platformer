@@ -437,3 +437,29 @@ void Pathfinding::AddFallLinks(iPoint position, iPoint limit)
 		}
 	}
 }
+
+bool Pathfinding::IsRightNode(iPoint position) const
+{
+	auto coords = app->map->WorldToCoordinates(position);
+	coords.y -= 1;
+	if(!IsValidPosition(coords)) return false;
+	return groundMap->at(coords.x)[coords.y].type == CL::NavType::RIGHT
+		|| groundMap->at(coords.x)[coords.y].type == CL::NavType::SOLO;
+}
+
+bool Pathfinding::IsLeftNode(iPoint position) const
+{
+	auto coords = app->map->WorldToCoordinates(position) - 1;
+	if(!IsValidPosition(coords)) return false;
+	return groundMap->at(coords.x)[coords.y].type == CL::NavType::LEFT
+		|| groundMap->at(coords.x)[coords.y].type == CL::NavType::SOLO;
+}
+
+bool Pathfinding::IsBorderNode(iPoint position) const
+{
+	auto coords = app->map->WorldToCoordinates(position);
+	if(!IsValidPosition(coords)) return false;
+	return groundMap->at(coords.x)[coords.y].type == CL::NavType::LEFT
+		|| groundMap->at(coords.x)[coords.y].type == CL::NavType::SOLO
+		|| groundMap->at(coords.x)[coords.y].type == CL::NavType::RIGHT;
+}

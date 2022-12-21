@@ -67,6 +67,10 @@ public:
 	// --- Get information
 	bool IsValidPosition(iPoint position) const;
 	NavPoint &GetNavPoint(iPoint position) const;
+	bool IsRightNode(iPoint position) const;
+	bool IsLeftNode(iPoint position) const;
+
+	bool IsBorderNode(iPoint position) const;
 
 private:
 	iPoint GetTerrainUnder(iPoint position) const;

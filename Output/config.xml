@@ -31,16 +31,17 @@
 				<animation name="jump" style="1" speed="0.07" />
 				<animation name="walk" style="1" speed="0.2">
 					<collidergroup name="CharacterSensor" class="Dynamic" density="1" sensor="true" width="43" height="58">
-						<chain x="20" y="54" friction="0" points="5,13 14,3 32,4 43,15 42,33 37,40 38,50 34,53 12,53 9,50" />
+						<chain x="20" y="54" friction="0" points="3,12 10,5 32,5 39,12 39,46 32,54 10,54 3,46" />
 					</collidergroup>
-					<collidergroup name="Terrain" class="Dynamic" sensor="false" radius="7">
-						<circle name="Ground" friction="1" x="40" y="103" />
-						<circle name="BottomRight" friction="0" x="51" y="96" />
-						<circle name="Right" friction="0" x="56" y="75" />
-						<circle name="TopRight" friction="0" x="52" y="62" />
-						<circle name="Top" friction="0" x="39" y="57" />
-						<circle name="TopLeft" friction="0" x="25" y="65" />
-						<circle name="BottomLeft" friction="0" x="28" y="91" />
+					<collidergroup name="Terrain" class="Dynamic" sensor="false" radius="12">
+						<circle name="Ground" friction="1" x="41" y="98" />
+						<circle name="BottomRight" friction="0" x="51" y="93" />
+						<circle name="Right" friction="0" x="51" y="81" />
+						<circle name="HoldRight" friction="0" x="51" y="68" />
+						<circle name="Top" friction="0" x="41" y="63" />
+						<circle name="HoldLeft" friction="0" x="31" y="68"/>
+						<circle name="PushLeft" friction="0" x="31" y="81" />
+						<circle name="BottomLeft" friction="0" x="31" y="93" />
 					</collidergroup>
 				</animation>
 			</animationdata>

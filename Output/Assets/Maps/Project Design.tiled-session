@@ -1,0 +1,143 @@
+{
+    "activeFile": "Mountain/Mountain64.tmx",
+    "expandedProjectPaths": [
+        "CITM_Design/Output/Assets",
+        "Mountain",
+        "CITM_Design/Output",
+        "citm_desvj_project_template-L12_Pathfinding_Astar_Pro_solution/Output",
+        "CITM_Design",
+        "citm_desvj_project_template-L12_Pathfinding_Astar_Pro_solution/Output/Assets",
+        ".",
+        "citm_desvj_project_template-L12_Pathfinding_Astar_Pro_solution/Output/Assets/Maps",
+        "CITM_Design/Output/Assets/Maps/Mountain",
+        "citm_desvj_project_template-L12_Pathfinding_Astar_Pro_solution",
+        "CITM_Design/Output/Assets/Maps"
+    ],
+    "file.lastUsedOpenFilter": "All Files (*)",
+    "fileStates": {
+        "": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "CITM_Design/Output/Assets/Maps/Mountain.tmx": {
+            "scale": 0.3837109375,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 1282.2152092028912,
+                "y": 385.70701415046324
+            }
+        },
+        "CITM_Design/Output/Assets/Maps/Mountain.tmx#MountainTiles": {
+            "scaleInDock": 1
+        },
+        "CITM_Design/Output/Assets/Maps/Mountain/EntitiesHitbox.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1,
+            "scaleInEditor": 0.75
+        },
+        "CITM_Design/Output/Assets/Maps/Mountain/ItemHitboxProvider.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "CITM_Design/Output/Assets/Maps/Mountain/Mountain64.tmx": {
+            "expandedGroupLayers": [
+                7
+            ],
+            "expandedObjectLayers": [
+                5,
+                7,
+                6
+            ],
+            "scale": 0.33,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 2045.4545454545453,
+                "y": 350.0000000000001
+            }
+        },
+        "CITM_Design/Output/Assets/Maps/Mountain/Mountain64.tmx#Items": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "CITM_Design/Output/Assets/Maps/Mountain/Mountain64.tmx#MountainTiles64x64": {
+            "dynamicWrapping": false,
+            "scaleInDock": 0.75,
+            "scaleInEditor": 1
+        },
+        "CITM_Design/Output/Assets/Maps/Mountain64.tmx": {
+            "scale": 1,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 366.5,
+                "y": 484
+            }
+        },
+        "CITM_Design/Output/Assets/Maps/Mountain64.tmx#Items": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "CITM_Design/Output/Assets/Maps/Mountain64.tmx#MountainTiles64x64": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "Mountain/EntitiesHitbox.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 0.33,
+            "scaleInEditor": 1
+        },
+        "Mountain/Mountain64.tmx": {
+            "scale": 1.5,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 3214.6666666666665,
+                "y": 676.6666666666667
+            }
+        },
+        "Mountain/Mountain64.tmx#Items": {
+            "scaleInDock": 1
+        },
+        "Mountain/Mountain64.tmx#MountainTiles64x64": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1
+        },
+        "citm_desvj_project_template-L12_Pathfinding_Astar_Pro_solution/Output/Assets/Maps/iso.tmx": {
+            "scale": 0.4690625,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 801.5989340439706,
+                "y": 396.53564290473014
+            }
+        },
+        "citm_desvj_project_template-L12_Pathfinding_Astar_Pro_solution/Output/Assets/Maps/iso.tmx#isometric_grass_and_water": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "citm_desvj_project_template-L12_Pathfinding_Astar_Pro_solution/Output/Assets/Maps/iso.tmx#meta": {
+            "scaleInDock": 1
+        }
+    },
+    "frame.defaultDuration": 100,
+    "last.imagePath": "C:/Users/oriol/Documents/GitHub/2D Platformer Gamekit/Animations/Base/Monster/Forest/mosquito",
+    "openFiles": [
+        "Mountain/Mountain64.tmx",
+        "Mountain/EntitiesHitbox.tsx"
+    ],
+    "project": "Project Design.tiled-project",
+    "property.type": "ColliderLayers",
+    "recentFiles": [
+        "Mountain/EntitiesHitbox.tsx",
+        "Mountain/Mountain64.tmx",
+        "CITM_Design/Output/Assets/Maps/Mountain/Mountain64.tmx",
+        "CITM_Design/Output/Assets/Maps/Mountain/EntitiesHitbox.tsx",
+        "citm_desvj_project_template-L12_Pathfinding_Astar_Pro_solution/Output/Assets/Maps/iso.tmx",
+        "CITM_Design/Output/Assets/Maps/Mountain/ItemHitboxProvider.tsx",
+        "CITM_Design/Output/Assets/Maps/Mountain64.tmx",
+        "CITM_Design/Output/Assets/Maps/Mountain.tmx"
+    ],
+    "tileset.embedInMap": false,
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.type": 1
+}

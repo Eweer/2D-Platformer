@@ -491,25 +491,73 @@
    <properties>
     <property name="Terrain" type="bool" value="true"/>
     <property name="Walkability" type="bool" value="false"/>
+    <property name="variance_max" type="int" value="400"/>
+    <property name="variance_min" type="int" value="200"/>
    </properties>
+   <objectgroup draworder="index" id="2">
+    <object id="1" x="1" y="9">
+     <polygon points="0,0 0,1 -1,1 -1,4 0,4 0,5 1,5 1,6 2,6 2,8 3,8 3,9 2,9 2,13 3,13 3,16 4,16 4,18 5,18 5,19 6,19 6,20 7,20 7,27 8,27 8,28 9,28 9,29 11,29 11,30 12,30 12,34 13,34 13,36 14,36 14,38 15,38 15,39 17,39 17,40 18,40 18,41 21,41 21,42 22,42 22,43 23,43 23,44 24,44 24,45 25,45 25,46 26,46 26,48 27,48 27,49 28,49 28,50 30,50 30,52 31,52 31,53 33,53 33,54 37,54 38,55 43,55 43,54 45,54 45,53 46,53 46,54 52,54 52,55 60,55 60,54 61,54 61,55 63,55 63,49 63,48 36,48 31,44 31,42 23,34 21,34 21,29 18,24 18,21 16,19 14,19 14,17 11,11 11,5 8,0 6,-1 2,-1"/>
+    </object>
+   </objectgroup>
+   <animation>
+    <frame tileid="71" duration="100"/>
+    <frame tileid="72" duration="100"/>
+    <frame tileid="73" duration="100"/>
+    <frame tileid="74" duration="100"/>
+    <frame tileid="75" duration="100"/>
+    <frame tileid="76" duration="100"/>
+    <frame tileid="77" duration="100"/>
+    <frame tileid="78" duration="100"/>
+   </animation>
   </tile>
   <tile id="99">
    <properties>
     <property name="Terrain" type="bool" value="true"/>
     <property name="Walkability" type="bool" value="false"/>
    </properties>
+   <objectgroup draworder="index" id="2">
+    <object id="1" x="0" y="57">
+     <polygon points="0,0 0,7 3,7 3,6 5,6 5,5 6,5 6,6 10,6 10,7 23,7 23,6 24,6 24,7 38,7 38,6 39,6 39,7 42,7 42,6 43,6 43,7 63,7 63,6 64,6 64,0"/>
+    </object>
+   </objectgroup>
+   <animation>
+    <frame tileid="99" duration="100"/>
+    <frame tileid="91" duration="100"/>
+   </animation>
   </tile>
   <tile id="91">
    <properties>
     <property name="Terrain" type="bool" value="true"/>
     <property name="Walkability" type="bool" value="false"/>
    </properties>
+   <objectgroup draworder="index" id="2">
+    <object id="1" x="0" y="57">
+     <polygon points="0,0 0,7 3,7 3,6 5,6 5,5 6,5 6,6 10,6 10,7 23,7 23,6 24,6 24,7 38,7 38,6 39,6 39,7 42,7 42,6 43,6 43,7 63,7 63,6 64,6 64,0"/>
+    </object>
+   </objectgroup>
   </tile>
   <tile id="79">
    <properties>
     <property name="Terrain" type="bool" value="true"/>
     <property name="Walkability" type="bool" value="false"/>
+    <property name="variance_max" type="int" value="400"/>
+    <property name="variance_min" type="int" value="200"/>
    </properties>
+   <objectgroup draworder="index" id="2">
+    <object id="1" x="63" y="9">
+     <polygon points="0,0 0,1 1,1 1,4 0,4 0,5 -1,5 -1,6 -2,6 -2,8 -3,8 -3,9 -2,9 -2,13 -3,13 -3,16 -4,16 -4,18 -5,18 -5,19 -6,19 -6,20 -7,20 -7,27 -8,27 -8,28 -9,28 -9,29 -11,29 -11,30 -12,30 -12,34 -13,34 -13,36 -14,36 -14,38 -15,38 -15,39 -17,39 -17,40 -18,40 -18,41 -21,41 -21,42 -22,42 -22,43 -23,43 -23,44 -24,44 -24,45 -25,45 -25,46 -26,46 -26,48 -27,48 -27,49 -28,49 -28,50 -30,50 -30,52 -31,52 -31,53 -33,53 -33,54 -37,54 -38,55 -43,55 -43,54 -45,54 -45,53 -46,53 -46,54 -52,54 -52,55 -60,55 -60,54 -61,54 -61,55 -63,55 -63,49 -63,48 -36,48 -31,44 -31,42 -23,34 -21,34 -21,29 -18,24 -18,21 -16,19 -14,19 -14,17 -11,11 -11,5 -8,0 -6,-1 -2,-1"/>
+    </object>
+   </objectgroup>
+   <animation>
+    <frame tileid="79" duration="100"/>
+    <frame tileid="80" duration="100"/>
+    <frame tileid="81" duration="100"/>
+    <frame tileid="82" duration="100"/>
+    <frame tileid="83" duration="100"/>
+    <frame tileid="84" duration="100"/>
+    <frame tileid="85" duration="100"/>
+    <frame tileid="101" duration="100"/>
+   </animation>
   </tile>
   <tile id="67">
    <properties>
@@ -1777,7 +1825,7 @@
    <tile/>
    <tile gid="72"/>
    <tile gid="100"/>
-   <tile gid="92"/>
+   <tile gid="100"/>
    <tile gid="80"/>
    <tile/>
    <tile/>
@@ -1895,7 +1943,7 @@
    <tile/>
    <tile gid="72"/>
    <tile gid="100"/>
-   <tile gid="92"/>
+   <tile gid="100"/>
    <tile gid="80"/>
    <tile/>
    <tile/>

@@ -223,21 +223,14 @@ public:
 	bool Contains(iPoint position) const;
 	int RayCast(int x1, int y1, int x2, int y2, float &normal_x, float &normal_y) const;
 
-	void SetNewShape(int i)
-	{
-		body->DestroyFixture(body->GetFixtureList());
-		body->CreateFixture(fixtures[i].get());
-	}
-
 	int width = 0;
 	int height = 0;
 	b2Body *body = nullptr;
 	Entity *listener = nullptr;
 	Projectile *pListener = nullptr;
 	CL::ColliderLayers ctype = CL::ColliderLayers::UNKNOWN;
-	std::vector<std::unique_ptr<b2FixtureDef>> fixtures;
-	std::vector<iPoint> offsets;
 	std::unique_ptr<FixtureData> ground;
+	std::unique_ptr<FixtureData> top;
 };
 
 // Module --------------------------------------

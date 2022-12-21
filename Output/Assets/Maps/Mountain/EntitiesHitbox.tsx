@@ -38,27 +38,30 @@
   <image width="128" height="128" source="../../Animations/Player/Mage/Walk/walk2.png"/>
   <objectgroup draworder="index" id="3">
    <object id="2" name="Sensor" class="Dynamic" x="20" y="54" width="43" height="58">
-    <polygon points="5,13 14,3 32,4 43,15 42,33 37,40 38,50 34,53 12,53 9,50"/>
+    <polygon points="9,12 16,5 32,5 39,12 39,46 33,54 17,54 9,46"/>
    </object>
-   <object id="4" name="Ground" class="Dynamic" x="40" y="103" width="7" height="7">
+   <object id="4" name="Ground" class="Dynamic" x="41" y="98" width="12" height="12">
     <ellipse/>
    </object>
-   <object id="6" name="BottomRight" class="Dynamic" x="51" y="96" width="7" height="7">
+   <object id="6" name="BottomRight" class="Dynamic" x="51" y="93" width="12" height="12">
     <ellipse/>
    </object>
-   <object id="7" name="Front" class="Dynamic" x="56" y="75" width="7" height="7">
+   <object id="7" name="PushRight" class="Dynamic" x="51" y="81" width="12" height="12">
     <ellipse/>
    </object>
-   <object id="8" name="TopRight" class="Dynamic" x="52" y="62" width="7" height="7">
+   <object id="8" name="HoldRight" class="Dynamic" x="51" y="68" width="12" height="12">
     <ellipse/>
    </object>
-   <object id="9" name="Top" class="Dynamic" x="39" y="57" width="7" height="7">
+   <object id="9" name="Top" class="Dynamic" x="41" y="63" width="12" height="12">
     <ellipse/>
    </object>
-   <object id="10" name="TopLeft" class="Dynamic" x="25" y="65" width="7" height="7">
+   <object id="10" name="HoldLeft" class="Dynamic" x="31" y="68" width="12" height="12">
     <ellipse/>
    </object>
-   <object id="11" name="BottomLeft" class="Dynamic" x="28" y="91" width="7" height="7">
+   <object id="12" name="PushLeft" class="Dynamic" x="31" y="81" width="12" height="12">
+    <ellipse/>
+   </object>
+   <object id="13" name="BottomLeft" class="Dynamic" x="31" y="93" width="12" height="12">
     <ellipse/>
    </object>
   </objectgroup>
@@ -260,7 +263,9 @@
   </objectgroup>
  </tile>
  <tile id="32">
-  <image source="../../../../../2D Platformer Gamekit/Animations/Base/Monster/Forest/mosquito/flight1.png"/>
+  <image format="png">
+   <data encoding="base64"></data>
+  </image>
   <objectgroup draworder="index" id="2">
    <object id="1" x="28" y="35" width="72" height="58">
     <polygon points="-1,39 -1,13 15,-1 42,4 73,46 48,46 30,58 10,58"/>

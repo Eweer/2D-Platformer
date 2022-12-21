@@ -1,0 +1,132 @@
+{
+    "automappingRulesFile": "",
+    "commands": [
+    ],
+    "extensionsPath": "extensions",
+    "folders": [
+        ".",
+        "CITM_Design/Output/Assets/Maps"
+    ],
+    "propertyTypes": [
+        {
+            "color": "#ffa0a0a4",
+            "id": 6,
+            "members": [
+                {
+                    "name": "AnimIteration",
+                    "propertyType": "AnimIteration",
+                    "type": "string",
+                    "value": "UNKNOWN"
+                },
+                {
+                    "name": "AnimationFrame",
+                    "type": "int",
+                    "value": 0
+                },
+                {
+                    "name": "AnimationName",
+                    "propertyType": "PlayerAnimation",
+                    "type": "string",
+                    "value": "UNKNOWN"
+                },
+                {
+                    "name": "AnimationSpeed",
+                    "type": "float",
+                    "value": 0
+                }
+            ],
+            "name": "Animation",
+            "type": "class",
+            "useAs": [
+                "property",
+                "tile"
+            ]
+        },
+        {
+            "id": 7,
+            "name": "AnimIteration",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "ONCE",
+                "LOOP_FROM_START",
+                "FORWARD_BACKWARD",
+                "LOOP_FORWARD_BACKWARDS",
+                "NEVER",
+                "UNKNOWN"
+            ],
+            "valuesAsFlags": false
+        },
+        {
+            "id": 1,
+            "name": "ColliderLayers",
+            "storageType": "int",
+            "type": "enum",
+            "values": [
+                "PLATFORMS",
+                "PLAYER",
+                "ENEMIES",
+                "ITEMS",
+                "TRIGGERS",
+                "CHECKPOINTS",
+                "UNKNOWN"
+            ],
+            "valuesAsFlags": true
+        },
+        {
+            "id": 2,
+            "name": "ImageVariation",
+            "storageType": "int",
+            "type": "enum",
+            "values": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4"
+            ],
+            "valuesAsFlags": false
+        },
+        {
+            "id": 4,
+            "name": "ItemType",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "unknown",
+                "coin",
+                "gem",
+                "heart",
+                "arrow",
+                "star",
+                "cross"
+            ],
+            "valuesAsFlags": false
+        },
+        {
+            "id": 5,
+            "name": "PlayerAnimation",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "Attack",
+                "Attack_Extra",
+                "Climb",
+                "Death",
+                "Fire",
+                "Fire_Extra",
+                "High_Jump",
+                "Hurt",
+                "Idle",
+                "Jump",
+                "Push",
+                "Run",
+                "Run_Attack",
+                "Walk",
+                "Walk_attack",
+                "UNKNOWN"
+            ],
+            "valuesAsFlags": false
+        }
+    ]
+}

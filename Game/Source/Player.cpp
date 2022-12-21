@@ -7,6 +7,7 @@
 #include "Projectile.h"
 #include "Log.h"
 #include "Physics.h"
+#include "Pathfinding.h"
 #include "Scene.h"
 
 #include "Defs.h"
@@ -118,35 +119,6 @@ bool Player::Awake()
 	return true;
 }
 
-std::string Player::ChooseAnim()
-{
-	if(bAttack1 || bAttack2 || bHurt || bDead || bFalling >= 100)
-		bLockAnim = true;
-
-	if(bDead) return "death";
-	if(bHurt) return "hurt";
-	if(bFalling >= 100) return "falling";
-	if(bFalling >= 10) return "jump";
-	if(bClimbing) return "climb";
-	if(bPushing) return "push";
-	if(bNormalJump) return "jump";
-	if(bHighJump) return "high_Jump";
-	if(bRunning)
-	{
-		if(bAttack1) return "run_Attack";
-		return "run";
-	}
-	if(bWalking)
-	{
-		if(bAttack1) return "walk_Attack";
-		return "walk";
-	}
-	if(bAttack2) return "attack_Extra";
-	if(bAttack1) return "attack";
-	if(bIdle) return "idle";
-	return "unknown";
-}
-
 bool Player::UpdateProjectiles()
 {
 	// Update Projectiles
@@ -164,35 +136,7 @@ bool Player::Update()
 	if(skillCDTimer >= skillCD) skillCDTimer = 0;
 	if(skillCDTimer > 0) skillCDTimer++;
 
-	if(iFrames > 0)
-	{
-		iFrames++;
-
-		// If player is dead
-		if(hp == 0)
-		{
-			if(texture->IsLastFrame()) texture->Pause();
-			if(iFrames >= 100)
-			{
-				iFrames = 0;
-				active = false;
-				Start();
-				active = true;
-				bDead = false;
-				bAbleToMove = true;
-				bLockAnim = false;
-				hp = 3;
-			}
-		}
-		// If it's not dead and iFrame timer expired
-		else if(iFrames >= 40)
-		{
-			iFrames = 0;
-			bHurt = false;
-		}
-		else if(iFrames >= 20)
-			bAbleToMove = true;
-	}
+	if(iFrames > 0) UpdateDamaged();
 
 	// If landing
 	if(bKeepMomentum)
@@ -200,182 +144,20 @@ bool Player::Update()
 		pBody->body->SetLinearVelocity(b2Vec2(velocityToKeep.x, 0));
 		bKeepMomentum = false;
 	}
-	
-	b2Vec2 vel;
-	b2Vec2 impulse;
-	float maxVel;
-	if(pBody)
-	{
-		// Set movement variables
-		vel = pBody->body->GetLinearVelocity();
-		impulse = {0, 0};
-		maxVel = app->input->GetKey(SDL_SCANCODE_LSHIFT) == KeyState::KEY_REPEAT ? 7.5f : 5.0f;
-	}
 
-	// If it's able to move
-	if(bAbleToMove)
-	{
-		// Move player if pressing A/D
-		if(app->input->GetKey(SDL_SCANCODE_A) == KeyState::KEY_REPEAT)
-		{
-			if(vel.y != 0) impulse.x = b2Max(vel.x - 0.15f, maxVel * -1);
-			else impulse.x = b2Max(vel.x - 0.25f, maxVel * -1);
-			dir = 1;
-		}
-
-		if(app->input->GetKey(SDL_SCANCODE_D) == KeyState::KEY_REPEAT)
-		{
-			if(vel.y != 0) impulse.x = b2Min(vel.x + 0.15f, maxVel);
-			else impulse.x = b2Min(vel.x + 0.25f, maxVel);
-			dir = 0;
-		}
-		if(impulse.x == 0) impulse.x = vel.x * 0.98f;
-	}
-
+	b2Vec2 impulse = GetHorizontalInput();
 
 	// If it's playing an animation lock
-	if(bLockAnim)
-	{
-		// If it's attacking, wait for fifth texture before creating the projectile
-		if(bAttackQueue && texture->GetCurrentFrame() >= 5)
-		{
-			using enum CL::ColliderLayers;
-			bAttackQueue = false;
-			std::unique_ptr<Projectile>projPtr;
-			if(bAttack1)
-			{
-				bAttack1 = false;
-				projPtr = std::make_unique<Projectile>(
-					texture->GetAnim("fire"),
-					iPoint(position.x + 30, position.y),
-					projectileMap["fire"],
-					attackDir
-				);
-			}
-			else if(bAttack2)
-			{
-				skillCDTimer++;
-				bAttack2 = false;
-				projPtr = std::make_unique<Projectile>(
-					texture->GetAnim("fire_Extra"),
-					iPoint(position.x + 30, position.y),
-					projectileMap["fire_Extra"],
-					attackDir
-				);
-			}
-			projectiles.push_back(std::move(projPtr));
-		}
-		if(bHighJump) bHighJump = false;
-
-		// If the texture finished playing, we give the control back to the player
-		if(texture->GetAnimFinished())
-		{
-			bLockAnim = false;
-			bAbleToMove = true;
-		}
-	}
+	if(bLockAnim) UpdateAnimLock();
 	// Jump / Attacks
 	else 
 	{
-		// Check if player is able and wants to jump
-		if(jump.currentJumps < jump.maxJumps && app->input->GetKey(SDL_SCANCODE_SPACE) == KeyState::KEY_DOWN)
-		{
-			// Check if it is currently jumping, if it is restart the animation
-			if(bNormalJump || bHighJump)
-			{
-				texture->SetCurrentFrame(0);
-				bLockAnim = true;
-			}
-
-			if(app->input->GetKey(SDL_SCANCODE_LSHIFT) == KeyState::KEY_REPEAT)
-			{
-				impulse.y = jump.jumpImpulse * -1.5f;
-				impulse.x /= 1.5f;
-				bHighJump = true;
-			}
-			else
-			{
-				impulse.y = jump.jumpImpulse * -1.0f;
-				bNormalJump = true;
-			}
-
-			jump.bOnAir = true;
-			jump.currentJumps++;
-
-			pBody->body->SetLinearVelocity(b2Vec2(vel.x, 0));
-			pBody->body->ApplyLinearImpulse(b2Vec2(0, impulse.y), pBody->body->GetWorldCenter(), true);
-		}
-
-		// Left click attack, only able to do it if on the floor
-		if(!jump.bOnAir && app->input->GetMouseButtonDown(SDL_BUTTON_LEFT) == KeyState::KEY_DOWN)
-		{
-			// If it's idle, player can't move during the lock.
-			if(impulse.x == 0) bAbleToMove = false;
-			iPoint currentMousePos = {
-				app->input->GetMousePosition().x - app->render->GetCamera().x,
-				app->input->GetMousePosition().y - app->render->GetCamera().y
-			};
-			attackDir = PIXEL_TO_METERS(currentMousePos - position);
-			bAttack1 = true;
-			bAttackQueue = true;
-			if(pBody->body->GetPosition().x > PIXEL_TO_METERS(currentMousePos.x))
-				dir = 1;
-			else
-				dir = 0;
-		}
-
-		// Right click attack, only able to do it if on the floor
-		if(skillCDTimer == 0 && !jump.bOnAir && app->input->GetMouseButtonDown(SDL_BUTTON_RIGHT) == KeyState::KEY_DOWN)
-		{
-			// Stop all momentum, player can't move during lock
-			impulse.x = 0;
-			bAbleToMove = false;
-			iPoint currentMousePos = {
-				app->input->GetMousePosition().x - app->render->GetCamera().x,
-				app->input->GetMousePosition().y - app->render->GetCamera().y
-			};
-			attackDir = PIXEL_TO_METERS(currentMousePos - position);
-			bAttack2 = true;
-			bAttackQueue = true;
-			if(pBody->body->GetPosition().x > PIXEL_TO_METERS(currentMousePos.x))
-				dir = 1;
-			else
-				dir = 0;
-		}		
+		UpdateJumpImpulse(impulse);
+		UpdateAttacks(impulse);
 	}
-
-	if(pBody)
-	{
-		// Set player speed
-		pBody->body->SetLinearVelocity(b2Vec2(impulse.x, pBody->body->GetLinearVelocity().y));
 	
-
-		// Set boolean actions based on current movement
-		if(pBody->body->GetLinearVelocity().y <= 0)	bFalling = 0;
-		else if(pBody->body->GetLinearVelocity().y > 1.0f) bFalling++;
-
-		if(pBody->body->GetLinearVelocity().x == 0)
-		{
-			bWalking = false;
-			bRunning = false;
-			bIdle = true;
-		}
-		else
-		{
-			bIdle = false;
-			bWalking = true;
-			if(app->input->GetKey(SDL_SCANCODE_LSHIFT) == KeyState::KEY_REPEAT)
-				bRunning = true;
-			else
-				bRunning = false;
-		}
-		
-		app->scene->IncreaseBGScrollSpeed(impulse.x);
-		// Set image position and draw character
-		position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x);
-		position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y);
-		
-	}
+	UpdateVelocity(impulse);
+	UpdateActionBooleans();
 
 	// If it's not locked, we set the texture based on priority
 	if(!bLockAnim) texture->SetCurrentAnimation(ChooseAnim());
@@ -387,21 +169,8 @@ bool Player::Update()
 		texture->GetFlipPivot()
 	);
 
-	if(auto currentCoords = app->map->WorldToCoordinates(position);
-	   currentCoords != coordinates)
-	{
-		changedTile = true;
-		coordinates = currentCoords;
-	}
-	else
-		changedTile = false;
-
-	// Move camera
-	if(bMoveCamera)
-		app->render->AdjustCamera(position);
-
-	if(app->input->GetKey(SDL_SCANCODE_M) == KeyState::KEY_DOWN)
-		bMoveCamera = !bMoveCamera;
+	UpdateNewCoordinates();
+	UpdateCamera();
 
 	if(app->input->GetKey(SDL_SCANCODE_F10) == KeyState::KEY_DOWN)
 		bGodMode = !bGodMode;
@@ -418,9 +187,11 @@ void Player::BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fi
 			break;
 		case PLATFORMS:
 		{
-			if(pBody->ground->ptr == fixtureA && pBody->body->GetLinearVelocity().y > 0)
+			if(pBody->body->GetLinearVelocity().y <= 0) break;
+
+			if(pBody->ground->ptr == fixtureA)
 			{
-				if (bNormalJump) bLockAnim = false;
+				bLockAnim = false;
 
 				bNormalJump = false;
 				bHighJump = false;
@@ -434,13 +205,33 @@ void Player::BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fi
 					.jumpImpulse = jump.jumpImpulse,
 				};
 			}
- 			
+			else if((pBody->top->ptr != fixtureA
+				 && pBody->ground->ptr != fixtureA
+				 && position.y < pBodyB->GetPosition().y)
+				 && (pBodyB->GetPosition().x < position.x
+				 && app->pathfinding->IsRightNode(pBodyB->GetPosition()))
+				 || (pBodyB->GetPosition().x > position.x
+				 && app->pathfinding->IsLeftNode(pBodyB->GetPosition())))
+			{
+				texture->SetCurrentAnimation("hold");
+				holdPosition = pBodyB->GetPosition();
+				holdPosition.y -= 10;
+				bHolding = true;
+				bAbleToMove = false;
+				pBody->body->SetLinearVelocity(b2Vec2(0, pBody->body->GetLinearVelocity().y));
+
+			}
+				
+
 			break;
 		}
 		case PLAYER:
 		{
 			break;
 		}
+		case BULLET:
+			if(pBodyB->pListener->source != ENEMIES) break;
+			[[fallthrough]];
 		case ENEMIES:
 		{
 			if(iFrames == 0)
@@ -451,6 +242,7 @@ void Player::BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fi
 				{
 					position.x -= 20;
 					position.y -= 10;
+					bHolding = false;
 					bDead = true;
 					bAbleToMove = false;
 					bLockAnim = false;
@@ -546,6 +338,7 @@ void Player::SpecificRestart()
 	bAbleToMove = true;
 	bGodMode = false;
 	bAttackQueue = false;
+	bHolding = false;
 	attackDir = {0, 0};
 }
 
@@ -591,3 +384,282 @@ pugi::xml_node Player::SaveState(pugi::xml_node const &data)
 
 	return data;
 }
+
+//---------- Update utils
+
+std::string Player::ChooseAnim()
+{
+	if(bAttack1 || bAttack2 || bHurt || bDead || bFalling >= 100)
+		bLockAnim = true;
+
+	if(bDead) return "death";
+	if(bHolding) return "hold";
+	if(bHurt) return "hurt";
+	if(bFalling >= 100) return "falling";
+	if(bFalling >= 10) return "jump";
+	if(bClimbing) return "climb";
+	if(bPushing) return "push";
+	if(bNormalJump) return "jump";
+	if(bHighJump) return "high_Jump";
+	if(bRunning)
+	{
+		if(bAttack1) return "run_Attack";
+		return "run";
+	}
+	if(bWalking)
+	{
+		if(bAttack1) return "walk_Attack";
+		return "walk";
+	}
+	if(bAttack2) return "attack_Extra";
+	if(bAttack1) return "attack";
+	if(bIdle) return "idle";
+	return "unknown";
+}
+
+void Player::UpdateAnimLock()
+{
+	// If it's attacking, wait for fifth texture before creating the projectile
+	if(bAttackQueue && texture->GetCurrentFrame() >= 5)
+	{
+		bAttackQueue = false;
+		std::unique_ptr<Projectile>projPtr;
+		if(bAttack1)
+		{
+			bAttack1 = false;
+			projPtr = std::make_unique<Projectile>(
+				texture->GetAnim("fire"),
+				iPoint(position.x + 30, position.y),
+				projectileMap["fire"],
+				attackDir
+			);
+		}
+		else if(bAttack2)
+		{
+			skillCDTimer++;
+			bAttack2 = false;
+			projPtr = std::make_unique<Projectile>(
+				texture->GetAnim("fire_Extra"),
+				iPoint(position.x + 30, position.y),
+				projectileMap["fire_Extra"],
+				attackDir
+			);
+		}
+		projectiles.push_back(std::move(projPtr));
+	}
+	if(bHighJump) bHighJump = false;
+
+	// If the texture finished playing, we give the control back to the player
+	if(texture->GetAnimFinished())
+	{
+		bLockAnim = false;
+		bAbleToMove = true;
+	}
+}
+
+void Player::UpdateDamaged()
+{
+	iFrames++;
+
+	// If player is dead
+	if(hp == 0)
+	{
+		if(texture->IsLastFrame()) texture->Pause();
+		if(iFrames >= 100)
+		{
+			iFrames = 0;
+			active = false;
+			Start();
+			active = true;
+			bDead = false;
+			bAbleToMove = true;
+			bLockAnim = false;
+			hp = 3;
+		}
+	}
+	// If it's not dead and iFrame timer expired
+	else if(iFrames >= 40)
+	{
+		iFrames = 0;
+		bHurt = false;
+	}
+	else if(iFrames >= 20) bAbleToMove = true;
+}
+
+b2Vec2 Player::GetHorizontalInput()
+{
+	b2Vec2 vel = {0.0f, 0.0f};
+	b2Vec2 impulse = {0.0f, 0.0f};
+	float maxVel = 0.0f;
+	// If it's able to move
+	if(pBody && bAbleToMove && !bHolding)
+	{
+		// Set movement variables
+		vel = pBody->body->GetLinearVelocity();
+		maxVel = app->input->GetKey(SDL_SCANCODE_LSHIFT) == KeyState::KEY_REPEAT ? 7.5f : 5.0f;
+
+		// Move player if pressing A/D
+		if(app->input->GetKey(SDL_SCANCODE_A) == KeyState::KEY_REPEAT)
+		{
+			if(vel.y != 0) impulse.x = b2Max(vel.x - 0.15f, maxVel * -1);
+			else impulse.x = b2Max(vel.x - 0.25f, maxVel * -1);
+			dir = 1;
+		}
+
+		if(app->input->GetKey(SDL_SCANCODE_D) == KeyState::KEY_REPEAT)
+		{
+			if(vel.y != 0) impulse.x = b2Min(vel.x + 0.15f, maxVel);
+			else impulse.x = b2Min(vel.x + 0.25f, maxVel);
+			dir = 0;
+		}
+		if(impulse.x == 0) impulse.x = vel.x * 0.98f;
+	}
+	return impulse;
+}
+
+void Player::UpdateJumpImpulse(b2Vec2 &impulse)
+{
+	// Check if player is able and wants to jump
+	if((jump.currentJumps < jump.maxJumps || bHolding) && app->input->GetKey(SDL_SCANCODE_SPACE) == KeyState::KEY_DOWN)
+	{
+		if(bHolding)
+		{
+			pBody->body->SetGravityScale(1);
+			bHolding = false;
+			bAbleToMove = true;
+		}
+		// Check if it is currently jumping, if it is restart the animation
+		if(bNormalJump || bHighJump)
+		{
+			texture->SetCurrentFrame(0);
+			bLockAnim = true;
+		}
+
+		if(app->input->GetKey(SDL_SCANCODE_LSHIFT) == KeyState::KEY_REPEAT)
+		{
+			impulse.y = jump.jumpImpulse * -1.5f;
+			impulse.x /= 1.5f;
+			bHighJump = true;
+		}
+		else
+		{
+			impulse.y = jump.jumpImpulse * -1.0f;
+			bNormalJump = true;
+		}
+
+		jump.bOnAir = true;
+		jump.currentJumps++;
+
+		pBody->body->SetLinearVelocity(b2Vec2(impulse.x, 0));
+		pBody->body->ApplyLinearImpulse(b2Vec2(0, impulse.y), pBody->body->GetWorldCenter(), true);
+	}
+}
+
+void Player::UpdateAttacks(b2Vec2 &impulse)
+{
+	if(bHolding || jump.bOnAir) return;
+
+	// Left click attack, only able to do it if on the floor
+	if(app->input->GetMouseButtonDown(SDL_BUTTON_LEFT) == KeyState::KEY_DOWN)
+	{
+		// If it's idle, player can't move during the lock.
+		if(impulse.x == 0) bAbleToMove = false;
+		iPoint currentMousePos = {
+			app->input->GetMousePosition().x - app->render->GetCamera().x,
+			app->input->GetMousePosition().y - app->render->GetCamera().y
+		};
+		attackDir = PIXEL_TO_METERS(currentMousePos - position);
+		bAttack1 = true;
+		bAttackQueue = true;
+		if(pBody->body->GetPosition().x > PIXEL_TO_METERS(currentMousePos.x))
+			dir = 1;
+		else
+			dir = 0;
+	}
+
+	// Right click attack, only able to do it if on the floor
+	if(skillCDTimer == 0 && app->input->GetMouseButtonDown(SDL_BUTTON_RIGHT) == KeyState::KEY_DOWN)
+	{
+		// Stop all momentum, player can't move during lock
+		impulse.x = 0;
+		bAbleToMove = false;
+		iPoint currentMousePos = {
+			app->input->GetMousePosition().x - app->render->GetCamera().x,
+			app->input->GetMousePosition().y - app->render->GetCamera().y
+		};
+		attackDir = PIXEL_TO_METERS(currentMousePos - position);
+		bAttack2 = true;
+		bAttackQueue = true;
+		if(pBody->body->GetPosition().x > PIXEL_TO_METERS(currentMousePos.x))
+			dir = 1;
+		else
+			dir = 0;
+	}
+}
+
+void Player::UpdateActionBooleans()
+{
+	if(!pBody) return;
+
+	// Set boolean actions based on current movement
+	if(pBody->body->GetLinearVelocity().y <= 0)	bFalling = 0;
+	else if(pBody->body->GetLinearVelocity().y > 1.0f) bFalling++;
+
+	if(pBody->body->GetLinearVelocity().x == 0)
+	{
+		bWalking = false;
+		bRunning = false;
+		bIdle = true;
+	}
+	else
+	{
+		bIdle = false;
+		bWalking = true;
+		if(app->input->GetKey(SDL_SCANCODE_LSHIFT) == KeyState::KEY_REPEAT)
+			bRunning = true;
+		else
+			bRunning = false;
+	}
+}
+
+void Player::UpdateVelocity(const b2Vec2 impulse)
+{
+	if(!pBody) return;
+
+	if(bHolding && position.y >= holdPosition.y)
+	{
+		pBody->body->SetGravityScale(0);
+		pBody->body->SetLinearVelocity(b2Vec2(0.0f, 0.0f));
+	}
+
+	// Set player speed
+	pBody->body->SetLinearVelocity(b2Vec2(impulse.x, pBody->body->GetLinearVelocity().y));
+	app->scene->IncreaseBGScrollSpeed(impulse.x);
+
+	// Set image position and draw character
+	position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x);
+	position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y);
+}
+
+void Player::UpdateNewCoordinates()
+{
+	if(auto currentCoords = app->map->WorldToCoordinates(position);
+	   currentCoords != coordinates)
+	{
+		changedTile = true;
+		coordinates = currentCoords;
+	}
+	else
+		changedTile = false;
+}
+
+void Player::UpdateCamera()
+{
+	// Move camera
+	if(bMoveCamera)
+		app->render->AdjustCamera(position);
+
+	if(app->input->GetKey(SDL_SCANCODE_M) == KeyState::KEY_DOWN)
+		bMoveCamera = !bMoveCamera;
+}
+
