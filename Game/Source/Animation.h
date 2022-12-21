@@ -34,7 +34,7 @@ public:
 
 	~Animation() = default;
 
-	SDL_Texture *UpdateAndGetFrame()
+	std::shared_ptr<SDL_Texture> UpdateAndGetFrame()
 	{
 		if(TimeSinceLastFunctionCall > 0) TimeSinceLastFunctionCall += 0.1f;
 		if(TimeSinceLastFunctionCall > FunctionCooldown) TimeSinceLastFunctionCall = 0;
@@ -111,9 +111,12 @@ public:
 		}
 	}
 
-	SDL_Texture *GetCurrentTexture() const
+	std::shared_ptr<SDL_Texture> GetCurrentTexture() const
 	{
-		if(frames.empty() || frames.at(currentAnimName).empty()) return nullptr;
+		if(currentAnimName.empty()) return nullptr;
+		if(frames.empty()) return nullptr;
+		if(!frames.contains(currentAnimName)) return nullptr;
+		if(frames.at(currentAnimName).empty()) return nullptr;
 
 		if((int)currentFrame >= frames.at(currentAnimName).size())
 			return frames.at(currentAnimName).at(frames.at(currentAnimName).size() - 1);
@@ -121,7 +124,7 @@ public:
 			return frames.at(currentAnimName).at((uint)currentFrame);
 	}
 
-	SDL_Texture *GetAnimationByName(std::string_view name) const
+	std::shared_ptr<SDL_Texture> GetAnimationByName(std::string_view name) const
 	{
 		if(auto tex = frames.find(name); tex != frames.end() && !tex->second.empty())
 			return tex->second.front();
@@ -156,7 +159,7 @@ public:
 		return GetFrameCount(name);
 	}
 	
-	Animation *AddSingleFrame(SDL_Texture *texture)
+	Animation *AddSingleFrame(std::shared_ptr<SDL_Texture> texture)
 	{
 		frames["unknown"].push_back(texture);
 		return this;
@@ -310,11 +313,11 @@ public:
 		return static_cast<int>(floor(currentFrame));
 	}
 
-	std::vector<SDL_Texture *>GetAnim(std::string_view anim)
+	std::vector<std::shared_ptr<SDL_Texture>>GetAnim(std::string_view anim)
 	{
 		if(auto it = frames.find(anim); it != frames.end())
 			return it->second;
-		return std::vector<SDL_Texture *>();
+		return std::vector<std::shared_ptr<SDL_Texture>>();
 	}
 
 private:
@@ -330,8 +333,8 @@ private:
 	uint loopsToDo = 0;
 	uint width = 0;
 	uint height = 0;
-	std::unordered_map<std::string, std::vector<SDL_Texture *>, StringHash, std::equal_to<>> frames;
+	std::unordered_map<std::string, std::vector<std::shared_ptr<SDL_Texture>>, StringHash, std::equal_to<>> frames;
 	std::unordered_map<std::string, float, StringHash, std::equal_to<>> frameSpeed;
-	SDL_Texture *staticImage = nullptr;
+	std::shared_ptr<SDL_Texture> staticImage = nullptr;
 };
 #endif	// __ANIMATION_H__

@@ -231,7 +231,7 @@ bool Map::LoadTileSet(pugi::xml_node const &mapFile)
 		retTileSet->tilecount = elem.attribute("tilecount").as_int();
 
 		auto path = mapFolder + elem.child("image").attribute("source").as_string();
-		retTileSet->texture = app->tex->Load(path.c_str());
+		retTileSet->texture = app->tex->Load(path.c_str()).get();
 
 		for(auto const &tileInfoNode : elem.children("tile"))
 		{

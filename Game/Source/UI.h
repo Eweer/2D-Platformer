@@ -55,7 +55,7 @@ private:
 
 	int IncreaseY(int font) const;
 
-	std::unordered_map<std::string, SDL_Texture *, StringHash, std::less_equal<>> uiElements;
+	std::unordered_map<std::string, std::shared_ptr<SDL_Texture>, StringHash, std::less_equal<>> uiElements;
 
 	float degree = 0.0f;
 	int laps = 0;

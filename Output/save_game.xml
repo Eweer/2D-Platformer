@@ -1,45 +1,118 @@
 <?xml version="1.0"?>
 <save_state>
 	<scene>
-		<layer id="1" x="-519.33" y="0.00" additionalspeed="0.10" />
-		<layer id="2" x="-1038.66" y="0.00" additionalspeed="0.10" />
-		<layer id="3" x="-1558.00" y="0.00" additionalspeed="0.10" />
-		<layer id="4" x="-370.37" y="0.00" additionalspeed="0.10" />
-		<layer id="5" x="-886.96" y="0.00" additionalspeed="0.10" />
-		<layer id="6" x="-1407.54" y="0.00" additionalspeed="0.10" />
+		<layer id="1" x="-67.52" y="0.00" additionalspeed="0.10" />
+		<layer id="2" x="-135.04" y="0.00" additionalspeed="0.10" />
+		<layer id="3" x="-202.56" y="0.00" additionalspeed="0.10" />
+		<layer id="4" x="-270.08" y="0.00" additionalspeed="0.10" />
+		<layer id="5" x="-337.60" y="0.00" additionalspeed="0.10" />
+		<layer id="6" x="-405.12" y="0.00" additionalspeed="0.10" />
 	</scene>
 	<entitymanager>
 		<player>
-			<position x="1685" y="789" />
+			<position x="220" y="1301" />
 			<velocity x="0.00" y="0.00" />
 			<entity active="true" disablenextupdate="false" />
 			<character hp="3" iframes="0" />
-			<jump onair="false" currentjumps="0" keepmomentum="false" />
+			<jump onair="true" currentjumps="0" keepmomentum="false" />
 			<anim falling="0" />
 			<misc move="true" skillcdtimer="0" />
 			<attack queue="false" abletomove="true" />
 		</player>
+		<item>
+			<item imgvariation="0" class="heart" />
+			<position x="1616" y="720" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="2" class="cross" />
+			<position x="768" y="1424" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
 		<enemy>
 			<enemy id="0" class="Dwarf" />
-			<position x="2426" y="1182" />
-			<velocity x="2.00" y="0.00" />
+			<position x="2145" y="1054" />
+			<velocity x="0.00" y="0.00" />
 			<entity active="true" disablenextupdate="false" />
 			<character hp="3" iframes="0" />
 			<jump onair="false" currentjumps="0" keepmomentum="false" />
-			<pathfind behaviour="1">
-				<destination x="40" y="18" />
-			</pathfind>
+			<pathfind behaviour="0" />
 		</enemy>
 		<enemy>
-			<enemy id="1" class="Mosquito" />
-			<position x="2648" y="575" />
+			<enemy id="1" class="Dwarf" />
+			<position x="145" y="481" />
+			<velocity x="0.00" y="0.00" />
+			<entity active="true" disablenextupdate="false" />
+			<character hp="3" iframes="0" />
+			<jump onair="false" currentjumps="0" keepmomentum="false" />
+			<pathfind behaviour="1" />
+		</enemy>
+		<enemy>
+			<enemy id="2" class="Dwarf" />
+			<position x="1121" y="1246" />
+			<velocity x="0.00" y="0.00" />
+			<entity active="true" disablenextupdate="false" />
+			<character hp="3" iframes="0" />
+			<jump onair="false" currentjumps="0" keepmomentum="false" />
+			<pathfind behaviour="1" />
+		</enemy>
+		<enemy>
+			<enemy id="3" class="Dwarf" />
+			<position x="3127" y="1054" />
+			<velocity x="0.00" y="0.00" />
+			<entity active="true" disablenextupdate="false" />
+			<character hp="3" iframes="0" />
+			<jump onair="false" currentjumps="0" keepmomentum="false" />
+			<pathfind behaviour="0" />
+		</enemy>
+		<enemy>
+			<enemy id="4" class="Dwarf" />
+			<position x="3113" y="734" />
+			<velocity x="0.00" y="0.00" />
+			<entity active="true" disablenextupdate="false" />
+			<character hp="3" iframes="0" />
+			<jump onair="false" currentjumps="0" keepmomentum="false" />
+			<pathfind behaviour="0" />
+		</enemy>
+		<enemy>
+			<enemy id="5" class="Mosquito" />
+			<position x="3309" y="1294" />
+			<velocity x="0.68" y="3.13" />
+			<entity active="true" disablenextupdate="false" />
+			<character hp="3" iframes="0" />
+			<jump onair="false" currentjumps="0" keepmomentum="false" />
+			<pathfind behaviour="0" />
+		</enemy>
+		<enemy>
+			<enemy id="6" class="Mosquito" />
+			<position x="558" y="295" />
 			<velocity x="-2.00" y="0.00" />
 			<entity active="true" disablenextupdate="false" />
 			<character hp="3" iframes="0" />
 			<jump onair="false" currentjumps="0" keepmomentum="false" />
 			<pathfind behaviour="1">
-				<destination x="37" y="8" />
+				<destination x="1" y="4" />
 			</pathfind>
+		</enemy>
+		<enemy>
+			<enemy id="7" class="Mosquito" />
+			<position x="1018" y="1014" />
+			<velocity x="-2.00" y="0.00" />
+			<entity active="true" disablenextupdate="false" />
+			<character hp="3" iframes="0" />
+			<jump onair="false" currentjumps="0" keepmomentum="false" />
+			<pathfind behaviour="1">
+				<destination x="13" y="15" />
+			</pathfind>
+		</enemy>
+		<enemy>
+			<enemy id="8" class="Mosquito" />
+			<position x="3507" y="1880" />
+			<velocity x="1.65" y="3.80" />
+			<entity active="true" disablenextupdate="false" />
+			<character hp="3" iframes="0" />
+			<jump onair="false" currentjumps="0" keepmomentum="false" />
+			<pathfind behaviour="0" />
 		</enemy>
 		<item>
 			<item imgvariation="0" class="star" />
@@ -47,8 +120,138 @@
 			<entity active="true" disablenextupdate="false" />
 		</item>
 		<item>
+			<item imgvariation="1" class="star" />
+			<position x="400" y="1040" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="1" class="coin" />
+			<position x="592" y="1040" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="3" class="coin" />
+			<position x="896" y="1040" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
 			<item imgvariation="0" class="coin" />
-			<position x="3268" y="1364" />
+			<position x="2416" y="1296" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="0" class="coin" />
+			<position x="2464" y="1296" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="0" class="coin" />
+			<position x="2512" y="1296" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="0" class="coin" />
+			<position x="2560" y="1296" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="0" class="coin" />
+			<position x="2608" y="1296" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="0" class="coin" />
+			<position x="2656" y="1296" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="0" class="coin" />
+			<position x="2416" y="1248" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="0" class="coin" />
+			<position x="2464" y="1248" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="0" class="coin" />
+			<position x="2512" y="1248" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="0" class="coin" />
+			<position x="2560" y="1248" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="0" class="coin" />
+			<position x="2608" y="1248" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="0" class="coin" />
+			<position x="2656" y="1248" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="0" class="coin" />
+			<position x="2704" y="1296" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="0" class="coin" />
+			<position x="2752" y="1296" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="0" class="coin" />
+			<position x="2800" y="1296" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="0" class="coin" />
+			<position x="2848" y="1296" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="0" class="coin" />
+			<position x="2896" y="1296" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="0" class="coin" />
+			<position x="2944" y="1296" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="0" class="coin" />
+			<position x="2704" y="1248" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="0" class="coin" />
+			<position x="2752" y="1248" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="0" class="coin" />
+			<position x="2800" y="1248" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="0" class="coin" />
+			<position x="2848" y="1248" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="0" class="coin" />
+			<position x="2896" y="1248" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="0" class="coin" />
+			<position x="2944" y="1248" />
 			<entity active="true" disablenextupdate="false" />
 		</item>
 		<item>
@@ -56,12 +259,37 @@
 			<position x="146" y="414" />
 			<entity active="true" disablenextupdate="false" />
 		</item>
+		<item>
+			<item imgvariation="2" class="gem" />
+			<position x="1488" y="784" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="2" class="gem" />
+			<position x="1744" y="784" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="3" class="gem" />
+			<position x="1680" y="752" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="3" class="gem" />
+			<position x="1552" y="752" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
+		<item>
+			<item imgvariation="0" class="gem" />
+			<position x="720" y="912" />
+			<entity active="true" disablenextupdate="false" />
+		</item>
 	</entitymanager>
 	<ui>
 		<pause pause="false" />
 	</ui>
 	<renderer>
-		<camera x="-1429" y="-277" />
+		<camera x="0" y="-576" />
 		<graphics vsync="false" targetfps="60" />
 	</renderer>
 </save_state>

@@ -52,33 +52,24 @@ bool Textures::CleanUp()
 }
 
 // Load new texture from file path
-SDL_Texture* Textures::Load(const char* path)
+std::shared_ptr<SDL_Texture> Textures::Load(const char* path)
 {
-	SDL_Texture* texture = nullptr;
-
 	if(SDL_Surface* surface = IMG_Load(path)) 
 	{
-		texture = LoadSurface(surface);
+		auto texture = app->render->LoadTexture(surface);
 		SDL_FreeSurface(surface);
+		if(texture)
+		{
+			textures.push_back(std::move(texture));
+
+			return textures.back();
+		}
+		else LOG("Unable to create texture from surface! SDL Error: %s\n", SDL_GetError());
+
 	}	
-	else 
-		LOG("Could not load surface with path: %s. IMG_Load: %s", path, IMG_GetError());
+	else LOG("Could not load surface with path: %s. IMG_Load: %s", path, IMG_GetError());
 
-	return texture;
-}
-
-
-// Translate a surface into a texture
-SDL_Texture* Textures::LoadSurface(SDL_Surface* surface)
-{
-	if(auto texturePtr = app->render->LoadTexture(surface);
-		texturePtr != nullptr)
-	{
-		textures.emplace_back(std::move(texturePtr));
-	}
-	else LOG("Unable to create texture from surface! SDL Error: %s\n", SDL_GetError());
-
-	return textures.back().get();
+	return nullptr;
 }
 
 // Unload texture

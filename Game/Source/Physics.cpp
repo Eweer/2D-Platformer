@@ -45,6 +45,7 @@ bool Physics::Start()
 
 bool Physics::PreUpdate()
 {
+	using enum KeyState;
 	float newGrav = b2_maxFloat;
 	for (uint keyIterator = SDL_SCANCODE_1; keyIterator <= SDL_SCANCODE_0; keyIterator++)
 	{
@@ -81,10 +82,10 @@ bool Physics::PreUpdate()
 bool Physics::PostUpdate()
 {
 	// Activate or deactivate debug mode
-	if (app->input->GetKey(SDL_SCANCODE_F9) == KEY_DOWN)
+	if (app->input->GetKey(SDL_SCANCODE_F9) == KeyState::KEY_DOWN)
 		debug = !debug;
 
-	if (app->input->GetKey(SDL_SCANCODE_F2) == KEY_DOWN)
+	if (app->input->GetKey(SDL_SCANCODE_F2) == KeyState::KEY_DOWN)
 		debugWhileSelected = !debugWhileSelected;
 
 	if (!debug) return true;
@@ -96,7 +97,7 @@ bool Physics::PostUpdate()
 	{
 		for (b2Fixture *f = b->GetFixtureList(); f; f = f->GetNext())
 		{
-			if (app->input->GetMouseButtonDown(SDL_BUTTON_LEFT) == KEY_DOWN && IsMouseOverObject(f))
+			if (app->input->GetMouseButtonDown(SDL_BUTTON_LEFT) == KeyState::KEY_DOWN && IsMouseOverObject(f))
 			{
 				selected = f->GetBody();
 				break;
@@ -411,43 +412,33 @@ b2MouseJoint *Physics::CreateMouseJoint(b2Body *origin, b2Body *target, b2Vec2 p
 
 void Physics::DragSelectedObject()
 {
-	switch (app->input->GetMouseButtonDown(SDL_BUTTON_LEFT))
+	if(app->input->GetMouseButtonDown(SDL_BUTTON_LEFT) == KeyState::KEY_DOWN)
 	{
-		case KeyState::KEY_DOWN:
+		iPoint mousePos =
 		{
-			iPoint mousePos =
-			{
-				app->input->GetMousePosition().x - app->render->GetCamera().x,
-				app->input->GetMousePosition().y - app->render->GetCamera().y
-			};
-			mouseJoint = CreateMouseJoint(ground, selected, PIXEL_TO_METERS(mousePos));
-			break;
-		}
-		case KeyState::KEY_REPEAT:
-		{
-			iPoint mousePos =
-			{
-				app->input->GetMousePosition().x - app->render->GetCamera().x,
-				app->input->GetMousePosition().y - app->render->GetCamera().y
-			};
-			mouseJoint->SetTarget(PIXEL_TO_METERS(mousePos));
-			app->render->DrawLine(
-				mousePos,
-				METERS_TO_PIXELS(selected->GetPosition()),
-				SDL_Color(0, 255, 255, 255)
-			);
-			break;
-		}
-		case KeyState::KEY_UP:
-		{
-			DestroyMouseJoint();
-			break;
-		}
-		case KeyState::KEY_IDLE:
-			break;
-
+			app->input->GetMousePosition().x - app->render->GetCamera().x,
+			app->input->GetMousePosition().y - app->render->GetCamera().y
+		};
+		mouseJoint = CreateMouseJoint(ground, selected, PIXEL_TO_METERS(mousePos));
 	}
-
+	else if(app->input->GetMouseButtonDown(SDL_BUTTON_LEFT) == KeyState::KEY_REPEAT)
+	{
+		iPoint mousePos =
+		{
+			app->input->GetMousePosition().x - app->render->GetCamera().x,
+			app->input->GetMousePosition().y - app->render->GetCamera().y
+		};
+		mouseJoint->SetTarget(PIXEL_TO_METERS(mousePos));
+		app->render->DrawLine(
+			mousePos,
+			METERS_TO_PIXELS(selected->GetPosition()),
+			SDL_Color(0, 255, 255, 255)
+		);
+	}
+	else if(app->input->GetMouseButtonDown(SDL_BUTTON_LEFT) == KeyState::KEY_UP)
+	{
+		DestroyMouseJoint();
+	}
 }
 
 void Physics::DestroyMouseJoint()

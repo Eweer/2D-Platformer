@@ -105,7 +105,7 @@ public:
 
 	bool HasSaveData() const final;
 
-	std::unique_ptr<SDL_Texture, std::function<void(SDL_Texture *)>> LoadTexture(SDL_Surface *surface);
+	std::shared_ptr<SDL_Texture> LoadTexture(SDL_Surface *surface);
 
 	SDL_Rect GetCamera() const;
 

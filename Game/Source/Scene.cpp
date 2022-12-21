@@ -72,7 +72,7 @@ bool Scene::Start()
 
 			uint w;
 			uint h;
-			app->tex->GetSize(background.back().texture, w, h);
+			app->tex->GetSize(background.back().texture.get(), w, h);
 			background.back().size.x = static_cast<float>(w);
 		}
 	}
@@ -81,7 +81,7 @@ bool Scene::Start()
 	{
 		uint w;
 		uint h;
-		app->tex->GetSize(background.back().texture, w, h);
+		app->tex->GetSize(background.back().texture.get(), w, h);
 		bgScale = static_cast<float>(app->win->GetHeight()) / static_cast<float>(h);
 	}
 
@@ -112,16 +112,16 @@ bool Scene::Pause(int phase)
 {
 	for(auto &elem : background)
 	{
-		app->render->DrawBackground(elem.texture, elem.position + 2 - elem.size * bgScale, bgScale);
-		app->render->DrawBackground(elem.texture, elem.position, bgScale);
-		app->render->DrawBackground(elem.texture, elem.position - 2 + elem.size * bgScale, bgScale);
+		app->render->DrawBackground(elem.texture.get(), elem.position + 2 - elem.size * bgScale, bgScale);
+		app->render->DrawBackground(elem.texture.get(), elem.position, bgScale);
+		app->render->DrawBackground(elem.texture.get(), elem.position - 2 + elem.size * bgScale, bgScale);
 	}
 
 	// Request App to Load / Save when pressing the keys F5 (save) / F6 (load)
-	if (app->input->GetKey(SDL_SCANCODE_F5) == KEY_DOWN)
+	if (app->input->GetKey(SDL_SCANCODE_F5) == KeyState::KEY_DOWN)
 		app->SaveGameRequest();
 
-	if (app->input->GetKey(SDL_SCANCODE_F6) == KEY_DOWN)
+	if (app->input->GetKey(SDL_SCANCODE_F6) == KeyState::KEY_DOWN)
 		app->LoadGameRequest();
 
 	return true;
@@ -132,9 +132,9 @@ bool Scene::Update(float dt)
 {
 	for(auto &elem : background)
 	{
-		app->render->DrawBackground(elem.texture, elem.position + 2 - elem.size * bgScale, bgScale);
-		app->render->DrawBackground(elem.texture, elem.position, bgScale);
-		app->render->DrawBackground(elem.texture, elem.position - 2 + elem.size * bgScale, bgScale);
+		app->render->DrawBackground(elem.texture.get(), elem.position + 2 - elem.size * bgScale, bgScale);
+		app->render->DrawBackground(elem.texture.get(), elem.position, bgScale);
+		app->render->DrawBackground(elem.texture.get(), elem.position - 2 + elem.size * bgScale, bgScale);
 		elem.position.x -= (elem.increase * additionalSpeed) + elem.increase;
 
 		if(elem.position.x <= elem.size.x * (-1 * bgScale))
@@ -145,14 +145,14 @@ bool Scene::Update(float dt)
 
 	additionalSpeed = 0.0f;
 
-	//if(app->input->GetKey(SDL_SCANCODE_F3) == KEY_DOWN)
+	//if(app->input->GetKey(SDL_SCANCODE_F3) == KeyState::KEY_DOWN)
 		//app->ResetLevelRequest();
 
 	// Request App to Load / Save when pressing the keys F5 (save) / F6 (load)
-	if (app->input->GetKey(SDL_SCANCODE_F5) == KEY_DOWN)
+	if (app->input->GetKey(SDL_SCANCODE_F5) == KeyState::KEY_DOWN)
 		app->SaveGameRequest();
 
-	if (app->input->GetKey(SDL_SCANCODE_F6) == KEY_DOWN)
+	if (app->input->GetKey(SDL_SCANCODE_F6) == KeyState::KEY_DOWN)
 		app->LoadGameRequest();
 
 	// Draw map
@@ -164,7 +164,7 @@ bool Scene::Update(float dt)
 // Called each loop iteration
 bool Scene::PostUpdate()
 {
-	if(app->input->GetKey(SDL_SCANCODE_ESCAPE) == KEY_DOWN)
+	if(app->input->GetKey(SDL_SCANCODE_ESCAPE) == KeyState::KEY_DOWN)
 		return false;
 	
 	return true;

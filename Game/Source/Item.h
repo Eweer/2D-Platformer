@@ -31,7 +31,7 @@ public:
 	std::unordered_map<std::string, std::vector<std::pair<ShapeData, iPoint>>, StringHash, std::equal_to<>> colliderMap;
 	int width = 0;
 	int height = 0;
-	const Animation *anim;
+	std::shared_ptr<Animation> anim;
 	std::string itemClass = "Unknown";
 };
 

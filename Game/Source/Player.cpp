@@ -209,21 +209,21 @@ bool Player::Update()
 		// Set movement variables
 		vel = pBody->body->GetLinearVelocity();
 		impulse = {0, 0};
-		maxVel = app->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT ? 7.5f : 5.0f;
+		maxVel = app->input->GetKey(SDL_SCANCODE_LSHIFT) == KeyState::KEY_REPEAT ? 7.5f : 5.0f;
 	}
 
 	// If it's able to move
 	if(bAbleToMove)
 	{
 		// Move player if pressing A/D
-		if(app->input->GetKey(SDL_SCANCODE_A) == KEY_REPEAT)
+		if(app->input->GetKey(SDL_SCANCODE_A) == KeyState::KEY_REPEAT)
 		{
 			if(vel.y != 0) impulse.x = b2Max(vel.x - 0.15f, maxVel * -1);
 			else impulse.x = b2Max(vel.x - 0.25f, maxVel * -1);
 			dir = 1;
 		}
 
-		if(app->input->GetKey(SDL_SCANCODE_D) == KEY_REPEAT)
+		if(app->input->GetKey(SDL_SCANCODE_D) == KeyState::KEY_REPEAT)
 		{
 			if(vel.y != 0) impulse.x = b2Min(vel.x + 0.15f, maxVel);
 			else impulse.x = b2Min(vel.x + 0.25f, maxVel);
@@ -278,7 +278,7 @@ bool Player::Update()
 	else 
 	{
 		// Check if player is able and wants to jump
-		if(jump.currentJumps < jump.maxJumps && app->input->GetKey(SDL_SCANCODE_SPACE) == KEY_DOWN)
+		if(jump.currentJumps < jump.maxJumps && app->input->GetKey(SDL_SCANCODE_SPACE) == KeyState::KEY_DOWN)
 		{
 			// Check if it is currently jumping, if it is restart the animation
 			if(bNormalJump || bHighJump)
@@ -287,7 +287,7 @@ bool Player::Update()
 				bLockAnim = true;
 			}
 
-			if(app->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT)
+			if(app->input->GetKey(SDL_SCANCODE_LSHIFT) == KeyState::KEY_REPEAT)
 			{
 				impulse.y = jump.jumpImpulse * -1.5f;
 				impulse.x /= 1.5f;
@@ -307,7 +307,7 @@ bool Player::Update()
 		}
 
 		// Left click attack, only able to do it if on the floor
-		if(!jump.bOnAir && app->input->GetMouseButtonDown(SDL_BUTTON_LEFT) == KEY_DOWN)
+		if(!jump.bOnAir && app->input->GetMouseButtonDown(SDL_BUTTON_LEFT) == KeyState::KEY_DOWN)
 		{
 			// If it's idle, player can't move during the lock.
 			if(impulse.x == 0) bAbleToMove = false;
@@ -325,7 +325,7 @@ bool Player::Update()
 		}
 
 		// Right click attack, only able to do it if on the floor
-		if(skillCDTimer == 0 && !jump.bOnAir && app->input->GetMouseButtonDown(SDL_BUTTON_RIGHT) == KEY_DOWN)
+		if(skillCDTimer == 0 && !jump.bOnAir && app->input->GetMouseButtonDown(SDL_BUTTON_RIGHT) == KeyState::KEY_DOWN)
 		{
 			// Stop all momentum, player can't move during lock
 			impulse.x = 0;
@@ -364,7 +364,7 @@ bool Player::Update()
 		{
 			bIdle = false;
 			bWalking = true;
-			if(app->input->GetKey(SDL_SCANCODE_LSHIFT) == KEY_REPEAT)
+			if(app->input->GetKey(SDL_SCANCODE_LSHIFT) == KeyState::KEY_REPEAT)
 				bRunning = true;
 			else
 				bRunning = false;
@@ -381,7 +381,7 @@ bool Player::Update()
 	if(!bLockAnim) texture->SetCurrentAnimation(ChooseAnim());
 
 	app->render->DrawCharacterTexture(
-		texture->UpdateAndGetFrame(),
+		texture->UpdateAndGetFrame().get(),
 		iPoint(position.x - colliderOffset.x, position.y - colliderOffset.y),
 		(bool)dir,
 		texture->GetFlipPivot()
@@ -400,10 +400,10 @@ bool Player::Update()
 	if(bMoveCamera)
 		app->render->AdjustCamera(position);
 
-	if(app->input->GetKey(SDL_SCANCODE_M) == KEY_DOWN)
+	if(app->input->GetKey(SDL_SCANCODE_M) == KeyState::KEY_DOWN)
 		bMoveCamera = !bMoveCamera;
 
-	if(app->input->GetKey(SDL_SCANCODE_F10) == KEY_DOWN)
+	if(app->input->GetKey(SDL_SCANCODE_F10) == KeyState::KEY_DOWN)
 		bGodMode = !bGodMode;
 
 	return true;
@@ -498,13 +498,15 @@ bool Player::IsOnAir() const
 
 bool Player::Pause() const
 {
-	app->render->DrawCharacterTexture(
-		texture->GetCurrentTexture(),
-		iPoint(position.x - colliderOffset.x, position.y - colliderOffset.y),
-		(bool)dir,
-		texture->GetFlipPivot()
-	);
-
+	if(auto tex = texture->GetCurrentTexture(); tex)
+	{
+		app->render->DrawCharacterTexture(
+			tex.get(),
+			iPoint(position.x - colliderOffset.x, position.y - colliderOffset.y),
+			(bool)dir,
+			texture->GetFlipPivot()
+		);
+	}
 	for(auto it = projectiles.begin(); it < projectiles.end(); ++it)
 	{
 		if(!it->get()) continue;

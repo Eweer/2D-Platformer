@@ -7,7 +7,7 @@ struct SDL_Texture;
 
 struct BGInfo
 {
-	SDL_Texture *texture;
+	std::shared_ptr<SDL_Texture>texture;
 	fPoint position;
 	float increase;
 	fPoint size;

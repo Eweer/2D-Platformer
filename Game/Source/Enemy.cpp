@@ -99,7 +99,7 @@ bool Enemy::Update()
 		position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y);
 	}
 	app->render->DrawCharacterTexture(
-		texture->UpdateAndGetFrame(),
+		texture->UpdateAndGetFrame().get(),
 		iPoint(position.x - colliderOffset.x, position.y - colliderOffset.y),
 		(bool)dir,
 		texture->GetFlipPivot()

@@ -114,13 +114,15 @@ bool Item::Start()
 
 bool Item::Update()
 {  
-	if(anim) app->render->DrawTexture(anim->GetCurrentTexture(), position.x, position.y);
+	
+	if(auto tex = anim->GetCurrentTexture().get(); tex) app->render->DrawTexture(tex, position.x, position.y);
 	return true;
 }
 
 bool Item::Pause() const
 {
-	if(anim) app->render->DrawTexture(anim->GetCurrentTexture(), position.x, position.y);
+	
+	if(auto tex = anim->GetCurrentTexture().get(); tex) app->render->DrawTexture(tex, position.x, position.y);
 	return true;
 }
 

@@ -28,12 +28,11 @@ public:
 	bool CleanUp() final;
 
 	// Load Texture
-	SDL_Texture* Load(const char* path);
-	SDL_Texture* LoadSurface(SDL_Surface* surface);
+	std::shared_ptr<SDL_Texture> Load(const char* path);
 	bool Unload(SDL_Texture const *texture);
 	void GetSize(SDL_Texture* const texture, uint& width, uint& height) const;
 
-	std::list<std::unique_ptr<SDL_Texture, std::function<void(SDL_Texture *)>>>textures;
+	std::list<std::shared_ptr<SDL_Texture>>textures;
 };
 
 

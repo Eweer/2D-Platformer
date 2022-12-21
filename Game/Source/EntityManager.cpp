@@ -210,7 +210,7 @@ void EntityManager::LoadItemAnimations()
 		   anim == allEntities[entityClass].animation.end())
 		{
 			// If we don't, we create a new one
-			allEntities[entityClass].animation[variation] = std::make_unique<Animation>();
+			allEntities[entityClass].animation[variation] = std::make_shared<Animation>();
 		}
 
 		// Create the path of the file
@@ -248,7 +248,7 @@ void EntityManager::LoadItemAnimations()
 			if(variation = itemEntity->imageVariation;
 			   variation == std::stoi(m.str(2)))
 			{
-				itemEntity->anim = allEntities[entityClass].animation[variation].get();
+				itemEntity->anim = allEntities[entityClass].animation[variation];
 			}
 		}
 

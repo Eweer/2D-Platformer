@@ -51,7 +51,7 @@ int Fonts::Load(std::string const &fontName)
 		
 		std::string texturePath = path + fontNode.child("properties").child("texture").attribute("file").as_string();
 		
-		if(newFont.graphic = app->tex->Load(texturePath.c_str());
+		if(newFont.graphic = app->tex->Load(texturePath.c_str()).get();
 		   !newFont.graphic) 
 		{
 			return -1;

@@ -98,7 +98,7 @@ bool App::Update()
 {
 	PrepareUpdate();
 
-	if (input->GetWindowEvent(WE_QUIT)) return false;
+	if (input->GetWindowEvent(EventWindow::WE_QUIT)) return false;
 
 	if(!PreUpdate()) return false;
 	if(!DoUpdate()) return false;
@@ -106,7 +106,7 @@ bool App::Update()
 
 	FinishUpdate();
 
-	if (input->GetKey(SDL_SCANCODE_P) == KEY_DOWN)
+	if (input->GetKey(SDL_SCANCODE_P) == KeyState::KEY_DOWN)
 	{
 		return PauseGame();
 	}
@@ -361,6 +361,7 @@ bool App::DoPaused()
 
 bool App::PauseGame()
 {
+	using enum KeyState;
 	physics->ToggleStep();
 	ui->TogglePauseDraw();
 	while (input->GetKey(SDL_SCANCODE_P) == KEY_DOWN || input->GetKey(SDL_SCANCODE_P) == KEY_REPEAT)

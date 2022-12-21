@@ -15,7 +15,7 @@ struct EntityInfo
 {
 	CL::ColliderLayers type = CL::ColliderLayers::UNKNOWN;
 	std::vector<std::unique_ptr<Entity>> entities;
-	std::unordered_map<int, std::unique_ptr<Animation>> animation;
+	std::unordered_map<int, std::shared_ptr<Animation>> animation;
 };
 
 class EntityManager : public Module
