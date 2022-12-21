@@ -195,6 +195,7 @@ void Player::BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fi
 
 				bNormalJump = false;
 				bHighJump = false;
+				bFalling = false;
 
 				bKeepMomentum = true;
 				velocityToKeep = pBody->body->GetLinearVelocity();
@@ -322,7 +323,7 @@ void Player::SpecificRestart()
 	changedTile = true;
 	bMoveCamera = true;
 	skillCDTimer = 0;
-	bFalling = 0;
+	bFalling = false;
 	bDead = false;
 	bHurt = false;
 	bAttack2 = false;
@@ -389,14 +390,13 @@ pugi::xml_node Player::SaveState(pugi::xml_node const &data)
 
 std::string Player::ChooseAnim()
 {
-	if(bAttack1 || bAttack2 || bHurt || bDead || bFalling >= 100)
+	if(bAttack1 || bAttack2 || bHurt || bDead)
 		bLockAnim = true;
 
 	if(bDead) return "death";
 	if(bHolding) return "hold";
 	if(bHurt) return "hurt";
-	if(bFalling >= 100) return "falling";
-	if(bFalling >= 10) return "jump";
+	if(bFalling) return "short_fall";
 	if(bClimbing) return "climb";
 	if(bPushing) return "push";
 	if(bNormalJump) return "jump";
@@ -420,41 +420,44 @@ std::string Player::ChooseAnim()
 void Player::UpdateAnimLock()
 {
 	// If it's attacking, wait for fifth texture before creating the projectile
-	if(bAttackQueue && texture->GetCurrentFrame() >= 5)
+	if(bAttackQueue)
 	{
-		bAttackQueue = false;
-		std::unique_ptr<Projectile>projPtr;
-		if(bAttack1)
+		if(texture->GetCurrentFrame() >= 5)
 		{
-			bAttack1 = false;
-			projPtr = std::make_unique<Projectile>(
-				texture->GetAnim("fire"),
-				iPoint(position.x + 30, position.y),
-				projectileMap["fire"],
-				attackDir
-			);
+			std::unique_ptr<Projectile>projPtr;
+			if(bAttack1)
+			{
+				bAttack1 = false;
+				projPtr = std::make_unique<Projectile>(
+					texture->GetAnim("fire"),
+					iPoint(position.x + 30, position.y),
+					projectileMap["fire"],
+					attackDir
+				);
+			}
+			else if(bAttack2)
+			{
+				skillCDTimer++;
+				bAttack2 = false;
+				projPtr = std::make_unique<Projectile>(
+					texture->GetAnim("fire_Extra"),
+					iPoint(position.x + 30, position.y),
+					projectileMap["fire_Extra"],
+					attackDir
+				);
+			}
+			projectiles.push_back(std::move(projPtr));
 		}
-		else if(bAttack2)
+		else if(texture->GetAnimFinished())
 		{
-			skillCDTimer++;
-			bAttack2 = false;
-			projPtr = std::make_unique<Projectile>(
-				texture->GetAnim("fire_Extra"),
-				iPoint(position.x + 30, position.y),
-				projectileMap["fire_Extra"],
-				attackDir
-			);
+			bLockAnim = false;
+			bAbleToMove = true;
+			bAttackQueue = false;
 		}
-		projectiles.push_back(std::move(projPtr));
 	}
-	if(bHighJump) bHighJump = false;
 
 	// If the texture finished playing, we give the control back to the player
-	if(texture->GetAnimFinished())
-	{
-		bLockAnim = false;
-		bAbleToMove = true;
-	}
+	
 }
 
 void Player::UpdateDamaged()
@@ -528,24 +531,24 @@ void Player::UpdateJumpImpulse(b2Vec2 &impulse)
 			bHolding = false;
 			bAbleToMove = true;
 		}
-		// Check if it is currently jumping, if it is restart the animation
-		if(bNormalJump || bHighJump)
-		{
-			texture->SetCurrentFrame(0);
-			bLockAnim = true;
-		}
 
 		if(app->input->GetKey(SDL_SCANCODE_LSHIFT) == KeyState::KEY_REPEAT)
 		{
 			impulse.y = jump.jumpImpulse * -1.5f;
 			impulse.x /= 1.5f;
 			bHighJump = true;
+			texture->SetCurrentAnimation("high_Jump");
 		}
 		else
 		{
 			impulse.y = jump.jumpImpulse * -1.0f;
 			bNormalJump = true;
+			texture->SetCurrentAnimation("jump");
 		}
+
+		// Check if it is currently jumping, if it is, restart the animation
+		if(bFalling) bFalling = false;
+		else texture->SetCurrentFrame(0);
 
 		jump.bOnAir = true;
 		jump.currentJumps++;
@@ -602,8 +605,27 @@ void Player::UpdateActionBooleans()
 	if(!pBody) return;
 
 	// Set boolean actions based on current movement
-	if(pBody->body->GetLinearVelocity().y <= 0)	bFalling = 0;
-	else if(pBody->body->GetLinearVelocity().y > 1.0f) bFalling++;
+	if(pBody->body->GetLinearVelocity().y <= 0) [[likely]]
+		bFalling = false;
+	else if(!bFalling)
+	{
+		if(bHighJump || bNormalJump)
+		{
+			if(pBody->body->GetLinearVelocity().y > 0.0f)
+			{
+				bFalling = true;
+				texture->SetCurrentAnimation("short_Fall");
+			}
+		}
+		else
+		{
+			if(pBody->body->GetLinearVelocity().y > 1.0f)
+			{
+				bFalling = true;
+				texture->SetCurrentAnimation("short_Fall");
+			}
+		}
+	}
 
 	if(pBody->body->GetLinearVelocity().x == 0)
 	{
@@ -615,10 +637,7 @@ void Player::UpdateActionBooleans()
 	{
 		bIdle = false;
 		bWalking = true;
-		if(app->input->GetKey(SDL_SCANCODE_LSHIFT) == KeyState::KEY_REPEAT)
-			bRunning = true;
-		else
-			bRunning = false;
+		bRunning = (app->input->GetKey(SDL_SCANCODE_LSHIFT) == KeyState::KEY_REPEAT);
 	}
 }
 

@@ -29,6 +29,7 @@
 				<properties width="128" height="128" pivotx="42" pivoty="85" animstyle="4" animloop="true" />
 				<animation name="idle" style="4" speed="0.06" />
 				<animation name="jump" style="1" speed="0.07" />
+				<animation name="short_Fall" style="1" speed="0.08" />
 				<animation name="walk" style="1" speed="0.2">
 					<collidergroup name="CharacterSensor" class="Dynamic" density="1" sensor="true" width="43" height="58">
 						<chain x="20" y="54" friction="0" points="3,12 10,5 32,5 39,12 39,46 32,54 10,54 3,46" />

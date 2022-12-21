@@ -62,7 +62,7 @@ private:
 	int skillCDTimer = 0;
 	int skillCD = 0;
 
-	int bFalling = 0;
+	bool bFalling = false;
 	bool bDead = false;
 	bool bHurt = false;
 	bool bAttack2 = false;
