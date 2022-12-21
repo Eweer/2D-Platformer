@@ -246,15 +246,12 @@ void Player::BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fi
 					hp -= damageTaken;
 				}
 				iFrames = 1;
+				pBody->body->SetLinearVelocity(b2Vec2(0, pBody->body->GetLinearVelocity().y));
 				if(hp <= 0)
 				{
 					position.x -= 20;
 					position.y -= 10;
-					bHolding = false;
 					bDead = true;
-					bAbleToMove = false;
-					bLockAnim = false;
-					pBody->body->SetLinearVelocity(b2Vec2(0, pBody->body->GetLinearVelocity().y));
 					Disable();
 					active = true;
 				}
@@ -263,8 +260,16 @@ void Player::BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fi
 					position.x -= 20;
 					position.y -= 10;
 					bHurt = true;
-					bAbleToMove = false;
+					b2Vec2 impulse =
+					{
+						(position.x < enemy->position.x) ? -4.0f : 4.0f,
+						(position.y < enemy->position.y) ? -2.0f : -4.0f
+					};
+					pBody->body->ApplyLinearImpulse(impulse, pBody->body->GetWorldCenter(), true);
 				}
+				bHolding = false;
+				bAbleToMove = false;
+				bLockAnim = false;
 			}
 			break;
 		}
@@ -662,8 +667,13 @@ void Player::UpdateVelocity(const b2Vec2 impulse)
 	}
 
 	// Set player speed
-	pBody->body->SetLinearVelocity(b2Vec2(impulse.x, pBody->body->GetLinearVelocity().y));
-	app->scene->IncreaseBGScrollSpeed(impulse.x);
+	b2Vec2 speed =
+	{
+		(impulse.x != 0) ? impulse.x : pBody->body->GetLinearVelocity().x,
+		pBody->body->GetLinearVelocity().y
+	};
+	pBody->body->SetLinearVelocity(speed);
+	app->scene->IncreaseBGScrollSpeed(speed.x);
 
 	// Set image position and draw character
 	position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x);

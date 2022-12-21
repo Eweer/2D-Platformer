@@ -138,7 +138,6 @@ void Enemy::BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fix
 		   && (pBody->body->GetPosition().x > pBodyB->body->GetPosition().x))
 		{
 			dir = dir ? 0 : 1;
-			pBody->body->SetLinearVelocity(b2Vec2(pBody->body->GetLinearVelocity().x*-1, pBody->body->GetLinearVelocity().y));
 		}
 		bRequestPath = true;
 		

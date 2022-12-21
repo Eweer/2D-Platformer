@@ -300,7 +300,7 @@ bool EntityManager::PreUpdate()
 
 				auto b = enemy->SetBehaviour(player->position, app->win->GetWindowSize());
 
-				if(!(player->DidChangeTile() || enemy->bRequestPath)) continue;
+				if(!player->DidChangeTile() && !enemy->bRequestPath) continue;
 
 				// Get destination coordinates depending on the type of terrain the enemy can go through
 				iPoint destinationCoords = {0, 0};
@@ -309,6 +309,7 @@ bool EntityManager::PreUpdate()
 				if(b == AGGRO)
 				{
 					destinationCoords = app->pathfinding->GetDestinationCoordinates(player->position, enemy->pTerrain);
+					// Fix X coordinate if enemy is right of the player
 					// Adjust Y position for air enemis, they'll look for the one above the player
 					if(enemy->pTerrain == PathfindTerrain::AIR)
 						destinationCoords.y--;
