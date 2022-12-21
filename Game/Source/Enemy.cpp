@@ -39,6 +39,8 @@ bool Enemy::Awake()
 
 bool Enemy::Update()
 {
+	if(attackTimer >= attackCD) attackTimer = 0;
+	else if(attackTimer > 0) attackTimer++;
 	// While doing hurt/dead animation, we don't move the character
 	if(iFrames > 0)
 	{		
@@ -143,12 +145,16 @@ void Enemy::BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fix
 	}
 	if((pBodyB->ctype & PLAYER) == PLAYER)
 	{
-		if(pBodyB->GetPosition().x > position.x)
-			dir = 0;
-		else
-			dir = 1;
+		if(attackTimer == 0)
+		{
+			if(pBodyB->GetPosition().x > position.x)
+				dir = 0;
+			else
+				dir = 1;
 
-		texture->SetCurrentAnimation("attack");
+			texture->SetCurrentAnimation("attack");
+			attackTimer++;
+		}
 	}
 }
 

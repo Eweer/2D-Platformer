@@ -20,6 +20,7 @@
 #include <format>
 #include <string>
 #include <string_view>
+#include "Enemy.h"
 
 
 Player::Player()
@@ -171,7 +172,6 @@ bool Player::Update()
 		texture->GetFlipPivot()
 	);
 
-	UpdateNewCoordinates();
 	UpdateCamera();
 
 	if(app->input->GetKey(SDL_SCANCODE_F10) == KeyState::KEY_DOWN)
@@ -237,7 +237,8 @@ void Player::BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fi
 			[[fallthrough]];
 		case ENEMIES:
 		{
-			if(iFrames == 0)
+			auto enemy = dynamic_cast<Enemy *>(pBodyB->listener);
+			if(iFrames == 0 && enemy->attackTimer == 1)
 			{
 				if(!bGodMode)
 				{
@@ -523,7 +524,8 @@ b2Vec2 Player::GetHorizontalInput()
 			else impulse.x = b2Min(vel.x + 0.25f, maxVel);
 			dir = 0;
 		}
-		if(impulse.x == 0) impulse.x = vel.x * 0.98f;
+		if(impulse.x == 0)
+			impulse.x = vel.x * 0.9f;
 	}
 	return impulse;
 }
@@ -568,7 +570,7 @@ void Player::UpdateJumpImpulse(b2Vec2 &impulse)
 
 void Player::UpdateAttacks(b2Vec2 &impulse)
 {
-	if(bHolding || jump.bOnAir) return;
+	if(bHolding || jump.bOnAir || !pBody || pBody->body->GetLinearVelocity().y != 0) return;
 
 	// Left click attack, only able to do it if on the floor
 	if(app->input->GetMouseButtonDown(SDL_BUTTON_LEFT) == KeyState::KEY_DOWN)
@@ -635,17 +637,17 @@ void Player::UpdateActionBooleans()
 		}
 	}
 
-	if(pBody->body->GetLinearVelocity().x == 0)
-	{
-		bWalking = false;
-		bRunning = false;
-		bIdle = true;
-	}
-	else
+	if(app->input->GetKey(SDL_SCANCODE_A) == KeyState::KEY_REPEAT || app->input->GetKey(SDL_SCANCODE_D) == KeyState::KEY_REPEAT)
 	{
 		bIdle = false;
 		bWalking = true;
 		bRunning = (app->input->GetKey(SDL_SCANCODE_LSHIFT) == KeyState::KEY_REPEAT);
+	}
+	else
+	{
+		bWalking = false;
+		bRunning = false;
+		bIdle = true;
 	}
 }
 
@@ -666,6 +668,8 @@ void Player::UpdateVelocity(const b2Vec2 impulse)
 	// Set image position and draw character
 	position.x = METERS_TO_PIXELS(pBody->body->GetTransform().p.x);
 	position.y = METERS_TO_PIXELS(pBody->body->GetTransform().p.y);
+
+	UpdateNewCoordinates();
 }
 
 void Player::UpdateNewCoordinates()

@@ -38,6 +38,9 @@ public:
 
 	void SpecificRestart() final;
 
+	int attackCD = 60;
+	int attackTimer = 0;
+
 	std::string enemyClass = "";
 
 	int currentPathIndex = 0;
