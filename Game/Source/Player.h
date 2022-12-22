@@ -2,6 +2,7 @@
 #define __PLAYER_H__
 
 #include "Character.h"
+#include "Enemy.h"
 #include "Projectile.h"
 #include <deque>
 #include <vector>
@@ -19,6 +20,8 @@ public:
 	bool UpdateProjectiles() override;
 
 	bool Update() final;
+
+	void HitByEnemy(Enemy const *enemy);
 
 	void BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fixtureB, PhysBody const *pBodyA, PhysBody const *pBodyB) final;
 
@@ -49,7 +52,6 @@ private:
 	void UpdateDamaged();
 	std::string ChooseAnim();
 
-	iPoint coordinates = {0, 0};
 	bool changedTile = true;
 
 	std::string playerCharacter;

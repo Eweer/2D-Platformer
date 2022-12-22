@@ -201,6 +201,7 @@ public:
 
 	// Translates x,y coordinates from map positions to world positions
 	iPoint MapToWorld(int x, int y) const;
+	int MapXToWorld(int x) const;
 	iPoint MapToWorld(iPoint position) const;
 
 	iPoint WorldToCoordinates(iPoint position) const;

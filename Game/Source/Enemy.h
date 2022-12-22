@@ -27,7 +27,7 @@ public:
 	b2Vec2 SetPathMovementParameters(iPoint currentCords);
 	void DrawDebug() const final;
 	void DrawDebugPath() const;
-	b2Vec2 SetGroundPathMovement(iPoint currentCoords);
+	b2Vec2 SetGroundPathMovement();
 	b2Vec2 SetAirPathMovement(iPoint currentCoords);
 
 	BehaviourState SetBehaviour(iPoint playerPosition, iPoint screenSize);
@@ -44,6 +44,7 @@ public:
 	std::string enemyClass = "";
 
 	int currentPathIndex = 0;
+	std::string lastDirection = "none";
 	std::unique_ptr<std::vector<iPoint>> path;
 	bool bRequestPath = false;
 	PathfindTerrain pTerrain = PathfindTerrain::GROUND;
@@ -54,6 +55,8 @@ public:
 	BehaviourState behaviour = BehaviourState::IDLE;
 
 	int tileYOnDeath = 0;
+
+	bool bAtTile = false;
 
 	bool bAttack = false;
 	bool bDeath = false;

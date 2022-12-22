@@ -72,12 +72,18 @@ public:
 
 	bool IsBorderNode(iPoint position) const;
 
+	bool IsGroundNode(iPoint coords) const;
+
 private:
 	iPoint GetTerrainUnder(iPoint position) const;
 	void DrawNodeDebug() const;
 	bool CreateWalkabilityLinks();
 	void AddFallLinks(iPoint position, iPoint limit);
 	int HeuristicCost(iPoint origin, iPoint destination) const;
+
+	iPoint FixPositionOnTerrain(iPoint position) const;
+
+	iPoint FixPositionOnAir(iPoint position) const;
 
 	int maxJump = 1;
 	int minJump = 1;

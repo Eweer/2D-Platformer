@@ -309,18 +309,18 @@ bool EntityManager::PreUpdate()
 				if(b == AGGRO)
 				{
 					destinationCoords = app->pathfinding->GetDestinationCoordinates(player->position, enemy->pTerrain);
-					// Fix X coordinate if enemy is right of the player
+					// Fix X coordinate if enemy is left of the player
 					// Adjust Y position for air enemis, they'll look for the one above the player
 					if(enemy->pTerrain == PathfindTerrain::AIR)
 						destinationCoords.y--;
+					else if(enemy->position.x < player->position.x)
+						destinationCoords.x--;
 				}
 				else if(b == PATROL && (!enemy->path || enemy->currentPathIndex + 1 >= enemy->path->size()))
 					destinationCoords = app->pathfinding->GetPatrolCoordinates(enemy->position, enemy->dir, enemy->pTerrain, enemy->patrolRadius);
 				else
 					continue;
-								
-				if(destinationCoords == app->map->WorldToCoordinates(enemy->position)) continue;
-
+					
 				enemy->SetPath(destinationCoords);
 			}
 		}

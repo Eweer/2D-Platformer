@@ -1,5 +1,6 @@
 #include "Enemy.h"
 #include "App.h"
+#include "Player.h"
 #include "Map.h"
 #include "Projectile.h"
 #include "BitMaskColliderLayers.h"
@@ -72,21 +73,14 @@ bool Enemy::Update()
 	else if(path && !path->empty())
 	{
 		auto currentCoords = app->map->WorldToCoordinates(position);
-
-		if(currentPathIndex < path->size() - 1)
+		if(pTerrain == PathfindTerrain::AIR)
 		{
-			// and the currentCoords are the same as the ones on the path[currentPathIndex]
-			// and we are not in the air if the pathfinding is for a ground enemy
-			// or we are pathfinding an air enemy
-			if(currentCoords == path->at(currentPathIndex) &&
-			((pBody->body->GetLinearVelocity().y == 0 && pTerrain == PathfindTerrain::GROUND)
-			|| pTerrain == PathfindTerrain::AIR))
-			{
-				currentPathIndex++;	
-			}
+			if(currentPathIndex < path->size() - 1
+			   && currentCoords == path->at(currentPathIndex))
+				currentPathIndex++;
+			// As we already got to the last element of path, that is our destination
+			else  bRequestPath = true;
 		}
-		// As we already got to the last element of path, that is our destination
-		else bRequestPath = true;
 
 		// Set direction and animation
 		// This function returns the velocity as b2Vec2
@@ -142,18 +136,15 @@ void Enemy::BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fix
 		bRequestPath = true;
 		
 	}
-	if((pBodyB->ctype & PLAYER) == PLAYER)
+	if(((pBodyB->ctype & PLAYER) == PLAYER) && attackTimer == 0)
 	{
-		if(attackTimer == 0)
-		{
-			if(pBodyB->GetPosition().x > position.x)
-				dir = 0;
-			else
-				dir = 1;
+		if(pBodyB->GetPosition().x > position.x)
+			dir = 0;
+		else
+			dir = 1;
 
-			texture->SetCurrentAnimation("attack");
-			attackTimer++;
-		}
+		texture->SetCurrentAnimation("attack");
+		attackTimer++;
 	}
 }
 
@@ -172,7 +163,8 @@ bool Enemy::SetPath(iPoint destinationCoords)
 	// If the new path is valid and not empty, it's the new path
 	if(path) path.reset(pathPtr.release());
 	else path = std::move(pathPtr);
-	currentPathIndex = path->size() > 1 ? 1 : 0;
+	currentPathIndex = (path->front() == positionTile) ? 1 : 0;
+	bAtTile = false;
 	return true;
 }
 
@@ -199,33 +191,80 @@ void Enemy::DrawDebug() const
 	if(path && currentPathIndex < path->size() - 1) DrawDebugPath();
 }
 
-b2Vec2 Enemy::SetGroundPathMovement(iPoint currentCoords)
+b2Vec2 Enemy::SetGroundPathMovement()
 {
 	float sign = 0;
-
-	if(currentCoords.y == path->at(currentPathIndex).y)
+	auto prevCoords = coordinates;
+	coordinates = app->map->WorldToCoordinates(position);
+	std::string direction = "none";
+	if(path->size() > 1)
 	{
-		if(currentCoords.x < path->at(currentPathIndex).x)
-			sign = 1;
-		else if(currentCoords.x > path->at(currentPathIndex).x)
-			sign = -1;
-	}
-	else
-	{
-		if(path->at(currentPathIndex - 1).x < path->at(currentPathIndex).x)
-			sign = 1;
-		if(path->at(currentPathIndex - 1).x > path->at(currentPathIndex).x)
-			sign = -1;
-	}
+		if(prevCoords.x != coordinates.x)
+		{
+			if(currentPathIndex < path->size() - 1) currentPathIndex++;
+			else bRequestPath = true;
+		}
 
-	if(sign == 0) texture->SetCurrentAnimation("idle");
-	else
-	{
-		dir = (sign == -1) ? 1 : 0;
-		texture->SetCurrentAnimation("walk");
+		if(currentPathIndex > 0)
+			direction = (path->at(currentPathIndex - 1).x < path->at(currentPathIndex).x) ? "right" : "left";
+		else 
+			direction = (prevCoords.x < path->at(currentPathIndex).x) ? "left" : "right";
 	}
+	else if(path->size() == 1)
+	{
+		bool facingPlayer = false;
+		for(auto elem = pBody->body->GetContactList(); elem; elem = elem->next)
+		{
+			if(auto const &otherPBody = static_cast<PhysBody *>(elem->other->GetUserData());
+			   otherPBody && ((otherPBody->ctype & CL::ColliderLayers::PLAYER) == CL::ColliderLayers::PLAYER))
+			{
+				if(!elem->contact->IsTouching()) continue;
+				direction = "none";
+				dir = (otherPBody->GetPosition().x > position.x) ? 0 : 1;
 
-	return b2Vec2(2.0f * sign, pBody->body->GetLinearVelocity().y);
+				if(attackTimer == 0)
+				{
+					auto const &player = static_cast<Player *>(otherPBody->listener);
+					texture->SetCurrentAnimation("attack");
+					attackTimer++;
+					player->HitByEnemy(this);
+				}
+
+				facingPlayer = true;
+				break;
+			}
+		}
+
+		if(!facingPlayer)
+		{
+			iPoint value = {
+				coordinates.x + (coordinates.x ^ path->at(0).x),
+				coordinates.y
+			};
+			if(app->pathfinding->IsGroundNode(value) && coordinates.x - path->at(0).x <= 1 )
+				direction = lastDirection;
+			else
+			{
+				bRequestPath = true;
+				lastDirection = "none";
+				direction = lastDirection;
+			}
+		}
+	}
+	if(direction != "none") lastDirection = direction;
+
+	if(attackTimer == 0)
+	{
+		if(direction == "none") texture->SetCurrentAnimation("idle");
+		else
+		{
+			sign = (direction == "right") ? 1 : -1;
+			dir = (sign == -1) ? 1 : 0;
+			texture->SetCurrentAnimation("walk");
+		}
+		return b2Vec2(2.0f * sign, pBody->body->GetLinearVelocity().y);
+	}
+	else return b2Vec2(0.0f, pBody->body->GetLinearVelocity().y);
 }
 
 BehaviourState Enemy::SetBehaviour(iPoint playerPosition, iPoint screenSize)
@@ -275,6 +314,9 @@ b2Vec2 Enemy::SetAirPathMovement(iPoint currentCoords)
 {
 	b2Vec2 sign = {0, 0};
 
+	if(currentPathIndex > path->size() - 1) currentPathIndex--;
+	if(currentPathIndex < 0) currentPathIndex = 0;
+
 	if(currentCoords.x < path->at(currentPathIndex).x)
 		sign.x = 1;
 	else if(currentCoords.x > path->at(currentPathIndex).x)
@@ -301,7 +343,7 @@ b2Vec2 Enemy::SetAirPathMovement(iPoint currentCoords)
 
 b2Vec2 Enemy::SetPathMovementParameters(iPoint currentCoords)
 {
-	if(pTerrain == PathfindTerrain::GROUND) return SetGroundPathMovement(currentCoords);
+	if(pTerrain == PathfindTerrain::GROUND) return SetGroundPathMovement();
 	else return SetAirPathMovement(currentCoords);
 }
 

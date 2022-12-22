@@ -109,15 +109,60 @@ int Pathfinding::HeuristicCost(iPoint origin, iPoint destination) const
 	return origin.DistanceManhattan(destination);
 }
 
+iPoint Pathfinding::FixPositionOnTerrain(iPoint position) const
+{
+	if(groundMap->at(position.x)[position.y].type == CL::NavType::TERRAIN)
+	{
+		using enum CL::NavType;
+		for(int i = position.y; i >= 0; i--)
+		{
+			if(groundMap->at(position.x)[i].type == RIGHT
+			|| groundMap->at(position.x)[i].type == SOLO)
+				position.x += 1;
+			else if(groundMap->at(position.x)[i].type == LEFT)
+				position.x -= 1;
+			else
+				continue;
+
+			break;
+		}
+	}
+	return position;
+}
+
+
+iPoint Pathfinding::FixPositionOnAir(iPoint position) const
+{
+	if(groundMap->at(position.x)[position.y].type == CL::NavType::NONE)
+	{
+		using enum CL::NavType;
+		for(int i = position.y; i >= 0; i--)
+		{
+			if(groundMap->at(position.x - 1)[i].type == RIGHT)
+				position.x -= 1;
+			else if(groundMap->at(position.x + 1)[i].type == LEFT
+				 || groundMap->at(position.x + 1)[i].type == SOLO)
+				position.x += 1;
+			else
+				continue;
+
+			break;
+		}
+	}
+	return position;
+}
+
+
 std::unique_ptr<std::vector<iPoint>> Pathfinding::AStarSearch(iPoint origin, iPoint destination, PathfindTerrain pTerrain) const
 {
 	// Check if path is valid. If it isn't log it and return an empty path
-	if(!IsValidPosition(origin) || !IsValidPosition(destination))
-	{
-		//LOG("Path from %s, %s to %s, %s is not valid", origin.x, origin.y, destination.x, destination.y);
-		return nullptr;
-	}
-
+	if(!IsValidPosition(origin) || !IsValidPosition(destination)) return nullptr;
+	
+	origin = FixPositionOnTerrain(origin);
+	destination = FixPositionOnTerrain(destination);
+	origin = FixPositionOnAir(origin);
+	destination = FixPositionOnAir(destination);
+	
 	// Counter of iterations so we can log it
 	int iterations = 0;
 
@@ -463,4 +508,14 @@ bool Pathfinding::IsBorderNode(iPoint position) const
 	return groundMap->at(coords.x)[coords.y].type == LEFT
 		|| groundMap->at(coords.x)[coords.y].type == SOLO
 		|| groundMap->at(coords.x)[coords.y].type == RIGHT;
+}
+
+bool Pathfinding::IsGroundNode(iPoint coords) const
+{
+	using enum CL::NavType;
+	if(!IsValidPosition(coords)) return false;
+	return groundMap->at(coords.x)[coords.y].type == LEFT
+		|| groundMap->at(coords.x)[coords.y].type == SOLO
+		|| groundMap->at(coords.x)[coords.y].type == RIGHT
+		|| groundMap->at(coords.x)[coords.y].type == PLATFORM;
 }

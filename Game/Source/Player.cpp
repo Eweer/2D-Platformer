@@ -180,6 +180,43 @@ bool Player::Update()
 	return true;
 }
 
+void Player::HitByEnemy(Enemy const *enemy)
+{
+	if(iFrames == 0 && enemy->attackTimer == 1)
+	{
+		if(!bGodMode)
+		{
+			damageTaken = 10;
+			hp -= damageTaken;
+		}
+		iFrames = 1;
+		pBody->body->SetLinearVelocity(b2Vec2(0, pBody->body->GetLinearVelocity().y));
+		if(hp <= 0)
+		{
+			position.x -= 20;
+			position.y -= 10;
+			bDead = true;
+			Disable();
+			active = true;
+		}
+		else
+		{
+			position.x -= 20;
+			position.y -= 10;
+			bHurt = true;
+			b2Vec2 impulse =
+			{
+				(position.x < enemy->position.x) ? -4.0f : 4.0f,
+				(position.y < enemy->position.y) ? -2.0f : -4.0f
+			};
+			pBody->body->ApplyLinearImpulse(impulse, pBody->body->GetWorldCenter(), true);
+		}
+		bHolding = false;
+		bAbleToMove = false;
+		bLockAnim = false;
+	}
+}
+
 void Player::BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fixtureB, PhysBody const *pBodyA, PhysBody const *pBodyB)
 {
 	switch (pBodyB->ctype)
@@ -238,39 +275,7 @@ void Player::BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fi
 		case ENEMIES:
 		{
 			auto enemy = dynamic_cast<Enemy *>(pBodyB->listener);
-			if(iFrames == 0 && enemy->attackTimer == 1)
-			{
-				if(!bGodMode)
-				{
-					damageTaken = 10;
-					hp -= damageTaken;
-				}
-				iFrames = 1;
-				pBody->body->SetLinearVelocity(b2Vec2(0, pBody->body->GetLinearVelocity().y));
-				if(hp <= 0)
-				{
-					position.x -= 20;
-					position.y -= 10;
-					bDead = true;
-					Disable();
-					active = true;
-				}
-				else
-				{
-					position.x -= 20;
-					position.y -= 10;
-					bHurt = true;
-					b2Vec2 impulse =
-					{
-						(position.x < enemy->position.x) ? -4.0f : 4.0f,
-						(position.y < enemy->position.y) ? -2.0f : -4.0f
-					};
-					pBody->body->ApplyLinearImpulse(impulse, pBody->body->GetWorldCenter(), true);
-				}
-				bHolding = false;
-				bAbleToMove = false;
-				bLockAnim = false;
-			}
+			if(enemy) HitByEnemy(enemy);
 			break;
 		}
 		case TRIGGERS:

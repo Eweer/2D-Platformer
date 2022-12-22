@@ -41,6 +41,8 @@ public:
 	int dir = 0;
 	SDL_Point textureOffset = {0,0};
 
+	iPoint coordinates = {0, 0};
+
 	int hp = 3;
 	int iFrames = 0;
 

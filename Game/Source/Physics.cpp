@@ -212,8 +212,8 @@ void Physics::EndContact(b2Contact *contact)
 			// AND the contact is not touching
 			// AND the other body of the current iterator contact is the same
 			// as the one we are ending contact right now we don't end the collision
-			if((itA->contact->IsTouching() && itA->other->GetUserData() == pBodyB) ||
-			   (itB->contact->IsTouching() && itB->other->GetUserData() == pBodyA))
+			if((itA->contact->IsTouching() && static_cast<PhysBody *>(itA->other->GetUserData()) == pBodyB) ||
+			   (itB->contact->IsTouching() && static_cast<PhysBody *>(itB->other->GetUserData()) == pBodyA))
 			{
 				return;
 			}

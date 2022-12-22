@@ -1,26 +1,23 @@
 <?xml version="1.0"?>
 <save_state>
 	<scene>
-		<layer id="1" x="-64.33" y="0.00" additionalspeed="0.10" />
-		<layer id="2" x="-128.66" y="0.00" additionalspeed="0.10" />
-		<layer id="3" x="-192.98" y="0.00" additionalspeed="0.10" />
-		<layer id="4" x="-257.31" y="0.00" additionalspeed="0.10" />
-		<layer id="5" x="-321.64" y="0.00" additionalspeed="0.10" />
-		<layer id="6" x="-385.97" y="0.00" additionalspeed="0.10" />
+		<layer id="1" x="-173.86" y="0.00" additionalspeed="0.10" />
+		<layer id="2" x="-347.73" y="0.00" additionalspeed="0.10" />
+		<layer id="3" x="-521.58" y="0.00" additionalspeed="0.10" />
+		<layer id="4" x="-695.45" y="0.00" additionalspeed="0.10" />
+		<layer id="5" x="-869.30" y="0.00" additionalspeed="0.10" />
+		<layer id="6" x="-1043.17" y="0.00" additionalspeed="0.10" />
 	</scene>
 	<entitymanager>
 		<player>
-			<position x="51" y="1301" />
+			<position x="409" y="1365" />
 			<velocity x="0.00" y="0.00" />
 			<entity active="true" disablenextupdate="false" />
-			<character hp="3" iframes="0" />
+			<character hp="100" iframes="0" />
 			<jump onair="false" currentjumps="0" keepmomentum="false" />
 			<anim falling="false" />
 			<misc move="true" skillcdtimer="0" />
-			<attack queue="true" abletomove="false">
-				<queue attack1="true" attack2="false" frame="3" />
-				<dir x="17.80" y="-0.48" />
-			</attack>
+			<attack queue="false" abletomove="true" />
 		</player>
 		<item>
 			<item imgvariation="0" class="heart" />
@@ -29,17 +26,19 @@
 		</item>
 		<item>
 			<item imgvariation="2" class="cross" />
-			<position x="768" y="1424" />
-			<entity active="true" disablenextupdate="false" />
+			<position x="783" y="1371" />
+			<entity active="false" disablenextupdate="false" />
 		</item>
 		<enemy>
 			<enemy id="0" class="Dwarf" />
-			<position x="2145" y="1054" />
-			<velocity x="0.00" y="0.00" />
+			<position x="2407" y="1054" />
+			<velocity x="-2.00" y="0.00" />
 			<entity active="true" disablenextupdate="false" />
 			<character hp="3" iframes="0" />
 			<jump onair="false" currentjumps="0" keepmomentum="false" />
-			<pathfind behaviour="0" />
+			<pathfind behaviour="1">
+				<destination x="33" y="16" />
+			</pathfind>
 		</enemy>
 		<enemy>
 			<enemy id="1" class="Dwarf" />
@@ -52,12 +51,14 @@
 		</enemy>
 		<enemy>
 			<enemy id="2" class="Dwarf" />
-			<position x="1121" y="1246" />
-			<velocity x="0.00" y="0.00" />
+			<position x="483" y="1374" />
+			<velocity x="-2.00" y="0.00" />
 			<entity active="true" disablenextupdate="false" />
 			<character hp="3" iframes="0" />
 			<jump onair="false" currentjumps="0" keepmomentum="false" />
-			<pathfind behaviour="1" />
+			<pathfind behaviour="2">
+				<destination x="6" y="21" />
+			</pathfind>
 		</enemy>
 		<enemy>
 			<enemy id="3" class="Dwarf" />
@@ -79,7 +80,7 @@
 		</enemy>
 		<enemy>
 			<enemy id="5" class="Mosquito" />
-			<position x="3388" y="1657" />
+			<position x="3610" y="2684" />
 			<velocity x="0.68" y="3.13" />
 			<entity active="true" disablenextupdate="false" />
 			<character hp="3" iframes="0" />
@@ -88,7 +89,7 @@
 		</enemy>
 		<enemy>
 			<enemy id="6" class="Mosquito" />
-			<position x="326" y="295" />
+			<position x="448" y="295" />
 			<velocity x="-2.00" y="0.00" />
 			<entity active="true" disablenextupdate="false" />
 			<character hp="3" iframes="0" />
@@ -99,18 +100,18 @@
 		</enemy>
 		<enemy>
 			<enemy id="7" class="Mosquito" />
-			<position x="1123" y="1014" />
-			<velocity x="2.00" y="0.00" />
+			<position x="1428" y="1014" />
+			<velocity x="-2.00" y="0.00" />
 			<entity active="true" disablenextupdate="false" />
 			<character hp="3" iframes="0" />
 			<jump onair="false" currentjumps="0" keepmomentum="false" />
 			<pathfind behaviour="1">
-				<destination x="26" y="15" />
+				<destination x="13" y="15" />
 			</pathfind>
 		</enemy>
 		<enemy>
 			<enemy id="8" class="Mosquito" />
-			<position x="3699" y="2320" />
+			<position x="4240" y="3565" />
 			<velocity x="1.65" y="3.80" />
 			<entity active="true" disablenextupdate="false" />
 			<character hp="3" iframes="0" />
@@ -120,7 +121,7 @@
 		<item>
 			<item imgvariation="0" class="star" />
 			<position x="594" y="1368" />
-			<entity active="true" disablenextupdate="false" />
+			<entity active="false" disablenextupdate="false" />
 		</item>
 		<item>
 			<item imgvariation="1" class="star" />
@@ -292,7 +293,7 @@
 		<pause pause="false" />
 	</ui>
 	<renderer>
-		<camera x="0" y="-576" />
+		<camera x="-153" y="-576" />
 		<graphics vsync="false" targetfps="60" />
 	</renderer>
 </save_state>

@@ -98,6 +98,12 @@ iPoint Map::MapToWorld(int x, int y) const
 }
 
 // Translates x,y coordinates from map positions to world positions
+int Map::MapXToWorld(int x) const
+{
+	return x * mapData.tileWidth;
+}
+
+// Translates x,y coordinates from map positions to world positions
 iPoint Map::MapToWorld(iPoint position) const
 {
 	return {position.x * mapData.tileWidth, position.y * mapData.tileHeight};
