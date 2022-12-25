@@ -1,6 +1,8 @@
 #include "Enemy.h"
 #include "App.h"
 #include "Player.h"
+#include "Physics.h"
+#include "Point.h"
 #include "Map.h"
 #include "Projectile.h"
 #include "BitMaskColliderLayers.h"
@@ -163,8 +165,7 @@ bool Enemy::SetPath(iPoint destinationCoords)
 	// If the new path is valid and not empty, it's the new path
 	if(path) path.reset(pathPtr.release());
 	else path = std::move(pathPtr);
-	currentPathIndex = (path->front() == positionTile) ? 1 : 0;
-	bAtTile = false;
+	currentPathIndex = path->size() > 1 ? 1 : 0;
 	return true;
 }
 
@@ -197,9 +198,9 @@ b2Vec2 Enemy::SetGroundPathMovement()
 	auto prevCoords = coordinates;
 	coordinates = app->map->WorldToCoordinates(position);
 	std::string direction = "none";
-	if(path->size() > 1)
+	if(path->size() > 1 && path->size() - 1 != currentPathIndex)
 	{
-		if(prevCoords.x != coordinates.x)
+		if(prevCoords.x != coordinates.x && !prevCoords.IsZero())
 		{
 			if(currentPathIndex < path->size() - 1) currentPathIndex++;
 			else bRequestPath = true;
@@ -208,9 +209,9 @@ b2Vec2 Enemy::SetGroundPathMovement()
 		if(currentPathIndex > 0)
 			direction = (path->at(currentPathIndex - 1).x < path->at(currentPathIndex).x) ? "right" : "left";
 		else 
-			direction = (prevCoords.x < path->at(currentPathIndex).x) ? "left" : "right";
+			direction = (prevCoords.x < path->at(currentPathIndex).x) ? "right" : "left";
 	}
-	else if(path->size() == 1)
+	else if(path->size() == 1 || path->size() - 1 == currentPathIndex)
 	{
 		bool facingPlayer = false;
 		for(auto elem = pBody->body->GetContactList(); elem; elem = elem->next)
@@ -237,18 +238,18 @@ b2Vec2 Enemy::SetGroundPathMovement()
 
 		if(!facingPlayer)
 		{
-			iPoint value = {
-				coordinates.x + (coordinates.x ^ path->at(0).x),
-				coordinates.y
-			};
-			if(app->pathfinding->IsGroundNode(value) && coordinates.x - path->at(0).x <= 1 )
-				direction = lastDirection;
-			else
+			int nextX = position.x + (position.x - METERS_TO_PIXELS(pBody->body->GetTransform().p.x));
+			iPoint tileAfterMoving = app->map->WorldToCoordinates(iPoint(nextX, position.y));
+
+			// If current or next coordinate is not a walkable tile we stop the movement and request a new path
+			if (!app->pathfinding->IsGroundNode(tileAfterMoving) 
+				|| !app->pathfinding->IsGroundNode(coordinates))
 			{
 				bRequestPath = true;
 				lastDirection = "none";
-				direction = lastDirection;
 			}
+			
+			direction = lastDirection;
 		}
 	}
 	if(direction != "none") lastDirection = direction;
