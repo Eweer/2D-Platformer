@@ -239,6 +239,7 @@ b2Vec2 Enemy::SetGroundPathMovement()
 		if(!facingPlayer)
 		{
 			int nextX = position.x + (position.x - METERS_TO_PIXELS(pBody->body->GetTransform().p.x));
+			if (lastDirection == "right") nextX += pBody->width;
 			iPoint tileAfterMoving = app->map->WorldToCoordinates(iPoint(nextX, position.y));
 
 			// If current or next coordinate is not a walkable tile we stop the movement and request a new path
