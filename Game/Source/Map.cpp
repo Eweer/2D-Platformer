@@ -126,7 +126,6 @@ int Map::WorldYToCoordinates(int n) const
 	return n / mapData.tileHeight;
 }
 
-
 // Get relative Tile rectangle
 SDL_Rect TileSet::GetTileRect(int gid) const
 {
@@ -613,7 +612,6 @@ std::unique_ptr<navPointMatrix> Map::CreateWalkabilityMap()
 {
 	return CreateWalkabilityNodes();
 }
-
 
 std::unique_ptr<navPointMatrix> Map::CreateWalkabilityNodes() const
 {

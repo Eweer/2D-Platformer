@@ -152,7 +152,6 @@ iPoint Pathfinding::FixPositionOnAir(iPoint position) const
 	return position;
 }
 
-
 std::unique_ptr<std::vector<iPoint>> Pathfinding::AStarSearch(iPoint origin, iPoint destination, PathfindTerrain pTerrain) const
 {
 	// Check if path is valid. If it isn't log it and return an empty path

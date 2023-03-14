@@ -245,13 +245,19 @@ void Player::BeforeCollisionStart(b2Fixture const *fixtureA, b2Fixture const *fi
 					.jumpImpulse = jump.jumpImpulse,
 				};
 			}
-			else if((pBody->top->ptr != fixtureA
-				 && pBody->ground->ptr != fixtureA
-				 && position.y < pBodyB->GetPosition().y)
-				 && (pBodyB->GetPosition().x < position.x
-				 && app->pathfinding->IsRightNode(pBodyB->GetPosition()))
-				 || (pBodyB->GetPosition().x > position.x
-				 && app->pathfinding->IsLeftNode(pBodyB->GetPosition())))
+			else if(
+				(
+					pBody->top->ptr != fixtureA
+					&& pBody->ground->ptr != fixtureA
+					&& position.y < pBodyB->GetPosition().y
+				) && (
+					 pBodyB->GetPosition().x < position.x
+					 && app->pathfinding->IsRightNode(pBodyB->GetPosition())
+				) || (
+					 pBodyB->GetPosition().x > position.x
+					 && app->pathfinding->IsLeftNode(pBodyB->GetPosition())
+					 )
+				)
 			{
 				texture->SetCurrentAnimation("hold");
 				holdPosition = pBodyB->GetPosition();
@@ -689,8 +695,9 @@ void Player::UpdateVelocity(const b2Vec2 impulse)
 
 void Player::UpdateNewCoordinates()
 {
-	if(auto currentCoords = app->map->WorldToCoordinates(position);
-	   currentCoords != coordinates)
+
+	if(iPoint currentCoords = app->map->WorldToCoordinates(position);
+		currentCoords != coordinates)
 	{
 		changedTile = true;
 		coordinates = currentCoords;

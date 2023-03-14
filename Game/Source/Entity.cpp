@@ -14,9 +14,6 @@
 
 #include <regex>
 
-#pragma warning(push)
-#pragma warning(disable : 123)
-
 Entity::Entity(pugi::xml_node const &itemNode, int newId) : id(newId), parameters(itemNode) {}
 
 bool Entity::Awake()
@@ -130,6 +127,3 @@ BodyType Entity::BodyTypeStrToEnum(std::string const &str) const
 	}
 	return UNKNOWN;
 }
-
-
-#pragma warning( pop )

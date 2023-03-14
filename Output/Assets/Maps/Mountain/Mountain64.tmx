@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="64" height="24" tilewidth="64" tileheight="64" infinite="0" nextlayerid="8" nextobjectid="95">
+<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="64" height="24" tilewidth="64" tileheight="64" infinite="0" nextlayerid="9" nextobjectid="96">
  <tileset firstgid="1" name="MountainTiles64x64" tilewidth="64" tileheight="64" tilecount="121" columns="11">
   <image source="BaseTiles.png" width="704" height="704"/>
   <tile id="0">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="false"/>
     <property name="Walkability" type="bool" value="true"/>
    </properties>
@@ -16,7 +16,7 @@
   </tile>
   <tile id="6">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="false"/>
     <property name="Walkability" type="bool" value="true"/>
    </properties>
@@ -28,7 +28,7 @@
   </tile>
   <tile id="1">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="false"/>
     <property name="Walkability" type="bool" value="true"/>
    </properties>
@@ -40,7 +40,7 @@
   </tile>
   <tile id="7">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="false"/>
     <property name="Walkability" type="bool" value="true"/>
    </properties>
@@ -52,7 +52,7 @@
   </tile>
   <tile id="9">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="false"/>
     <property name="Walkability" type="bool" value="true"/>
    </properties>
@@ -64,7 +64,7 @@
   </tile>
   <tile id="8">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="false"/>
     <property name="Walkability" type="bool" value="true"/>
    </properties>
@@ -76,7 +76,7 @@
   </tile>
   <tile id="26">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="false"/>
     <property name="Walkability" type="bool" value="true"/>
    </properties>
@@ -88,7 +88,7 @@
   </tile>
   <tile id="11">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="true"/>
     <property name="Walkability" type="bool" value="false"/>
    </properties>
@@ -100,7 +100,7 @@
   </tile>
   <tile id="23">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="true"/>
     <property name="Walkability" type="bool" value="false"/>
    </properties>
@@ -112,7 +112,7 @@
   </tile>
   <tile id="21">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="true"/>
     <property name="Walkability" type="bool" value="false"/>
    </properties>
@@ -124,7 +124,7 @@
   </tile>
   <tile id="19">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="true"/>
     <property name="Walkability" type="bool" value="true"/>
    </properties>
@@ -136,7 +136,7 @@
   </tile>
   <tile id="10">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="true"/>
     <property name="Walkability" type="bool" value="false"/>
    </properties>
@@ -148,7 +148,7 @@
   </tile>
   <tile id="5">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="true"/>
     <property name="Walkability" type="bool" value="false"/>
    </properties>
@@ -160,7 +160,7 @@
   </tile>
   <tile id="25">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="true"/>
     <property name="Walkability" type="bool" value="false"/>
    </properties>
@@ -172,7 +172,7 @@
   </tile>
   <tile id="32">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="false"/>
     <property name="Walkability" type="bool" value="true"/>
    </properties>
@@ -184,7 +184,7 @@
   </tile>
   <tile id="33">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="false"/>
     <property name="Walkability" type="bool" value="true"/>
    </properties>
@@ -196,7 +196,7 @@
   </tile>
   <tile id="35">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="false"/>
     <property name="Walkability" type="bool" value="true"/>
    </properties>
@@ -208,7 +208,7 @@
   </tile>
   <tile id="28">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="true"/>
     <property name="Walkability" type="bool" value="false"/>
    </properties>
@@ -220,7 +220,7 @@
   </tile>
   <tile id="24">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="true"/>
     <property name="Walkability" type="bool" value="false"/>
    </properties>
@@ -232,7 +232,7 @@
   </tile>
   <tile id="22">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="true"/>
     <property name="Walkability" type="bool" value="false"/>
    </properties>
@@ -244,7 +244,7 @@
   </tile>
   <tile id="17">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="true"/>
     <property name="Walkability" type="bool" value="false"/>
    </properties>
@@ -256,7 +256,7 @@
   </tile>
   <tile id="20">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="true"/>
     <property name="Walkability" type="bool" value="true"/>
    </properties>
@@ -268,7 +268,7 @@
   </tile>
   <tile id="3">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="true"/>
     <property name="Walkability" type="bool" value="false"/>
    </properties>
@@ -280,7 +280,7 @@
   </tile>
   <tile id="29">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="true"/>
     <property name="Walkability" type="bool" value="false"/>
    </properties>
@@ -292,7 +292,7 @@
   </tile>
   <tile id="4">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="true"/>
     <property name="Walkability" type="bool" value="false"/>
    </properties>
@@ -304,7 +304,7 @@
   </tile>
   <tile id="31">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="true"/>
     <property name="Walkability" type="bool" value="false"/>
    </properties>
@@ -316,7 +316,7 @@
   </tile>
   <tile id="30">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="true"/>
     <property name="Walkability" type="bool" value="false"/>
    </properties>
@@ -328,7 +328,7 @@
   </tile>
   <tile id="34">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="false"/>
     <property name="Walkability" type="bool" value="true"/>
    </properties>
@@ -340,7 +340,7 @@
   </tile>
   <tile id="27">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="true"/>
     <property name="Walkability" type="bool" value="false"/>
    </properties>
@@ -352,7 +352,7 @@
   </tile>
   <tile id="14">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="true"/>
     <property name="Walkability" type="bool" value="false"/>
    </properties>
@@ -364,7 +364,7 @@
   </tile>
   <tile id="15">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="true"/>
     <property name="Walkability" type="bool" value="false"/>
    </properties>
@@ -376,7 +376,7 @@
   </tile>
   <tile id="18">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="true"/>
     <property name="Walkability" type="bool" value="false"/>
    </properties>
@@ -388,7 +388,7 @@
   </tile>
   <tile id="16">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="true"/>
     <property name="Walkability" type="bool" value="true"/>
    </properties>
@@ -400,7 +400,7 @@
   </tile>
   <tile id="2">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="false"/>
     <property name="Walkability" type="bool" value="true"/>
    </properties>
@@ -412,7 +412,7 @@
   </tile>
   <tile id="12">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="false"/>
     <property name="Walkability" type="bool" value="true"/>
    </properties>
@@ -424,7 +424,7 @@
   </tile>
   <tile id="13">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="true"/>
     <property name="Walkability" type="bool" value="false"/>
    </properties>
@@ -561,7 +561,7 @@
   </tile>
   <tile id="67">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="1"/>
+    <property name="ColliderLayers" type="int" value="1"/>
     <property name="Terrain" type="bool" value="true"/>
     <property name="Walkability" type="bool" value="false"/>
    </properties>
@@ -963,10 +963,10 @@
   <image source="../Animated.png" width="160" height="160"/>
   <tile id="0">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="16"/>
+    <property name="ColliderLayers" type="int" value="16"/>
     <property name="EntityClass" value="DEATH"/>
     <property name="FxPath" value="Assets/Audio/Fx/Items/"/>
-    <property name="ImageVariation" type="int" propertytype="ImageVariation" value="0"/>
+    <property name="ImageVariation" type="int" value="0"/>
     <property name="TexturePath" value="Assets/Animations/Items/"/>
    </properties>
    <objectgroup draworder="index" id="2">
@@ -977,10 +977,10 @@
   </tile>
   <tile id="4">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
+    <property name="ColliderLayers" type="int" value="8"/>
     <property name="EntityClass" value="unknown"/>
     <property name="FxPath" value="Assets/Audio/Fx/Items/"/>
-    <property name="ImageVariation" type="int" propertytype="ImageVariation" value="0"/>
+    <property name="ImageVariation" type="int" value="0"/>
     <property name="TexturePath" value="Assets/Animations/Items/"/>
    </properties>
    <objectgroup draworder="index" id="2">
@@ -991,10 +991,10 @@
   </tile>
   <tile id="3">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
+    <property name="ColliderLayers" type="int" value="8"/>
     <property name="EntityClass" value="unknown"/>
     <property name="FxPath" value="Assets/Audio/Fx/Items/"/>
-    <property name="ImageVariation" type="int" propertytype="ImageVariation" value="1"/>
+    <property name="ImageVariation" type="int" value="1"/>
     <property name="TexturePath" value="Assets/Animations/Items/"/>
    </properties>
    <objectgroup draworder="index" id="2">
@@ -1005,10 +1005,10 @@
   </tile>
   <tile id="2">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
+    <property name="ColliderLayers" type="int" value="8"/>
     <property name="EntityClass" value="unknown"/>
     <property name="FxPath" value="Assets/Audio/Fx/Items/"/>
-    <property name="ImageVariation" type="int" propertytype="ImageVariation" value="2"/>
+    <property name="ImageVariation" type="int" value="2"/>
     <property name="TexturePath" value="Assets/Animations/Items/"/>
    </properties>
    <objectgroup draworder="index" id="2">
@@ -1019,10 +1019,10 @@
   </tile>
   <tile id="1">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
+    <property name="ColliderLayers" type="int" value="8"/>
     <property name="EntityClass" value="unknown"/>
     <property name="FxPath" value="Assets/Audio/Fx/Items/"/>
-    <property name="ImageVariation" type="int" propertytype="ImageVariation" value="3"/>
+    <property name="ImageVariation" type="int" value="3"/>
     <property name="TexturePath" value="Assets/Animations/Items/"/>
    </properties>
    <objectgroup draworder="index" id="2">
@@ -1033,10 +1033,10 @@
   </tile>
   <tile id="12">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
+    <property name="ColliderLayers" type="int" value="8"/>
     <property name="EntityClass" value="gem"/>
     <property name="FxPath" value="Assets/Audio/Fx/Items/"/>
-    <property name="ImageVariation" type="int" propertytype="ImageVariation" value="0"/>
+    <property name="ImageVariation" type="int" value="0"/>
     <property name="TexturePath" value="Assets/Animations/Items/"/>
    </properties>
    <objectgroup draworder="index" id="2">
@@ -1047,10 +1047,10 @@
   </tile>
   <tile id="10">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
+    <property name="ColliderLayers" type="int" value="8"/>
     <property name="EntityClass" value="gem"/>
     <property name="FxPath" value="Assets/Audio/Fx/Items/"/>
-    <property name="ImageVariation" type="int" propertytype="ImageVariation" value="1"/>
+    <property name="ImageVariation" type="int" value="1"/>
     <property name="TexturePath" value="Assets/Animations/Items/"/>
    </properties>
    <objectgroup draworder="index" id="2">
@@ -1061,10 +1061,10 @@
   </tile>
   <tile id="14">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
+    <property name="ColliderLayers" type="int" value="8"/>
     <property name="EntityClass" value="heart"/>
     <property name="FxPath" value="Assets/Audio/Fx/Items/"/>
-    <property name="ImageVariation" type="int" propertytype="ImageVariation" value="0"/>
+    <property name="ImageVariation" type="int" value="0"/>
     <property name="TexturePath" value="Assets/Animations/Items/"/>
    </properties>
    <objectgroup draworder="index" id="2">
@@ -1075,10 +1075,10 @@
   </tile>
   <tile id="13">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
+    <property name="ColliderLayers" type="int" value="8"/>
     <property name="EntityClass" value="heart"/>
     <property name="FxPath" value="Assets/Audio/Fx/Items/"/>
-    <property name="ImageVariation" type="int" propertytype="ImageVariation" value="1"/>
+    <property name="ImageVariation" type="int" value="1"/>
     <property name="TexturePath" value="Assets/Animations/Items/"/>
    </properties>
    <objectgroup draworder="index" id="2">
@@ -1089,10 +1089,10 @@
   </tile>
   <tile id="15">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
+    <property name="ColliderLayers" type="int" value="8"/>
     <property name="EntityClass" value="heart"/>
     <property name="FxPath" value="Assets/Audio/Fx/Items/"/>
-    <property name="ImageVariation" type="int" propertytype="ImageVariation" value="2"/>
+    <property name="ImageVariation" type="int" value="2"/>
     <property name="TexturePath" value="Assets/Animations/Items/"/>
    </properties>
    <objectgroup draworder="index" id="2">
@@ -1103,10 +1103,10 @@
   </tile>
   <tile id="11">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
+    <property name="ColliderLayers" type="int" value="8"/>
     <property name="EntityClass" value="gem"/>
     <property name="FxPath" value="Assets/Audio/Fx/Items/"/>
-    <property name="ImageVariation" type="int" propertytype="ImageVariation" value="2"/>
+    <property name="ImageVariation" type="int" value="2"/>
     <property name="TexturePath" value="Assets/Animations/Items/"/>
    </properties>
    <objectgroup draworder="index" id="2">
@@ -1117,10 +1117,10 @@
   </tile>
   <tile id="9">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
+    <property name="ColliderLayers" type="int" value="8"/>
     <property name="EntityClass" value="gem"/>
     <property name="FxPath" value="Assets/Audio/Fx/Items/"/>
-    <property name="ImageVariation" type="int" propertytype="ImageVariation" value="3"/>
+    <property name="ImageVariation" type="int" value="3"/>
     <property name="TexturePath" value="Assets/Animations/Items/"/>
    </properties>
    <objectgroup draworder="index" id="2">
@@ -1131,10 +1131,10 @@
   </tile>
   <tile id="16">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
+    <property name="ColliderLayers" type="int" value="8"/>
     <property name="EntityClass" value="cross"/>
     <property name="FxPath" value="Assets/Audio/Fx/Items/"/>
-    <property name="ImageVariation" type="int" propertytype="ImageVariation" value="0"/>
+    <property name="ImageVariation" type="int" value="0"/>
     <property name="TexturePath" value="Assets/Animations/Items/"/>
    </properties>
    <objectgroup draworder="index" id="2">
@@ -1145,10 +1145,10 @@
   </tile>
   <tile id="17">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
+    <property name="ColliderLayers" type="int" value="8"/>
     <property name="EntityClass" value="cross"/>
     <property name="FxPath" value="Assets/Audio/Fx/Items/"/>
-    <property name="ImageVariation" type="int" propertytype="ImageVariation" value="1"/>
+    <property name="ImageVariation" type="int" value="1"/>
     <property name="TexturePath" value="Assets/Animations/Items/"/>
    </properties>
    <objectgroup draworder="index" id="2">
@@ -1159,10 +1159,10 @@
   </tile>
   <tile id="18">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
+    <property name="ColliderLayers" type="int" value="8"/>
     <property name="EntityClass" value="cross"/>
     <property name="FxPath" value="Assets/Audio/Fx/Items/"/>
-    <property name="ImageVariation" type="int" propertytype="ImageVariation" value="2"/>
+    <property name="ImageVariation" type="int" value="2"/>
     <property name="TexturePath" value="Assets/Animations/Items/"/>
    </properties>
    <objectgroup draworder="index" id="2">
@@ -1173,10 +1173,10 @@
   </tile>
   <tile id="7">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
+    <property name="ColliderLayers" type="int" value="8"/>
     <property name="EntityClass" value="coin"/>
     <property name="FxPath" value="Assets/Audio/Fx/Items/"/>
-    <property name="ImageVariation" type="int" propertytype="ImageVariation" value="0"/>
+    <property name="ImageVariation" type="int" value="0"/>
     <property name="TexturePath" value="Assets/Animations/Items/"/>
    </properties>
    <objectgroup draworder="index" id="2">
@@ -1187,10 +1187,10 @@
   </tile>
   <tile id="8">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
+    <property name="ColliderLayers" type="int" value="8"/>
     <property name="EntityClass" value="coin"/>
     <property name="FxPath" value="Assets/Audio/Fx/Items/"/>
-    <property name="ImageVariation" type="int" propertytype="ImageVariation" value="1"/>
+    <property name="ImageVariation" type="int" value="1"/>
     <property name="TexturePath" value="Assets/Animations/Items/"/>
    </properties>
    <objectgroup draworder="index" id="2">
@@ -1201,10 +1201,10 @@
   </tile>
   <tile id="21">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
+    <property name="ColliderLayers" type="int" value="8"/>
     <property name="EntityClass" value="arrow"/>
     <property name="FxPath" value="Assets/Audio/Fx/Items/"/>
-    <property name="ImageVariation" type="int" propertytype="ImageVariation" value="0"/>
+    <property name="ImageVariation" type="int" value="0"/>
     <property name="TexturePath" value="Assets/Animations/Items/"/>
    </properties>
    <objectgroup draworder="index" id="2">
@@ -1215,10 +1215,10 @@
   </tile>
   <tile id="19">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
+    <property name="ColliderLayers" type="int" value="8"/>
     <property name="EntityClass" value="arrow"/>
     <property name="FxPath" value="Assets/Audio/Fx/Items/"/>
-    <property name="ImageVariation" type="int" propertytype="ImageVariation" value="1"/>
+    <property name="ImageVariation" type="int" value="1"/>
     <property name="TexturePath" value="Assets/Animations/Items/"/>
    </properties>
    <objectgroup draworder="index" id="2">
@@ -1229,10 +1229,10 @@
   </tile>
   <tile id="20">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
+    <property name="ColliderLayers" type="int" value="8"/>
     <property name="EntityClass" value="arrow"/>
     <property name="FxPath" value="Assets/Audio/Fx/Items/"/>
-    <property name="ImageVariation" type="int" propertytype="ImageVariation" value="2"/>
+    <property name="ImageVariation" type="int" value="2"/>
     <property name="TexturePath" value="Assets/Animations/Items/"/>
    </properties>
    <objectgroup draworder="index" id="2">
@@ -1243,10 +1243,10 @@
   </tile>
   <tile id="6">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
+    <property name="ColliderLayers" type="int" value="8"/>
     <property name="EntityClass" value="coin"/>
     <property name="FxPath" value="Assets/Audio/Fx/Items/"/>
-    <property name="ImageVariation" type="int" propertytype="ImageVariation" value="2"/>
+    <property name="ImageVariation" type="int" value="2"/>
     <property name="TexturePath" value="Assets/Animations/Items/"/>
    </properties>
    <objectgroup draworder="index" id="2">
@@ -1257,10 +1257,10 @@
   </tile>
   <tile id="5">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
+    <property name="ColliderLayers" type="int" value="8"/>
     <property name="EntityClass" value="coin"/>
     <property name="FxPath" value="Assets/Audio/Fx/Items/"/>
-    <property name="ImageVariation" type="int" propertytype="ImageVariation" value="3"/>
+    <property name="ImageVariation" type="int" value="3"/>
     <property name="TexturePath" value="Assets/Animations/Items/"/>
    </properties>
    <objectgroup draworder="index" id="2">
@@ -1271,10 +1271,10 @@
   </tile>
   <tile id="24">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
+    <property name="ColliderLayers" type="int" value="8"/>
     <property name="EntityClass" value="star"/>
     <property name="FxPath" value="Assets/Audio/Fx/Items/"/>
-    <property name="ImageVariation" type="int" propertytype="ImageVariation" value="0"/>
+    <property name="ImageVariation" type="int" value="0"/>
     <property name="TexturePath" value="Assets/Animations/Items/"/>
    </properties>
    <objectgroup draworder="index" id="2">
@@ -1285,10 +1285,10 @@
   </tile>
   <tile id="23">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
+    <property name="ColliderLayers" type="int" value="8"/>
     <property name="EntityClass" value="star"/>
     <property name="FxPath" value="Assets/Audio/Fx/Items/"/>
-    <property name="ImageVariation" type="int" propertytype="ImageVariation" value="1"/>
+    <property name="ImageVariation" type="int" value="1"/>
     <property name="TexturePath" value="Assets/Animations/Items/"/>
    </properties>
    <objectgroup draworder="index" id="2">
@@ -1299,10 +1299,10 @@
   </tile>
   <tile id="22">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="8"/>
+    <property name="ColliderLayers" type="int" value="8"/>
     <property name="EntityClass" value="star"/>
     <property name="FxPath" value="Assets/Audio/Fx/Items/"/>
-    <property name="ImageVariation" type="int" propertytype="ImageVariation" value="2"/>
+    <property name="ImageVariation" type="int" value="2"/>
     <property name="TexturePath" value="Assets/Animations/Items/"/>
    </properties>
    <objectgroup draworder="index" id="2">
@@ -3207,9 +3207,9 @@
    <tile/>
    <tile/>
    <tile/>
-   <tile/>
-   <tile/>
-   <tile/>
+   <tile gid="8"/>
+   <tile gid="10"/>
+   <tile gid="9"/>
    <tile/>
    <tile/>
    <tile/>
@@ -4438,12 +4438,12 @@
   <object id="88" gid="136" x="1616" y="720" width="32" height="32"/>
   <object id="93" x="1328" y="1472" width="416" height="64">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="16"/>
+    <property name="ColliderLayers" type="int" value="16"/>
    </properties>
   </object>
   <object id="94" x="2608" y="1472" width="224" height="64">
    <properties>
-    <property name="ColliderLayers" type="int" propertytype="ColliderLayers" value="16"/>
+    <property name="ColliderLayers" type="int" value="16"/>
    </properties>
   </object>
  </objectgroup>
